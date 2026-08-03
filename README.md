@@ -7,6 +7,7 @@
 ## 目前能力
 
 - 公開、免登入的六步評審流程：項目建立、初始診斷、補證資料、文化資產卡、G 端看板、G/B/C 活化輸出。
+- G 端看板使用 Leaflet 與 OpenStreetMap 的真實可縮放地理底圖；目前三個標記為比賽演示點位，真實上線前需逐一取得商戶同意並核驗座標。
 - 明確區分已實現的 Paw-Archivist / Paw-Verifier 核心，與為路演準備的互動原型。
 - 管理端登入頁與伺服器端 Session Cookie，作為後續資料管理能力展示。
 - SQLite 儲存專案、核驗項目、Session 與審計事件。
@@ -66,6 +67,8 @@
 ├── styles.css                  # 視覺系統與響應式樣式
 ├── assets/
 │   └── heritage-cover.jpeg     # Demo 主視覺
+├── vendor/
+│   └── leaflet.css             # 打包的 Leaflet 地圖樣式，避免現場 CDN 樣式失敗
 ├── server/
 │   └── app.py                  # Dependency-free Python API + SQLite
 ├── deploy/

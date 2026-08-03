@@ -30,7 +30,13 @@ const demoState = {
 
 const selectedProject = () => demoProjects.find(project => project.name === demoState.selectedProject) || demoProjects[0];
 
+let demoLiveMap = null;
+
 function demoRender() {
+  if (demoLiveMap) {
+    demoLiveMap.remove();
+    demoLiveMap = null;
+  }
   document.querySelector('#app').innerHTML = `
     <div class="demo-app">
       <header class="demo-header">
@@ -45,6 +51,46 @@ function demoRender() {
       </main>
       ${demoState.toast ? `<div class="demo-toast" role="status"><strong>已更新</strong><span>${demoState.toast}</span></div>` : ''}
     </div>`;
+  demoInitLiveMap();
+}
+
+function demoInitLiveMap() {
+  const target = document.querySelector('#demo-live-map');
+  if (!target) return;
+
+  if (!window.L) {
+    target.textContent = '地圖服務暫時無法載入，請檢查網絡後重試。';
+    return;
+  }
+
+  const places = [
+    { name: '禮記雪糕', status: '待商戶確認', color: '#b87923', coords: [22.2012, 113.5486] },
+    { name: '佛笑樓', status: '可公開', color: '#2f625f', coords: [22.1941, 113.5415] },
+    { name: '龍華茶樓', status: '來源衝突', color: '#a54739', coords: [22.2073, 113.5489] },
+  ];
+
+  demoLiveMap = window.L.map(target, {
+    scrollWheelZoom: false,
+    zoomControl: true,
+    attributionControl: true,
+  });
+  window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors',
+  }).addTo(demoLiveMap);
+
+  places.forEach((place) => {
+    window.L.circleMarker(place.coords, {
+      radius: 9,
+      color: '#fffdf8',
+      weight: 2,
+      fillColor: place.color,
+      fillOpacity: 1,
+    }).bindPopup(`<strong>${place.name}</strong><br><span>演示點位 · ${place.status}</span>`).addTo(demoLiveMap);
+  });
+
+  demoLiveMap.fitBounds(places.map(place => place.coords), { padding: [30, 30] });
+  window.setTimeout(() => demoLiveMap?.invalidateSize(), 0);
 }
 
 function demoIntro() {
@@ -122,6 +168,31 @@ function demoOutputs() {
   return `${demoHeading('STEP 06 · 活化輸出', '同一張文化資產卡，服務三種真實使用場景。', '底層資料只建一次；不同對象只取用已核驗且已授權的欄位，避免故事在傳播中失真。')}<div class="demo-output-grid"><article><strong>G</strong><h3>文化資產看板</h3><p>街區普查、採集進度、補訪優先級與保育路線規劃。</p><button data-output="G">預覽 G 端結果</button></article><article><strong>B</strong><h3>商戶內容包</h3><p>經商戶確認的品牌故事、三語簡介、POI 與社媒素材。</p><button data-output="B">預覽 B 端結果</button></article><article><strong>C</strong><h3>城市故事路線</h3><p>把可公開故事轉成旅客可以走進去的街區體驗。</p><button data-output="C">預覽 C 端結果</button></article></div>${preview}<div class="demo-finish"><strong>演示完成</strong><span>不是讓系統編出更多故事，而是讓故事可以被理解、查詢、核驗和重新使用。</span><button data-action="restart">重新開始</button></div>`;
 }
 
+function demoQwenWorkbench() {
+  const live = demoState.qwen.mode === 'live';
+  if (!demoState.qwenDraftGenerated) {
+    return `<section class="demo-qwen-workbench demo-qwen-process"><div class="demo-qwen-process-copy"><p class="demo-kicker">QWEN / PAW-ARCHIVIST</p><h3>把杂乱素材变成“可核验的候选资料”。</h3><p>Qwen 不写一篇故事，也不决定真伪。它把来源逐条拆开，抽取时间、地点、人物、说法和授权边界，并把每一个候选结论绑回原始来源。</p></div><div class="demo-qwen-flow"><div><span>输入</span><b>4</b><small>来源记录</small></div><i>→</i><div><span>Qwen 整理</span><b>7</b><small>字段提取</small></div><i>→</i><div><span>输出</span><b>2</b><small>候选结论</small></div></div><div class="demo-qwen-action"><span class="${live ? 'live' : 'guided'}">${live ? '实时模型可用' : '引导体验模式'}</span><button data-action="generate-qwen">${live ? '在管理端生成真实草稿' : '运行 Qwen 建档示例'}</button></div></section>`;
+  }
+  const accepted = demoState.qwenDraftAccepted;
+  return `<section class="demo-qwen-result"><div class="demo-qwen-result-head"><div><p class="demo-kicker">QWEN / PAW-ARCHIVIST OUTPUT</p><h3>来源已经被整理成核验任务</h3></div><span class="${accepted ? 'accepted' : 'pending'}">${accepted ? '已送往 Verifier' : '等待人工采纳'}</span></div><div class="demo-qwen-compare"><section><p>Qwen 读取的来源</p><div class="demo-qwen-source"><span>01</span><b>1933_创立年份_报道.pdf</b><small>公开报道</small></div><div class="demo-qwen-source"><span>02</span><b>礼记雪糕_访谈摘录.txt</b><small>商户访谈</small></div></section><section><p>Qwen 输出的候选资料</p><div class="demo-qwen-claim"><b>创立年份：1933</b><span>证据摘录：报道明确记载年份</span><em>来源 01</em></div><div class="demo-qwen-claim"><b>代际街坊记忆</b><span>证据摘录：顾客带子女重访</span><em>来源 02</em></div></section></div><div class="demo-qwen-review"><div><strong>Verifier 接下来做什么？</strong><span>核对原文、确认商户授权、决定公开边界。</span></div>${accepted ? '<b>2 条候选已进入待核验队列</b>' : '<button class="demo-inline-action" data-action="accept-qwen">采纳为待核验项</button>'}</div><small class="demo-qwen-legal">${live ? '真实草稿只在登录的管理端生成，并记录模型、操作者和采纳动作。' : '这是离线引导数据：展示真实规则，但不调用模型，也不写入服务器。'}</small></section>`;
+}
+
+function demoDashboard() {
+  const filter = demoState.dashboardFilter;
+  const queue = filter === 'public' ? [['禮記雪糕', '历史年份已核验', '可进入商户内容包', 'ready'], ['佛笑樓', '饮食记忆已确认', '可进入路线素材', 'ready']] : filter === 'pending' ? [['禮記雪糕', '老顾客故事', '等待商户公开确认', 'urgent'], ['龍華茶樓', '开业年份', '两条来源存在冲突', 'risk']] : [['禮記雪糕', '老顾客故事', '等待商户公开确认', 'urgent'], ['佛笑樓', '饮食记忆已确认', '可进入路线素材', 'ready'], ['龍華茶樓', '开业年份', '两条来源存在冲突', 'risk']];
+  return `${demoHeading('STEP 05 · 街区文化资产运营板', '从“记录一间店”走到“安排一个街区”。', 'G 端使用者能一眼判断哪里可以发布、哪里要补访、哪些问题会影响街区活化排程。')}<div class="demo-g-kpis"><div><span>建档覆盖</span><strong>3 <small>/ 12</small></strong><b>本期试点 · 荷兰园 / 水坑尾</b></div><div><span>资料可信度</span><strong>68<small>%</small></strong><b>较上次普查 +12%</b></div><div><span>待决策事项</span><strong>3</strong><b>2 项商户确认 · 1 项来源冲突</b></div><div><span>可释放内容</span><strong>2</strong><b>已满足公开与授权条件</b></div></div><div class="demo-dashboard-controls"><span>任务视图</span><button class="${filter === 'all' ? 'is-active' : ''}" data-dashboard="all">全部</button><button class="${filter === 'pending' ? 'is-active' : ''}" data-dashboard="pending">待处理</button><button class="${filter === 'public' ? 'is-active' : ''}" data-dashboard="public">可公开</button><button class="demo-export-button" data-action="export-board">导出本周工作单</button></div><div class="demo-governance-grid"><section class="demo-district-map"><div class="demo-map-heading"><div><p class="demo-kicker">DISTRICT OVERVIEW</p><h3>荷兰园 / 水坑尾</h3></div><span>试点范围</span></div><div class="demo-street-line demo-line-a"></div><div class="demo-street-line demo-line-b"></div><div class="demo-map-place place-a"><b>禮記雪糕</b><span>待商户确认</span></div><div class="demo-map-place place-b"><b>佛笑樓</b><span>可公开</span></div><div class="demo-map-place place-c"><b>龍華茶樓</b><span>来源冲突</span></div><div class="demo-map-legend"><span><i class="ready"></i>可公开</span><span><i class="urgent"></i>待确认</span><span><i class="risk"></i>需复核</span></div></section><section class="demo-priority-board"><div class="demo-priority-head"><div><p class="demo-kicker">FIELD QUEUE</p><h3>本周优先处理</h3></div><span>${queue.length} 项</span></div>${queue.map((row, index) => `<div class="demo-priority-row"><b>${String(index + 1).padStart(2, '0')}</b><div><strong>${row[0]} · ${row[1]}</strong><span>${row[2]}</span></div><em class="${row[3]}">${row[3] === 'ready' ? '可发布' : row[3] === 'risk' ? '需复核' : '待确认'}</em></div>`).join('')}<div class="demo-priority-footer"><span>建议行动</span><b>${filter === 'public' ? '生成可公开内容包' : '安排 2 次商户确认与 1 次来源复核'}</b></div></section></div><section class="demo-evidence-meter"><div><p class="demo-kicker">EVIDENCE HEALTH</p><h3>资料不是越多越好，而是每一条都要知道能不能用。</h3></div><div class="demo-meter-bars"><div><span>已回链来源</span><b><i style="width: 82%"></i></b><em>82%</em></div><div><span>已授权素材</span><b><i style="width: 55%"></i></b><em>55%</em></div><div><span>可公开叙述</span><b><i style="width: 41%"></i></b><em>41%</em></div></div></section>${demoNext('把可信资料转成不同成品')}`;
+}
+
+function demoOutputs() {
+  const mode = demoState.outputPreview || 'G';
+  const content = {
+    G: `<section class="demo-deliverable-g"><div class="demo-deliverable-top"><div><p class="demo-kicker">G · GOVERNMENT / CULTURE</p><h3>街区文化资产周报</h3><span>荷兰园 / 水坑尾 · 第 01 期</span></div><button data-action="export-board">导出 PDF 摘要</button></div><div class="demo-report-strip"><div><b>3</b><span>完成初步建档</span></div><div><b>2</b><span>可进入公开内容</span></div><div><b>3</b><span>需要现场处理</span></div></div><div class="demo-report-actions"><strong>本周建议</strong><p>优先完成礼记雪糕的商户公开确认，再处理龙华茶楼的年份冲突；两项完成后，可形成“老澳门饮食记忆”试点路线。</p></div></section>`,
+    B: `<section class="demo-deliverable-b"><div class="demo-merchant-cover"><img src="assets/heritage-cover.jpeg" alt="澳门街区文化记忆"><div><p>已核验商户内容</p><h3>禮記雪糕</h3><span>荷兰园 / 水坑尾 · 创立于 1933 年</span></div></div><div class="demo-merchant-copy"><div><p class="demo-kicker">BRAND STORY · READY TO REVIEW</p><h3>把可以被确认的记忆，说给新的顾客听。</h3><p>禮記雪糕自 1933 年起扎根澳门。有关街坊代际回访的故事仍在等待商户确认，因此不会进入公开版文字。</p></div><aside><span>内容权限</span><b>2 项可用</b><small>年份与地点已核验</small></aside></div></section>`,
+    C: `<section class="demo-deliverable-c"><div class="demo-route-head"><div><p class="demo-kicker">C · CITY WALK</p><h3>老澳门饮食记忆路线</h3><span>约 80 分钟 · 3 个文化停靠点</span></div><button data-action="route-save">保存路线</button></div><ol class="demo-route-stops"><li><b>01</b><div><strong>禮記雪糕</strong><span>从一间店的创立年份，走进荷兰园的街坊记忆。</span></div><em>已核验</em></li><li><b>02</b><div><strong>佛笑樓</strong><span>了解百年饮食保存样本与街区商业脉络。</span></div><em>已核验</em></li><li><b>03</b><div><strong>龍華茶樓</strong><span>保留“待考证”的问题，邀请游客理解历史仍在被补全。</span></div><em class="wait">待补证</em></li></ol></section>`,
+  }[mode];
+  return `${demoHeading('STEP 06 · 把可信资料交到真正使用的人手上', '同一份底稿，形成三种有边界的交付物。', 'G 端拿到决策清单，商户拿到可审核的内容包，旅客看到的是已经确认、可以公开的城市故事。')}<div class="demo-deliverable-tabs"><button class="${mode === 'G' ? 'is-active' : ''}" data-output="G"><b>G</b><span>街区周报</span></button><button class="${mode === 'B' ? 'is-active' : ''}" data-output="B"><b>B</b><span>商户内容包</span></button><button class="${mode === 'C' ? 'is-active' : ''}" data-output="C"><b>C</b><span>城市路线</span></button></div><div class="demo-deliverable-stage">${content}</div><div class="demo-finish"><strong>交付不是终点</strong><span>新的访谈、授权和核验会回到同一条资料链，让下一版内容更完整而不失真。</span><button data-action="restart">开始另一个个案</button></div>`;
+}
+
 function demoOutputPreview() {
   if (!demoState.outputPreview) return '';
   const copy = {
@@ -167,6 +238,8 @@ document.addEventListener('click', event => {
     demoToast('已生成带来源编号的 Qwen 引导草稿，等待人工采纳。');
   }
   else if (action === 'accept-qwen') { demoState.qwenDraftAccepted = true; demoToast('候选项已加入 Verifier 待核验队列，尚未公开。'); }
+  else if (action === 'export-board') demoToast('已准备街区文化资产周报，内容只包含已核验资料。');
+  else if (action === 'route-save') demoToast('路线草稿已保存，待补证站点会保留核验提示。');
   else if (action === 'trace') { demoState.traceOpen = !demoState.traceOpen; demoRender(); }
   else if (action === 'refresh-card') { demoState.cardRefreshed = true; demoToast('Paw-Archivist 已按目前來源更新內部草稿。'); }
   else if (action === 'close-output') { demoState.outputPreview = ''; demoRender(); }
@@ -184,3 +257,14 @@ fetch('/api/public/demo-status', { headers: { Accept: 'application/json' } })
     demoState.qwen = { mode: 'guided', live: false };
     demoRender();
   });
+
+function demoDashboard() {
+  const filter = demoState.dashboardFilter;
+  const queue = filter === 'public'
+    ? [['禮記雪糕', '歷史年份已核驗', '可進入商戶內容包', 'ready'], ['佛笑樓', '飲食記憶已確認', '可進入路線素材', 'ready']]
+    : filter === 'pending'
+      ? [['禮記雪糕', '老顧客故事', '等待商戶公開確認', 'urgent'], ['龍華茶樓', '開業年份', '兩條來源存在衝突', 'risk']]
+      : [['禮記雪糕', '老顧客故事', '等待商戶公開確認', 'urgent'], ['佛笑樓', '飲食記憶已確認', '可進入路線素材', 'ready'], ['龍華茶樓', '開業年份', '兩條來源存在衝突', 'risk']];
+
+  return `${demoHeading('STEP 05 · 街區文化資產運營板', '從「記錄一間店」走到「安排一個街區」。', 'G 端使用者能一眼判斷哪裡可以發布、哪裡要補訪、哪些問題會影響街區活化排程。')}<div class="demo-g-kpis"><div><span>建檔覆蓋</span><strong>3 <small>/ 12</small></strong><b>本期試點 · 荷蘭園 / 水坑尾</b></div><div><span>資料可信度</span><strong>68<small>%</small></strong><b>較上次普查 +12%</b></div><div><span>待決策事項</span><strong>3</strong><b>2 項商戶確認 · 1 項來源衝突</b></div><div><span>可釋放內容</span><strong>2</strong><b>已滿足公開與授權條件</b></div></div><div class="demo-dashboard-controls"><span>任務視圖</span><button class="${filter === 'all' ? 'is-active' : ''}" data-dashboard="all">全部</button><button class="${filter === 'pending' ? 'is-active' : ''}" data-dashboard="pending">待處理</button><button class="${filter === 'public' ? 'is-active' : ''}" data-dashboard="public">可公開</button><button class="demo-export-button" data-action="export-board">導出本週工作單</button></div><div class="demo-governance-grid"><section class="demo-district-map"><div class="demo-map-heading"><div><p class="demo-kicker">DISTRICT OVERVIEW</p><h3>荷蘭園 / 水坑尾</h3></div><span>實際地理底圖 · 演示點位</span></div><div id="demo-live-map" class="demo-live-map" aria-label="澳門荷蘭園與水坑尾的互動地圖"></div><div class="demo-map-legend"><span><i class="ready"></i>可公開</span><span><i class="urgent"></i>待確認</span><span><i class="risk"></i>需復核</span></div></section><section class="demo-priority-board"><div class="demo-priority-head"><div><p class="demo-kicker">FIELD QUEUE</p><h3>本週優先處理</h3></div><span>${queue.length} 項</span></div>${queue.map((row, index) => `<div class="demo-priority-row"><b>${String(index + 1).padStart(2, '0')}</b><div><strong>${row[0]} · ${row[1]}</strong><span>${row[2]}</span></div><em class="${row[3]}">${row[3] === 'ready' ? '可發布' : row[3] === 'risk' ? '需復核' : '待確認'}</em></div>`).join('')}<div class="demo-priority-footer"><span>建議行動</span><b>${filter === 'public' ? '生成可公開內容包' : '安排 2 次商戶確認與 1 次來源復核'}</b></div></section></div><section class="demo-evidence-meter"><div><p class="demo-kicker">EVIDENCE HEALTH</p><h3>資料不是越多越好，而是每一條都要知道能不能用。</h3></div><div class="demo-meter-bars"><div><span>已回鏈來源</span><b><i style="width: 82%"></i></b><em>82%</em></div><div><span>已授權素材</span><b><i style="width: 55%"></i></b><em>55%</em></div><div><span>可公開敘述</span><b><i style="width: 41%"></i></b><em>41%</em></div></div></section>${demoNext('把可信資料轉成不同成品')}`;
+}
