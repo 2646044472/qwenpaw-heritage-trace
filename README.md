@@ -10,6 +10,7 @@
 - G 端看板使用 Leaflet 與 OpenStreetMap 的真實可縮放地理底圖；目前三個標記為比賽演示點位，真實上線前需逐一取得商戶同意並核驗座標。
 - 明確區分已實現的 Paw-Archivist / Paw-Verifier 核心，與為路演準備的互動原型。
 - 管理端登入頁與伺服器端 Session Cookie，作為後續資料管理能力展示。
+- 管理端提供五步操作路徑：來源整理、Qwen/Paw-Archivist 候選建檔、Paw-Verifier 人工核驗、街區互動地圖與 G/B/C 成品；未配置模型時可運行不寫入模型的引導草稿。
 - SQLite 儲存專案、核驗項目、Session 與審計事件。
 - CSRF 驗證、登入失敗限速、登入/登出/資料變更審計記錄。
 - Paw-Archivist AI 建檔草稿：只使用已輸入的來源，回傳來源編號與證據摘錄；人工採納後仍是待核驗資料。
@@ -68,7 +69,8 @@
 ├── assets/
 │   └── heritage-cover.jpeg     # Demo 主視覺
 ├── vendor/
-│   └── leaflet.css             # 打包的 Leaflet 地圖樣式，避免現場 CDN 樣式失敗
+│   ├── leaflet.css             # 打包的 Leaflet 地圖樣式，避免現場 CDN 樣式失敗
+│   └── leaflet.js              # 打包的 Leaflet 地圖程式，避免外部腳本供應鏈依賴
 ├── server/
 │   └── app.py                  # Dependency-free Python API + SQLite
 ├── deploy/
