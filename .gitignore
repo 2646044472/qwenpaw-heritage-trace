@@ -1,0 +1,27 @@
+# Runtime data and local credentials
+.data/
+*.db
+*.sqlite
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Python and editor artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.vscode/
+
+# Local bridge state and logs
+*.log
+.tencent_winpty_bridge.json
+.tencent_winpty_bridge.log
+
+# Operating-system files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,26 @@
+[Unit]
+Description=QwenPaw Heritage Trace API
+After=network.target
+
+[Service]
+Type=simple
+User=qwenpaw
+Group=qwenpaw
+WorkingDirectory=/opt/qwenpaw-app
+EnvironmentFile=/etc/qwenpaw/qwenpaw.env
+ExecStart=/usr/bin/python3 /opt/qwenpaw-app/server/app.py
+Restart=on-failure
+RestartSec=3
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ReadWritePaths=/var/lib/qwenpaw
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=multi-user.target
