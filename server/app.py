@@ -293,6 +293,10 @@ class ApiHandler(BaseHTTPRequestHandler):
         if path == "/api/health":
             self.respond_json(HTTPStatus.OK, {"ok": True})
             return
+        if path == "/api/public/demo-status":
+            status = model_status()
+            self.respond_json(HTTPStatus.OK, {"archivist_mode": "live" if status["configured"] else "guided", "model_ready": status["configured"]})
+            return
         if path == "/api/session":
             session = self.session()
             if not session:

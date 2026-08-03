@@ -23,6 +23,9 @@ const demoState = {
   cardRefreshed: false,
   dashboardFilter: 'all',
   outputPreview: '',
+  qwen: { mode: 'checking', live: false },
+  qwenDraftGenerated: false,
+  qwenDraftAccepted: false,
 };
 
 const selectedProject = () => demoProjects.find(project => project.name === demoState.selectedProject) || demoProjects[0];
@@ -36,6 +39,7 @@ function demoRender() {
       </header>
       <main id="top" class="demo-main">
         ${demoIntro()}
+        ${demoWorkspaceBar()}
         <nav class="demo-steps" aria-label="六步演示流程">${demoSteps.map(step => `<button class="demo-step ${demoState.step === step.id ? 'is-active' : ''} ${demoState.step > step.id ? 'is-done' : ''}" data-step="${step.id}" aria-current="${demoState.step === step.id ? 'step' : 'false'}"><span>${String(step.id).padStart(2, '0')}</span><strong>${step.label}</strong><small>${step.note}</small></button>`).join('')}</nav>
         <section class="demo-surface" aria-live="polite">${demoStepContent()}</section>
       </main>
@@ -49,6 +53,12 @@ function demoIntro() {
     <figure class="demo-heritage-visual"><img src="assets/heritage-cover.jpeg" alt="澳門街區文化記憶插畫"><figcaption><span>澳門記憶 · 城市根脈</span><b>不生成故事，只整理證據。</b></figcaption></figure>
     <aside class="demo-truth"><strong>本次演示</strong><div><span>已實現核心</span><b>文化建檔 / 來源核驗</b></div><div><span>交互原型</span><b>採集、訪談、圖譜與活化輸出</b></div><p>所有示例資料僅供比賽展示，公開前仍需取得授權與人工確認。</p></aside>
   </section>`;
+}
+
+function demoWorkspaceBar() {
+  const qwenLabel = demoState.qwen.mode === 'live' ? 'Qwen 已连接 · 管理端可生成真实草稿' : demoState.qwen.mode === 'guided' ? 'Qwen 引导模式 · 使用示例草稿' : '正在检查 Qwen 状态';
+  const progress = demoState.qwenDraftAccepted ? '候选内容已进入待核验' : demoState.extraSourceAdded ? '补证资料已加入队列' : '等待补证资料';
+  return `<section class="demo-workspace-bar" aria-label="当前工作状态"><div><span>当前个案</span><strong>${selectedProject().name}</strong><b>${selectedProject().area}</b></div><div><span>资料状态</span><strong>${progress}</strong><b>公开前仍须核验</b></div><div class="demo-qwen-state ${demoState.qwen.mode}"><span>Qwen / Paw-Archivist</span><strong>${qwenLabel}</strong><b>${demoState.qwen.mode === 'live' ? '不直接发布事实' : '不发送访客输入到模型'}</b></div></section>`;
 }
 
 function demoStepContent() {
@@ -84,6 +94,21 @@ function demoAssetCard() {
   const trace = demoState.traceOpen ? `<aside class="demo-trace-panel"><div class="demo-trace-head"><div><p class="demo-kicker">SOURCE TRACE</p><h3>「1933 年創立」的來源回鏈</h3></div><button class="demo-icon-button" data-action="trace">關閉</button></div><div class="demo-trace-row"><span>01</span><div><b>《澳門日報》歷史專題</b><p>公開報道 · 創立年份記載</p></div><em>可公開</em></div><div class="demo-trace-row"><span>02</span><div><b>店主訪談摘錄 02</b><p>街坊回憶與代際消費故事</p></div><em class="wait">待確認</em></div><p class="demo-trace-note">Verifier 只會把來源足夠、公開範圍清楚的內容標為可公開。</p></aside>` : '';
   const refreshLabel = demoState.cardRefreshed ? '已按現有來源重新整理' : 'Paw-Archivist 重新整理';
   return `${demoHeading('STEP 04 · 文化資產卡', '讓每個欄位都有來源，也有公開邊界。', '這是目前可實作的核心：Paw-Archivist 進行結構化建檔，Paw-Verifier 對每一項敘述標記可信狀態。', '<span class="demo-implemented">已實現核心</span>')}<div class="demo-asset-tools"><span>資料版本：內部草稿 v0.3</span><button class="demo-inline-action" data-action="refresh-card">${refreshLabel}</button></div><div class="demo-asset-layout"><article class="demo-asset-card"><div class="demo-card-top"><p class="demo-kicker">CULTURAL ASSET CARD</p><span>內部草稿</span></div><h3>${project.name}</h3><dl><dt>類型</dt><dd>${project.type}</dd><dt>街區</dt><dd>${project.area}</dd><dt>創立年份</dt><dd>${project.year}</dd><dt>文化標籤</dt><dd><span>懷舊甜品</span><span>街坊記憶</span><span>代際消費</span></dd></dl><blockquote>「以前很多街坊都不是只來買雪糕，還會帶小朋友來。後來小朋友長大了，又帶自己的孩子回來。」<footer>訪談摘錄 02 · 待商戶確認公開範圍</footer></blockquote></article><aside class="demo-verifier"><div class="demo-verifier-head"><div><p class="demo-kicker">PAW-VERIFIER</p><h3>可信核驗</h3></div><span>4 項</span></div><div><b>1933 年創辦</b><span class="ok">可公開</span></div><div><b>三代顧客故事</b><span class="wait">待商戶確認</span></div><div><b>家族經營細節</b><span class="private">僅內部</span></div><div><b>歷史照片授權</b><span class="wait">待補證</span></div><button data-action="trace">${demoState.traceOpen ? '收起來源回鏈' : '查看來源回鏈'}</button></aside></div>${trace}${demoNext('查看街區活化看板')}`;
+}
+
+function demoQwenWorkbench() {
+  const live = demoState.qwen.mode === 'live';
+  if (!demoState.qwenDraftGenerated) {
+    return `<section class="demo-qwen-workbench"><div><p class="demo-kicker">QWEN ASSISTED ARCHIVING</p><h3>让 Qwen 整理来源，不替人下结论。</h3><p>它只读取本案已登记的来源，输出带来源编号的候选说法、证据摘录与核验提示。没有来源的内容不能成为候选项。</p></div><div class="demo-qwen-action"><span class="${live ? 'live' : 'guided'}">${live ? '实时模型可用' : '引导体验模式'}</span><button data-action="generate-qwen">${live ? '在管理端生成真实草稿' : '生成示例 Qwen 草稿'}</button></div></section>`;
+  }
+  const accepted = demoState.qwenDraftAccepted;
+  return `<section class="demo-qwen-result"><div class="demo-qwen-result-head"><div><p class="demo-kicker">QWEN DRAFT · ${live ? 'LIVE RULES' : 'GUIDED SAMPLE'}</p><h3>候选文化记录</h3></div><span class="${accepted ? 'accepted' : 'pending'}">${accepted ? '已送往 Verifier' : '等待人工采纳'}</span></div><p class="demo-qwen-summary">根据来源 01 的公开报道及来源 02 的访谈摘录，建议把“1933 年创立”与“街坊记忆”拆分处理：前者可优先核验，后者须先确认公开范围。</p><div class="demo-qwen-candidates"><article><b>候选 01 · 1933 年创立</b><p>证据：公开报道记载店铺创立年份。</p><span>来源 01 · 建议：核验后可公开</span></article><article><b>候选 02 · 代际街坊记忆</b><p>证据：访谈提及顾客带子女重访。</p><span>来源 02 · 建议：取得商户确认后再公开</span></article></div><div class="demo-qwen-footer"><small>${live ? '真实草稿必须在管理端登录后生成并记录审计事件。' : '这是离线示例草稿，不调用模型，也不写入服务器。'}</small>${accepted ? '<b>2 条候选项已成为待核验资料</b>' : '<button class="demo-inline-action" data-action="accept-qwen">采纳为待核验项</button>'}</div></section>`;
+}
+
+function demoAssetCard() {
+  const project = selectedProject();
+  const trace = demoState.traceOpen ? `<aside class="demo-trace-panel"><div class="demo-trace-head"><div><p class="demo-kicker">SOURCE TRACE</p><h3>「1933 年創立」的來源回鏈</h3></div><button class="demo-icon-button" data-action="trace">關閉</button></div><div class="demo-trace-row"><span>01</span><div><b>《澳門日報》歷史專題</b><p>公開報道 · 創立年份記載</p></div><em>可公開</em></div><div class="demo-trace-row"><span>02</span><div><b>店主訪談摘錄 02</b><p>街坊回憶與代際消費故事</p></div><em class="wait">待確認</em></div><p class="demo-trace-note">Verifier 只會把來源足夠、公開範圍清楚的內容標為可公開。</p></aside>` : '';
+  return `${demoHeading('STEP 04 · Qwen 建檔與人工核驗', '先让 Qwen 帮忙整理，再由人决定能不能相信。', 'Qwen 只产生候选说法；Archivist 采纳后，Verifier 决定公开、待确认或仅内部。', '<span class="demo-implemented">核心工作流</span>')}<div class="demo-asset-tools"><span>资料版本：内部草稿 v0.3</span><button class="demo-inline-action" data-action="refresh-card">${demoState.cardRefreshed ? '已按现有来源重新整理' : '更新结构化资料'}</button></div>${demoQwenWorkbench()}<div class="demo-asset-layout"><article class="demo-asset-card"><div class="demo-card-top"><p class="demo-kicker">CULTURAL ASSET CARD</p><span>内部草稿</span></div><h3>${project.name}</h3><dl><dt>类型</dt><dd>${project.type}</dd><dt>街区</dt><dd>${project.area}</dd><dt>创立年份</dt><dd>${project.year}</dd><dt>文化标签</dt><dd><span>怀旧甜品</span><span>街坊记忆</span><span>代际消费</span></dd></dl><blockquote>「以前很多街坊都不是只来买雪糕，还会带小朋友来。后来小朋友长大了，又带自己的孩子回来。」<footer>访谈摘录 02 · 待商户确认公开范围</footer></blockquote></article><aside class="demo-verifier"><div class="demo-verifier-head"><div><p class="demo-kicker">PAW-VERIFIER</p><h3>可信核验</h3></div><span>${demoState.qwenDraftAccepted ? '6 项' : '4 项'}</span></div><div><b>1933 年创办</b><span class="ok">可公开</span></div><div><b>三代顾客故事</b><span class="wait">待商户确认</span></div><div><b>家族经营细节</b><span class="private">仅内部</span></div><div><b>历史照片授权</b><span class="wait">待补证</span></div><button data-action="trace">${demoState.traceOpen ? '收起来源回链' : '查看来源回链'}</button></aside></div>${trace}${demoNext('把可信资料带进街区看板')}`;
 }
 
 function demoDashboard() {
@@ -136,9 +161,26 @@ document.addEventListener('click', event => {
   else if (action === 'search') demoToast('已找到既有項目、公開來源與待補證資料。');
   else if (action === 'plan-interview') { demoState.interviewPlanned = true; demoToast('補訪任務已加入採集清單。'); }
   else if (action === 'add-source') { demoState.extraSourceAdded = true; demoToast('示範素材已加入待核驗佇列，尚未公開。'); }
+  else if (action === 'generate-qwen') {
+    if (demoState.qwen.mode === 'live') { window.location.href = 'admin.html'; return; }
+    demoState.qwenDraftGenerated = true;
+    demoToast('已生成带来源编号的 Qwen 引导草稿，等待人工采纳。');
+  }
+  else if (action === 'accept-qwen') { demoState.qwenDraftAccepted = true; demoToast('候选项已加入 Verifier 待核验队列，尚未公开。'); }
   else if (action === 'trace') { demoState.traceOpen = !demoState.traceOpen; demoRender(); }
   else if (action === 'refresh-card') { demoState.cardRefreshed = true; demoToast('Paw-Archivist 已按目前來源更新內部草稿。'); }
   else if (action === 'close-output') { demoState.outputPreview = ''; demoRender(); }
 });
 
 demoRender();
+
+fetch('/api/public/demo-status', { headers: { Accept: 'application/json' } })
+  .then(response => response.ok ? response.json() : Promise.reject(new Error('status_unavailable')))
+  .then(status => {
+    demoState.qwen = { mode: status.archivist_mode === 'live' ? 'live' : 'guided', live: status.model_ready === true };
+    demoRender();
+  })
+  .catch(() => {
+    demoState.qwen = { mode: 'guided', live: false };
+    demoRender();
+  });
