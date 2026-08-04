@@ -1,4 +1,4 @@
 window.HERITAGE_CONFIG = Object.freeze({
-  // Keep /api for Tencent Cloud Nginx -> AWS same-origin proxying.
+  // Frontend and backend run on the same machine and share this origin.
   apiBase: '/api',
 });

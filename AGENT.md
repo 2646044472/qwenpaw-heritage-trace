@@ -25,7 +25,7 @@ details, or images without explicit authorisation and an agreed public scope.
 - `frontend/`: public demo, management UI, styles, static assets and browser API client.
 - `backend/server/app.py`: Python standard-library API and SQLite persistence.
 - `backend/`: Docker and local-backend configuration.
-- `contracts/`: versioned frontend-result contract shared with the AWS backend.
+- `contracts/`: versioned frontend-result contract shared by the local frontend and backend.
 - `deploy/`: Linux systemd, environment, and reverse-proxy templates.
 - `澳憶千尋QwenPawHeritageTrace.docx`: product proposal, not runtime data.
 
@@ -82,33 +82,18 @@ When changing API code:
 - Do not expose controls that a signed-in role is not authorised to execute;
   however, remember that hidden controls are a usability measure, not security.
 
-## Deployment Constraints
+## Local Operation
 
-The planned Tencent Cloud host also runs Minecraft. Website work must never
-alter the Minecraft directory, service, tmux session, backups, Java runtime,
-game port, firewall policy, or game user.
+This project is not deployed to a cloud server. GitHub synchronizes versioned
+code only; every machine runs `frontend/` and `backend/` together on localhost.
 
-Before any remote action, read:
-
-- `C:\Users\bankey\Desktop\file\cloud\AGENT.md`
-- `C:\Users\bankey\Desktop\file\cloud\ssh-tool\DELTA_AI_RUNBOOK.md`
-
-Deployment requirements:
-
-- Use a dedicated unprivileged `qwenpaw` Linux account and separate directories
-  under `/srv` and `/var/lib`.
-- Bind the API to `127.0.0.1` only; expose it through Caddy or Nginx on HTTPS.
-- Never expose Python, Vite, Node development, SQLite, or administration ports
-  directly to the internet.
-- Use a real domain, TLS, `QWENPAW_COOKIE_SECURE=1`, restrictive headers, and a
-  narrow CSP.
-- The public demo may be public. Restrict the login/admin/API/upload surface
-  with VPN, identity-aware access, or a reverse-proxy IP allowlist where the
-  administrators have stable addresses.
-- Do not upload private keys, environment files, databases, world data, logs,
-  passwords, or tokens.
-- Use versioned releases and rollback; do not overwrite a live deployment in
-  place.
+- Keep the API bound to `127.0.0.1`; do not expose Python, SQLite, or admin
+  endpoints to a LAN or the internet.
+- Keep `backend/.env`, `backend/.data`, logs, passwords and tokens local and
+  ignored by Git.
+- Use commits and `git pull --ff-only` / `git push origin main` for collaboration.
+- Do not configure or restart any remote server for this project unless the user
+  explicitly changes this architecture.
 
 ## Verification
 

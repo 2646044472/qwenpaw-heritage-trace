@@ -61,7 +61,7 @@
 
 ```text
 .
-├── frontend/                   # 騰訊雲部署的純靜態前端
+├── frontend/                   # 與後端同機運行的瀏覽器介面
 │   ├── index.html              # 公開、免登入的比賽 Demo 入口
 │   ├── admin.html              # 管理工作台入口
 │   ├── app.js / demo.js         # 管理端與公開 Demo 互動
@@ -69,7 +69,7 @@
 │   ├── styles.css / guide.html  # 視覺系統與公開操作流程頁
 │   ├── assets/                  # 審核後的靜態素材
 │   └── vendor/                  # 打包的 Leaflet，避免外部 CDN 依賴
-├── backend/                    # AWS 後端參考實作與本機協作環境
+├── backend/                    # 同機 Python 後端與本機協作環境
 │   ├── server/app.py           # Dependency-free Python API + SQLite
 │   ├── server/test_app.py       # Workflow contract tests
 │   ├── Dockerfile / compose.yaml
@@ -77,12 +77,11 @@
 ├── deploy/
 │   ├── qwenpaw.service         # systemd service template
 │   ├── qwenpaw.env.example     # 服務端環境變數範例
-│   ├── nginx-qwenpaw-demo.conf # 同機後端的舊部署範例
-│   └── nginx-frontend-aws.conf.example # 騰訊雲前端 -> AWS API 範例
+│   └── nginx-all-in-one.conf.example # 同機前端與後端的 Nginx 範例
 ├── contracts/
 │   ├── frontend-result.v1.schema.json # 前後端穩定資料契約
 │   ├── frontend-result.v1.mock.json   # 前端 / 後端聯調樣本
-│   └── README.md                       # AWS 後端交接要求
+│   └── README.md                       # 前後端共同資料契約
 └── 澳憶千尋QwenPawHeritageTrace.docx # 產品 proposal
 ```
 
@@ -92,14 +91,26 @@
 
 - Python 3.11+，目前程式以 Python 標準函式庫實作。
 - Node.js 僅用於前端語法檢查，不是執行時必要條件。
-- 生產環境須使用 Nginx 或 Caddy，把靜態檔案與 `/api/` 代理到同一個 HTTPS origin。
+- 前端與後端在同一台電腦運行；瀏覽器只請求同源 `/api/`。可直接由 Python 提供靜態檔，或選用本機 Nginx。
+
+### GitHub 同步
+
+GitHub 只同步版本化程式碼與文件。每台開發電腦都各自保存 `backend/.env`、`backend/.data/` 和任何模型憑據，這些檔案不進 Git。
+
+```powershell
+git pull --ff-only origin main
+# 修改、測試後
+git add frontend backend contracts deploy README.md AGENT.md
+git commit -m "Describe the change"
+git push origin main
+```
 
 ### 建立初始密碼雜湊
 
 後端不接受明文初始密碼。先在本機產生 scrypt 雜湊：
 
 ```powershell
-python -c "from server.app import password_hash; import getpass; print(password_hash(getpass.getpass('Initial password: ')))"
+python -c "from backend.server.app import password_hash; import getpass; print(password_hash(getpass.getpass('Initial password: ')))"
 ```
 
 將輸出內容設定為 `QWENPAW_INITIAL_PASSWORD_HASH`。不要把它提交到 Git、貼到截圖或放在前端 JavaScript。
@@ -126,7 +137,7 @@ python backend\server\app.py
 Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8000/api/health
 ```
 
-公開評審 Demo 不需要 API 或登入，直接開啟 `frontend/index.html` 即可展示。設定 `QWENPAW_SERVE_STATIC=1` 後，可在本機以 `http://127.0.0.1:8000/admin.html` 同源測試管理端；後端會從 `frontend/` 讀取白名單靜態資源，不得在生產環境啟用。生產環境使用 `deploy/nginx-qwenpaw-demo.conf` 或 `deploy/nginx-frontend-aws.conf.example` 把 `frontend/` 與 `/api/` 代理到同一個 HTTPS origin。
+公開評審 Demo 不需要 API 或登入，直接開啟 `frontend/index.html` 即可展示。設定 `QWENPAW_SERVE_STATIC=1` 後，可在本機以 `http://127.0.0.1:8000/admin.html` 同源測試管理端；後端會從 `frontend/` 讀取白名單靜態資源。若需要 Nginx，使用 `deploy/nginx-all-in-one.conf.example`，它把同機的 `/api/` 代理到 `127.0.0.1:8000`。
 
 ### 同學電腦與 Docker
 
@@ -168,21 +179,17 @@ Schema 與可直接用於聯調的樣本位於 `contracts/`。前端只讀取 `G
 
 服務端 Session 為不透明隨機 token，其雜湊才會存入資料庫。Cookie 必須使用 `HttpOnly`、`Secure` 和 `SameSite`；`Secure` 僅能在本地 HTTP 開發時暫時關閉。
 
-## 生產部署
+## 單機運行
 
-### 目前分工：騰訊雲前端，AWS 後端
-
-目前的生產架構是：騰訊雲只提供靜態檔案與 Nginx；AWS 由後端同學負責 API、資料庫、帳戶、Session、CSRF、RBAC 與 LLM 整合。瀏覽器一律請求騰訊雲同源的 `/api/...`，由 Nginx 安全地反向代理到 AWS HTTPS API。這避免跨域 Cookie、CORS 與模型 Key 暴露到瀏覽器。
+目前不部署雲伺服器。GitHub 用於同步程式碼；前端、API、SQLite、Session、審計與可選 Qwen-Paw/LLM 適配器都在同一台電腦上運行。
 
 ```text
-Browser -> Tencent Cloud Nginx + static frontend -> /api proxy -> AWS HTTPS API + database + LLM
+Browser -> frontend/ + /api -> local Python API -> local SQLite + optional server-side LLM
 ```
 
-騰訊雲應使用 [deploy/nginx-frontend-aws.conf.example](deploy/nginx-frontend-aws.conf.example)，將 `server_name` 與 AWS API 網域替換為正式值；前端的 [runtime-config.js](frontend/runtime-config.js) 保持 `apiBase: '/api'`。AWS 的完整回應、驗證與信任邊界見 [contracts/README.md](contracts/README.md)。在 AWS 網域與 TLS 憑證就緒前，不應將管理端當成已可用服務公開。
+`frontend/runtime-config.js` 固定使用 `apiBase: '/api'`。使用 `QWENPAW_SERVE_STATIC=1` 時，Python 後端直接提供前端；使用 Nginx 時，採用 [deploy/nginx-all-in-one.conf.example](deploy/nginx-all-in-one.conf.example)。完整資料契約見 [contracts/README.md](contracts/README.md)。
 
-這個網站計畫部署於同時運行 Minecraft 的伺服器。比賽期間可先部署純靜態、免登入的 `index.html` + `demo.js`；管理端與 API 應在安全巡檢、TLS、帳戶與角色權限完成後再開放。部署前必須先完成唯讀巡檢，確認現有服務、RAM、磁碟、監聽端口、Linux 防火牆和雲端安全組。不得把網站安裝到 Minecraft 目錄、tmux session 或遊戲帳戶中。
-
-建議目錄與服務分離：
+若在自己的 Linux 電腦以 systemd 運行，建議目錄與服務分離：
 
 ```text
 /srv/qwenpaw/releases/<timestamp>/
@@ -191,24 +198,20 @@ Browser -> Tencent Cloud Nginx + static frontend -> /api proxy -> AWS HTTPS API 
 /etc/qwenpaw/qwenpaw.env        # 0600, root-readable only
 ```
 
-生產啟用前的必要條件：
+本機運行的必要條件：
 
-1. 使用正式域名與有效 TLS 憑證。
-2. `QWENPAW_COOKIE_SECURE=1`。
-3. API 僅監聽 `127.0.0.1:8000`，不對外公開。
-4. 反向代理僅公開 `80/443`；不得公開 `8000`、`5173` 或其他開發端口。
-5. SSH 僅開放給管理者固定 IP；Minecraft 端口維持既有政策。
-6. 比賽 Demo 的 `/` 可公開；`admin.html`、管理 API、上傳與審計路由使用 IP allowlist、VPN 或 identity-aware proxy 作為額外門檻。
-7. 初始管理員透過受控 CLI/環境檔建立；沒有公開註冊與預設密碼。
-8. 以新 release 目錄上傳與驗證，再切換 `/srv/qwenpaw/app` 軟連結，保留上一版以便回滾。
+1. API 預設只監聽 `127.0.0.1:8000`，不對 LAN 或網際網路公開。
+2. 本機 HTTP 開發設定 `QWENPAW_COOKIE_SECURE=0`；若日後自行公開網站，才必須改為 HTTPS 與 `1`。
+3. 初始管理員只透過本機環境檔建立；沒有公開註冊與預設密碼。
+4. 以 GitHub commit 作為協作與回滾單位；不要同步 `.env`、資料庫、日誌或任何 token。
 
 ### AI 模型設定
 
-AI Key 只可寫在伺服器的 `/etc/qwenpaw/qwenpaw.env`，檔案權限為 `0600`；不可放進 `.env.example`、前端、資料庫欄位或 Git。服務端採用 OpenAI-compatible `/chat/completions` 介面，應使用允許後端服務的 Model Studio 或相容供應商憑據；Coding Plan 專用 Key 僅供互動式編程工具使用，不得作為本服務的部署後端憑據。中國大陸 Model Studio 相容端點可使用 `https://dashscope.aliyuncs.com/compatible-mode/v1`，模型名稱需以該服務帳戶的 `/models` 回應為準。
+AI Key 只可寫在本機 `backend/.env` 或本機受限環境變數；不可放進 `.env.example`、前端、資料庫欄位或 Git。服務端採用 OpenAI-compatible `/chat/completions` 介面，應使用允許後端服務的 Model Studio 或相容供應商憑據；Coding Plan 專用 Key 僅供互動式編程工具使用，不得作為本服務的部署後端憑據。中國大陸 Model Studio 相容端點可使用 `https://dashscope.aliyuncs.com/compatible-mode/v1`，模型名稱需以該服務帳戶的 `/models` 回應為準。
 
 草稿流程固定為：已有來源 → LLM 結構化草稿 → 人工選擇採納 → `pending` 核驗項目 → Verifier 決定是否可公開。模型錯誤、無來源、非 JSON 回應或沒有來源編號時，都不會寫入資料庫。
 
-`deploy/nginx-qwenpaw-demo.conf` 目前是反向代理草稿，仍需替換 `example.com`、加上正式 TLS server block、限制 `admin.html` 與 `/api/` 後才能上線。它不再依賴外部字型 CDN；地圖瓦片仍需網路存取，正式發布應評估合規的瓦片供應商與使用限制。
+`deploy/nginx-all-in-one.conf.example` 是同機 Nginx 範例；一般本機開發不必啟用它。它不依賴外部字型 CDN；地圖瓦片仍需網路存取，正式發布應評估合規的瓦片供應商與使用限制。
 
 ## 安全原則
 
@@ -218,8 +221,6 @@ AI Key 只可寫在伺服器的 `/etc/qwenpaw/qwenpaw.env`，檔案權限為 `06
 - 每次登入、資料建立、核驗狀態變更、發布與帳戶管理都必須有審計記錄。
 - 真實檔案上傳需採用 MIME/signature 驗證、檔名重寫、大小限制、隔離儲存與惡意檔掃描；目前 Demo 尚未提供上傳端點。
 - 不要用前端路由、localStorage 或 CSS 隱藏來實作安全控制。
-
-更完整的共享伺服器與管理登入規範位於 `C:\Users\bankey\Desktop\file\cloud\readme.md`。
 
 ## 驗證
 

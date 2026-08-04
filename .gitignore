@@ -16,6 +16,7 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .vscode/
+.sentry-native/
 
 # Local bridge state and logs
 *.log

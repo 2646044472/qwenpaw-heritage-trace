@@ -1,12 +1,12 @@
-# AWS Backend Handoff
+# Local Backend Contract
 
-腾讯云只托管本项目的静态前端。生产流量必须遵循以下路径：
+GitHub 只负责同步仓库；前端和后端在同一台电脑上运行：
 
 ```text
-Browser -> https://frontend-domain/api/... -> Tencent Nginx -> https://aws-api-domain/...
+Browser -> same-origin /api/... -> local Python API -> local database and optional LLM
 ```
 
-前端保持同源 `/api`，不把 AWS API URL、LLM Key 或任何模型配置写进浏览器。Nginx 模板见 `../deploy/nginx-frontend-aws.conf.example`，运行时配置为 `../frontend/runtime-config.js`。
+前端保持同源 `/api`，不把 API URL、LLM Key 或任何模型配置写进浏览器。运行时配置为 `../frontend/runtime-config.js`；本机 Nginx 可选模板见 `../deploy/nginx-all-in-one.conf.example`。
 
 ## Stable result contract
 
@@ -28,14 +28,12 @@ Browser -> https://frontend-domain/api/... -> Tencent Nginx -> https://aws-api-d
 
 管理端还需要 README 中列出的 `/api/session`、`/api/login`、`/api/logout`、projects、sources、claims、publications、AI drafts 和 workflow routes。写操作使用 JSON，并要求 `X-CSRF-Token`；登录态通过 `HttpOnly; Secure; SameSite=Lax` Cookie 维持。`/api/ai/status` 只能返回模型是否配置和显示名，绝不能返回 Key。
 
-登录、角色、CSRF、审计和发布拦截全部在 AWS 后端执行。即使腾讯云静态站点公开可访问，未登录请求也必须不能读取或写入管理数据。
+登录、角色、CSRF、审计和发布拦截全部在本机后端执行。即使前端文件可被打开，未登录请求也必须不能读取或写入管理数据。
 
 ## Qwen-Paw integration
 
-Qwen-Paw 只作为 AWS 后端中的 Archivist / Verifier 能力调用：管理端请求 AWS 的 `/api/projects/{id}/ai-drafts` 或 `/workflow`，由 AWS 服务端按已授权来源组装任务、调用已获准的 Qwen-Paw / 模型适配器，再验证并保存最终 contract。浏览器、腾讯云静态文件和 `frontend/runtime-config.js` 都不得保存或转发模型凭据。模型输出仅是待核验候选；确定性 Coordinator 校验失败时必须重试一次，随后以 `completed_with_errors` 结束，不能伪装为完成。
+Qwen-Paw 只作为本機後端中的 Archivist / Verifier 能力调用：管理端请求本机的 `/api/projects/{id}/ai-drafts` 或 `/workflow`，由后端按已授权来源组装任务、调用已获准的 Qwen-Paw / 模型适配器，再验证并保存最终 contract。浏览器和 `frontend/runtime-config.js` 都不得保存或转发模型凭据。模型输出仅是待核验候选；确定性 Coordinator 校验失败时必须重试一次，随后以 `completed_with_errors` 结束，不能伪装为完成。
 
-## Reverse-proxy trust boundary
+## Local trust boundary
 
-AWS 入口只接受来自腾讯云 Nginx 的代理流量，或以安全组、WAF、mTLS / 共享网关凭据达到同等保护。后端仅在该边界可信时才解释 `X-Forwarded-For`、`X-Forwarded-Host` 与 `X-Forwarded-Proto`；不能让互联网客户端直接伪造这些头。
-
-AWS API 必须使用有效 HTTPS 证书与稳定域名。Nginx 会保留请求路径，因此 AWS 应接受 `/api/...` 前缀。若后端移除此路径前缀，必须同时明确调整 `proxy_pass`，并在联调时验证所有 API route、Cookie `Path=/` 与 CSRF Origin 校验。
+API 默认只监听 `127.0.0.1`。如使用本机 Nginx，Nginx 会保留 `/api/...` 路径并代理到该回环端口；只有本机反向代理可以设置 `X-Forwarded-*` 头。不要将 API、数据库或模型端口直接暴露到局域网或互联网。
