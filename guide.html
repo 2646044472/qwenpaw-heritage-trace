@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4efe4" />
+    <title>澳憶・千尋 | 操作流程</title>
+    <link rel="stylesheet" href="styles.css?v=20260804-guide" />
+  </head>
+  <body class="guide-body">
+    <a class="skip-link" href="#guide-main">跳至主要內容</a>
+    <header class="guide-header">
+      <a class="guide-brand" href="index.html"><span>澳憶・千尋</span><small>QWENPAW HERITAGE TRACE</small></a>
+      <nav aria-label="主要連結"><a href="index.html">公開 Demo</a><a href="admin.html">管理端</a></nav>
+    </header>
+    <main id="guide-main" class="guide-main">
+      <section class="guide-intro">
+        <div>
+          <p class="guide-kicker">START HERE</p>
+          <h1>第一次使用，從這裡開始</h1>
+          <p>先選擇你的使用目的，再按工作流完成資料建檔。QwenPaw 只協助整理來源；是否公開始終由人工核驗決定。</p>
+          <div class="guide-intro-actions"><a class="btn btn-primary" href="index.html">體驗公開 Demo</a><a class="text-action" href="admin.html">登入管理端</a></div>
+        </div>
+        <img src="assets/heritage-cover.jpeg" alt="澳門街區文化資產示意" />
+      </section>
+
+      <section class="guide-section" aria-labelledby="entry-title">
+        <div class="guide-section-head"><p class="guide-kicker">CHOOSE AN ENTRY</p><h2 id="entry-title">我現在要做什麼？</h2></div>
+        <div class="guide-choices">
+          <article><span>公開訪客</span><h3>先理解方案</h3><p>不需登入。依六步 Demo 選個案、查看問題、證據與 G / B / C 輸出。</p><a href="index.html">打開公開 Demo</a></article>
+          <article><span>資料整理者</span><h3>建立一個個案</h3><p>登入後選擇項目，先新增可追溯來源，再讓 Qwen 整理候選資料。</p><a href="admin.html#archive">開始資料歸檔</a></article>
+          <article><span>核驗與發布者</span><h3>決定能否公開</h3><p>檢查候選的來源、風險和授權邊界；只有通過閘門的資料才能生成成品。</p><a href="admin.html#verify">前往核驗審核</a></article>
+        </div>
+      </section>
+
+      <section class="guide-section" aria-labelledby="workflow-title">
+        <div class="guide-section-head"><p class="guide-kicker">WORKFLOW</p><h2 id="workflow-title">日常工作流</h2><span>每一步都有明確交接</span></div>
+        <ol class="guide-flow">
+          <li><b>01</b><div><h3>選擇項目</h3><p>從左欄選現有個案，或建立一個新項目；先確認街區與資料範圍。</p><a href="admin.html">進入工作台</a></div></li>
+          <li><b>02</b><div><h3>整理來源</h3><p>點「新增來源」，填入名稱、類型、證據摘錄和權利狀態；不要把未授權內容標為公開。</p><a href="admin.html#archive">前往資料歸檔</a></div></li>
+          <li><b>03</b><div><h3>生成候選</h3><p>有來源後才可執行 Qwen 建檔。每條候選都要帶來源編號，尚未等於真實或可公開。</p><a href="admin.html#archive">查看 Qwen 建檔</a></div></li>
+          <li><b>04</b><div><h3>人工核驗</h3><p>在核驗頁對照原文並記錄理由：可公開、待確認或僅內部，不能由模型自行決定。</p><a href="admin.html#verify">進入核驗審核</a></div></li>
+          <li><b>05</b><div><h3>發布與回訪</h3><p>先執行 Coordinator，再查看地圖與發布閘門；通過後才建立 G / B / C 成品。</p><a href="admin.html#publish">查看發布與活化</a></div></li>
+        </ol>
+      </section>
+
+      <section class="guide-grid" aria-label="設定與協作說明">
+        <article>
+          <p class="guide-kicker">QWENPAW DESKTOP</p>
+          <h2>模型設定</h2>
+          <ol class="guide-steps"><li>開啟 QwenPaw Desktop 的 Settings → Models。</li><li>選擇 Aliyun Coding Plan (China)，在應用程式內保存自己的 API Key。</li><li>測試連線後，選擇要使用的模型。</li></ol>
+          <p class="guide-note">Desktop 的個人模型設定不會寫入本專案、Git 或 Docker `.env`。</p>
+        </article>
+        <article>
+          <p class="guide-kicker">LOCAL ACCOUNT</p>
+          <h2>本機管理端帳戶</h2>
+          <p>帳戶密碼只保存為不可逆的 scrypt 雜湊，無法從資料庫讀回。全新環境由啟動者在本機設定初始密碼。</p>
+          <p class="guide-note">同學各自使用 `.env.example` 建立自己的 `.env`；不要共用、截圖或提交密碼與 Key。</p>
+        </article>
+        <article>
+          <p class="guide-kicker">TEAM / CLOUD</p>
+          <h2>協作與部署</h2>
+          <p>同學電腦可用 Docker Compose 在本機回環地址啟動；Ubuntu 雲端以 systemd 和 Nginx 部署，API 維持只監聽 127.0.0.1。</p>
+          <a class="text-action" href="README.md">閱讀跨環境部署說明</a>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

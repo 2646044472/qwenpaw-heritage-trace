@@ -1,0 +1,40 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name example.com;
+
+    root /var/www/qwenpaw-demo;
+    index index.html;
+
+    access_log /var/log/nginx/qwenpaw-frontend.access.log;
+    error_log /var/log/nginx/qwenpaw-frontend.error.log warn;
+
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.tile.openstreetmap.org; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+
+    # Replace this with the AWS backend's HTTPS origin. Keep the browser on /api
+    # so cookies and CSRF remain same-origin from the frontend's perspective.
+    location /api/ {
+        proxy_pass https://aws-api.example.com;
+        proxy_http_version 1.1;
+        proxy_ssl_server_name on;
+        proxy_set_header Host aws-api.example.com;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_read_timeout 45s;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location ~* \.(?:css|js|jpg|jpeg|png|svg|ico|woff2?)$ {
+        expires 1h;
+        try_files $uri =404;
+    }
+}

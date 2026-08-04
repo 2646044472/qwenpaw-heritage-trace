@@ -65,7 +65,9 @@
 ├── demo.js                     # 六步評審流程與硬編碼 Demo 資料
 ├── admin.html                  # 後續管理工作台入口
 ├── app.js                      # 管理端互動與 API 呼叫
+├── runtime-config.js            # 前端 API base；生產預設同源 /api
 ├── styles.css                  # 視覺系統與響應式樣式
+├── guide.html                  # 公開操作流程頁
 ├── assets/
 │   └── heritage-cover.jpeg     # Demo 主視覺
 ├── vendor/
@@ -76,7 +78,15 @@
 ├── deploy/
 │   ├── qwenpaw.service         # systemd service template
 │   ├── qwenpaw.env.example     # 服務端環境變數範例
-│   └── nginx-qwenpaw-demo.conf # Nginx reverse proxy template
+│   ├── nginx-qwenpaw-demo.conf # 同機後端的舊部署範例
+│   └── nginx-frontend-aws.conf.example # 騰訊雲前端 -> AWS API 範例
+├── contracts/
+│   ├── frontend-result.v1.schema.json # 前後端穩定資料契約
+│   ├── frontend-result.v1.mock.json   # 前端 / 後端聯調樣本
+│   └── README.md                       # AWS 後端交接要求
+├── Dockerfile                   # 同學電腦 / CI 的一致執行環境
+├── compose.yaml                 # 僅綁定本機回環的 Docker 開發服務
+├── .env.example                 # 不含任何實際憑據的本機 Docker 設定範例
 └── 澳憶千尋QwenPawHeritageTrace.docx # 產品 proposal
 ```
 
@@ -109,6 +119,8 @@ $env:QWENPAW_PORT = "8000"
 $env:QWENPAW_COOKIE_SECURE = "0"
 $env:QWENPAW_INITIAL_USER = "admin"
 $env:QWENPAW_INITIAL_PASSWORD_HASH = "<scrypt-hash>"
+# 僅本機測試管理端時啟用；生產環境保持 0。
+$env:QWENPAW_SERVE_STATIC = "1"
 python server\app.py
 ```
 
@@ -118,7 +130,27 @@ python server\app.py
 Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8000/api/health
 ```
 
-公開評審 Demo 不需要 API 或登入，直接開啟 `index.html` 即可展示。`admin.html` 的 `app.js` 才會以同源 `/api/` 呼叫後端；本地完整測試管理端時，需要一個把 `/api/` 代理到 `127.0.0.1:8000` 的反向代理。生產環境使用 `deploy/nginx-qwenpaw-demo.conf` 作為起點。
+公開評審 Demo 不需要 API 或登入，直接開啟 `index.html` 即可展示。設定 `QWENPAW_SERVE_STATIC=1` 後，可在本機以 `http://127.0.0.1:8000/admin.html` 同源測試管理端；它只提供白名單靜態資源，不得在生產環境啟用。生產環境使用 `deploy/nginx-qwenpaw-demo.conf` 把靜態檔案與 `/api/` 代理到同一個 HTTPS origin。
+
+### 同學電腦與 Docker
+
+跨平台開發不依賴 Windows 路徑或本機已安裝的 QwenPaw Desktop。已安裝 Docker Desktop 的 Windows/macOS 電腦，以及 Ubuntu/Debian，都可用相同容器啟動：
+
+1. 複製 `.env.example` 為本機 `.env`，只在該檔填入使用者自己產生的 `QWENPAW_INITIAL_PASSWORD_HASH`。
+2. 執行 `docker compose up --build`。
+3. 開啟 `http://127.0.0.1:8000/admin.html`，容器資料保存在具名 volume，不會進 Git。
+
+Compose 的端口只綁定 `127.0.0.1`，方便本機協作測試；它不是雲端公開部署設定。沒有 Docker 時，Windows PowerShell 使用上一節命令；Linux/macOS 將相同變數以 `export QWENPAW_DB_PATH="$PWD/.data/qwenpaw.db"` 等方式設定後執行 `python3 server/app.py`。未設定 `QWENPAW_DB_PATH` 時，後端會使用專案內的 `.data/qwenpaw.db`，因此全新 clone 不會嘗試寫入 `/var/lib`。
+
+QwenPaw Desktop 是每位使用者自己的 Agent 工具。若要在 Desktop 內使用 Coding Plan，請在它的「Settings → Models」選擇 `Aliyun Coding Plan (China)`、完成測試連線並選擇模型；這個個人設定不會也不應被 Docker、Git 或專案 `.env` 讀取。
+
+### Workflow Contract
+
+管理端只消費 Coordinator 產生的 `frontend_result`。Archivist 的候選資料使用 `extraction_status: extracted|unknown`，不宣告核驗成功；Verifier 的最終狀態只允許 `supported`、`partially_supported`、`unsupported`、`unverifiable`，來源衝突、時間脈絡、引文與授權問題則放在 `risk_flags`。`source_ids` 是候選引用，`source_ids_checked` 是本次核對集合，`valid_source_ids` 與 `invalid_source_ids` 必須互斥且完整覆蓋核對集合；`citation_status`、核驗狀態與最終 `reason` 不得互相矛盾，也不得保留自我修正過程。
+
+Coordinator 會驗證 claim/source ID、枚舉一致性、必要 workflow/asset-card 區段、issue 引用與 claim 數量，並根據 claims 確定性計算 summary 與 review queue。資料不完整時會重試一次；仍失敗則記錄 `completed_with_errors`，不會標為完成。發布 API 同樣使用此 contract 的 `publication.safe_to_publish` 作為服務端闸门。
+
+Schema 與可直接用於聯調的樣本位於 `contracts/`。前端只讀取 `GET /api/projects/<id>/frontend-result` 回應中的 `frontend_result` 欄位，不能從原始 Agent 文字、聊天紀錄或前端自行統計來推導核驗或發布狀態。
 
 ## API 概覽
 
@@ -130,23 +162,35 @@ Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8000/api/health
 | `/api/logout` | `POST` | Session + CSRF | 結束 Session |
 | `/api/projects` | `GET` / `POST` | Session；POST 需 CSRF | 專案列表與建立 |
 | `/api/claims` | `GET` / `POST` | Session；POST 需 CSRF | 核驗項目查詢與建立 |
-| `/api/claims/<id>` | `PATCH` | Session + CSRF | 更新核驗公開狀態 |
+| `/api/claims/<id>` | `PATCH` | Verifier/Admin + CSRF | 寫入最終核驗結論、來源、風險與公開邊界 |
 | `/api/projects/<id>/archive` | `POST` | Session + CSRF | 產生內部資產檔案 |
 | `/api/ai/status` | `GET` | Session | 僅回傳模型是否已配置，不回傳 Key |
 | `/api/projects/<id>/ai-drafts` | `POST` | Archivist/Admin + CSRF | 以現有來源產生短期 AI 建檔草稿 |
 | `/api/projects/<id>/ai-drafts/<draft_id>/accept` | `POST` | Archivist/Admin + CSRF | 將選取草稿加入待核驗清單 |
+| `/api/projects/<id>/workflow` | `POST` | Archivist/Verifier/Admin + CSRF | 驗證下游輸出並產生 stable contract |
+| `/api/projects/<id>/frontend-result` | `GET` | Session | 讀取最後一次 `frontend_result` |
 
 服務端 Session 為不透明隨機 token，其雜湊才會存入資料庫。Cookie 必須使用 `HttpOnly`、`Secure` 和 `SameSite`；`Secure` 僅能在本地 HTTP 開發時暫時關閉。
 
 ## 生產部署
+
+### 目前分工：騰訊雲前端，AWS 後端
+
+目前的生產架構是：騰訊雲只提供靜態檔案與 Nginx；AWS 由後端同學負責 API、資料庫、帳戶、Session、CSRF、RBAC 與 LLM 整合。瀏覽器一律請求騰訊雲同源的 `/api/...`，由 Nginx 安全地反向代理到 AWS HTTPS API。這避免跨域 Cookie、CORS 與模型 Key 暴露到瀏覽器。
+
+```text
+Browser -> Tencent Cloud Nginx + static frontend -> /api proxy -> AWS HTTPS API + database + LLM
+```
+
+騰訊雲應使用 [deploy/nginx-frontend-aws.conf.example](deploy/nginx-frontend-aws.conf.example)，將 `server_name` 與 AWS API 網域替換為正式值；前端的 [runtime-config.js](runtime-config.js) 保持 `apiBase: '/api'`。AWS 的完整回應、驗證與信任邊界見 [contracts/README.md](contracts/README.md)。在 AWS 網域與 TLS 憑證就緒前，不應將管理端當成已可用服務公開。
 
 這個網站計畫部署於同時運行 Minecraft 的伺服器。比賽期間可先部署純靜態、免登入的 `index.html` + `demo.js`；管理端與 API 應在安全巡檢、TLS、帳戶與角色權限完成後再開放。部署前必須先完成唯讀巡檢，確認現有服務、RAM、磁碟、監聽端口、Linux 防火牆和雲端安全組。不得把網站安裝到 Minecraft 目錄、tmux session 或遊戲帳戶中。
 
 建議目錄與服務分離：
 
 ```text
-/srv/qwenpaw-demo/releases/<timestamp>/
-/srv/qwenpaw-demo/current -> releases/<timestamp>/
+/srv/qwenpaw/releases/<timestamp>/
+/srv/qwenpaw/app -> releases/<timestamp>/
 /var/lib/qwenpaw/qwenpaw.db
 /etc/qwenpaw/qwenpaw.env        # 0600, root-readable only
 ```
@@ -160,15 +204,15 @@ Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8000/api/health
 5. SSH 僅開放給管理者固定 IP；Minecraft 端口維持既有政策。
 6. 比賽 Demo 的 `/` 可公開；`admin.html`、管理 API、上傳與審計路由使用 IP allowlist、VPN 或 identity-aware proxy 作為額外門檻。
 7. 初始管理員透過受控 CLI/環境檔建立；沒有公開註冊與預設密碼。
-8. 以新 release 目錄上傳與驗證，再切換 `current` 軟連結，保留上一版以便回滾。
+8. 以新 release 目錄上傳與驗證，再切換 `/srv/qwenpaw/app` 軟連結，保留上一版以便回滾。
 
 ### AI 模型設定
 
-AI Key 只可寫在伺服器的 `/etc/qwenpaw/qwenpaw.env`，檔案權限為 `0600`；不可放進 `.env.example`、前端、資料庫欄位或 Git。現時服務端採用 OpenAI-compatible `/chat/completions` 介面，QwenPaw 文件列出的中國阿里雲 Coding Plan base URL 是 `https://coding.dashscope.aliyuncs.com/v1`。模型名稱需以該 Key 的 `/models` 回應為準。
+AI Key 只可寫在伺服器的 `/etc/qwenpaw/qwenpaw.env`，檔案權限為 `0600`；不可放進 `.env.example`、前端、資料庫欄位或 Git。服務端採用 OpenAI-compatible `/chat/completions` 介面，應使用允許後端服務的 Model Studio 或相容供應商憑據；Coding Plan 專用 Key 僅供互動式編程工具使用，不得作為本服務的部署後端憑據。中國大陸 Model Studio 相容端點可使用 `https://dashscope.aliyuncs.com/compatible-mode/v1`，模型名稱需以該服務帳戶的 `/models` 回應為準。
 
 草稿流程固定為：已有來源 → LLM 結構化草稿 → 人工選擇採納 → `pending` 核驗項目 → Verifier 決定是否可公開。模型錯誤、無來源、非 JSON 回應或沒有來源編號時，都不會寫入資料庫。
 
-`deploy/nginx-qwenpaw-demo.conf` 目前是反向代理草稿，仍需改為正式域名與 HTTPS server block 後才能上線。配置中的 CDN CSP 例外也應在發布前移除，改用本地字型和圖標資產。
+`deploy/nginx-qwenpaw-demo.conf` 目前是反向代理草稿，仍需替換 `example.com`、加上正式 TLS server block、限制 `admin.html` 與 `/api/` 後才能上線。它不再依賴外部字型 CDN；地圖瓦片仍需網路存取，正式發布應評估合規的瓦片供應商與使用限制。
 
 ## 安全原則
 
@@ -185,7 +229,10 @@ AI Key 只可寫在伺服器的 `/etc/qwenpaw/qwenpaw.env`，檔案權限為 `06
 
 ```powershell
 node --check app.js
+node --check demo.js
 python -m py_compile server\app.py
+python -m unittest -v server\test_app.py
+git diff --check
 ```
 
 對 API 進行變更後，至少測試：未登入拒絕、CSRF 拒絕、登入限速、角色拒絕、Session 到期、登出失效，以及審計日誌寫入。

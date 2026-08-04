@@ -1,0 +1,11 @@
+.git
+.data
+.tmp-user-flow
+.qwenpaw-runtime
+.env
+.env.*
+!.env.example
+__pycache__
+*.pyc
+*.db
+*.log

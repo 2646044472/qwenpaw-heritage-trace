@@ -41,7 +41,7 @@ function demoRender() {
     <div class="demo-app">
       <header class="demo-header">
         <a class="demo-brand" href="#top"><span>澳憶・千尋</span><small>QWENPAW HERITAGE TRACE</small></a>
-        <div class="demo-header-meta"><span class="demo-pill">比賽演示模式</span><span class="demo-case">案例：${selectedProject().name}</span><a href="admin.html">管理端</a></div>
+        <div class="demo-header-meta"><span class="demo-pill">比賽演示模式</span><span class="demo-case">案例：${selectedProject().name}</span><a href="guide.html">操作流程</a><a href="admin.html">管理端</a></div>
       </header>
       <main id="top" class="demo-main">
         ${demoIntro()}
@@ -247,7 +247,8 @@ document.addEventListener('click', event => {
 
 demoRender();
 
-fetch('/api/public/demo-status', { headers: { Accept: 'application/json' } })
+const demoApiBase = String(window.HERITAGE_CONFIG?.apiBase || '/api').replace(/\/+$/, '');
+fetch(`${demoApiBase}/public/demo-status`, { headers: { Accept: 'application/json' }, credentials: demoApiBase.startsWith('/') ? 'same-origin' : 'include' })
   .then(response => response.ok ? response.json() : Promise.reject(new Error('status_unavailable')))
   .then(status => {
     demoState.qwen = { mode: status.archivist_mode === 'live' ? 'live' : 'guided', live: status.model_ready === true };
