@@ -6,7 +6,7 @@
 Browser -> https://frontend-domain/api/... -> Tencent Nginx -> https://aws-api-domain/...
 ```
 
-前端保持同源 `/api`，不把 AWS API URL、LLM Key 或任何模型配置写进浏览器。Nginx 模板见 `../deploy/nginx-frontend-aws.conf.example`。
+前端保持同源 `/api`，不把 AWS API URL、LLM Key 或任何模型配置写进浏览器。Nginx 模板见 `../deploy/nginx-frontend-aws.conf.example`，运行时配置为 `../frontend/runtime-config.js`。
 
 ## Stable result contract
 
@@ -32,7 +32,7 @@ Browser -> https://frontend-domain/api/... -> Tencent Nginx -> https://aws-api-d
 
 ## Qwen-Paw integration
 
-Qwen-Paw 只作为 AWS 后端中的 Archivist / Verifier 能力调用：管理端请求 AWS 的 `/api/projects/{id}/ai-drafts` 或 `/workflow`，由 AWS 服务端按已授权来源组装任务、调用已获准的 Qwen-Paw / 模型适配器，再验证并保存最终 contract。浏览器、腾讯云静态文件和 `runtime-config.js` 都不得保存或转发模型凭据。模型输出仅是待核验候选；确定性 Coordinator 校验失败时必须重试一次，随后以 `completed_with_errors` 结束，不能伪装为完成。
+Qwen-Paw 只作为 AWS 后端中的 Archivist / Verifier 能力调用：管理端请求 AWS 的 `/api/projects/{id}/ai-drafts` 或 `/workflow`，由 AWS 服务端按已授权来源组装任务、调用已获准的 Qwen-Paw / 模型适配器，再验证并保存最终 contract。浏览器、腾讯云静态文件和 `frontend/runtime-config.js` 都不得保存或转发模型凭据。模型输出仅是待核验候选；确定性 Coordinator 校验失败时必须重试一次，随后以 `completed_with_errors` 结束，不能伪装为完成。
 
 ## Reverse-proxy trust boundary
 

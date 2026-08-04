@@ -61,20 +61,19 @@
 
 ```text
 .
-├── index.html                  # 公開、免登入的比賽 Demo 入口
-├── demo.js                     # 六步評審流程與硬編碼 Demo 資料
-├── admin.html                  # 後續管理工作台入口
-├── app.js                      # 管理端互動與 API 呼叫
-├── runtime-config.js            # 前端 API base；生產預設同源 /api
-├── styles.css                  # 視覺系統與響應式樣式
-├── guide.html                  # 公開操作流程頁
-├── assets/
-│   └── heritage-cover.jpeg     # Demo 主視覺
-├── vendor/
-│   ├── leaflet.css             # 打包的 Leaflet 地圖樣式，避免現場 CDN 樣式失敗
-│   └── leaflet.js              # 打包的 Leaflet 地圖程式，避免外部腳本供應鏈依賴
-├── server/
-│   └── app.py                  # Dependency-free Python API + SQLite
+├── frontend/                   # 騰訊雲部署的純靜態前端
+│   ├── index.html              # 公開、免登入的比賽 Demo 入口
+│   ├── admin.html              # 管理工作台入口
+│   ├── app.js / demo.js         # 管理端與公開 Demo 互動
+│   ├── runtime-config.js        # 瀏覽器 API base；預設同源 /api
+│   ├── styles.css / guide.html  # 視覺系統與公開操作流程頁
+│   ├── assets/                  # 審核後的靜態素材
+│   └── vendor/                  # 打包的 Leaflet，避免外部 CDN 依賴
+├── backend/                    # AWS 後端參考實作與本機協作環境
+│   ├── server/app.py           # Dependency-free Python API + SQLite
+│   ├── server/test_app.py       # Workflow contract tests
+│   ├── Dockerfile / compose.yaml
+│   └── .env.example            # 不含任何實際憑據的本機設定範例
 ├── deploy/
 │   ├── qwenpaw.service         # systemd service template
 │   ├── qwenpaw.env.example     # 服務端環境變數範例
@@ -84,9 +83,6 @@
 │   ├── frontend-result.v1.schema.json # 前後端穩定資料契約
 │   ├── frontend-result.v1.mock.json   # 前端 / 後端聯調樣本
 │   └── README.md                       # AWS 後端交接要求
-├── Dockerfile                   # 同學電腦 / CI 的一致執行環境
-├── compose.yaml                 # 僅綁定本機回環的 Docker 開發服務
-├── .env.example                 # 不含任何實際憑據的本機 Docker 設定範例
 └── 澳憶千尋QwenPawHeritageTrace.docx # 產品 proposal
 ```
 
@@ -113,7 +109,7 @@ python -c "from server.app import password_hash; import getpass; print(password_
 以下示例使用工作區內的暫存資料庫；請自行將 `<scrypt-hash>` 替換為上一步輸出。
 
 ```powershell
-$env:QWENPAW_DB_PATH = "$PWD\.data\qwenpaw.db"
+$env:QWENPAW_DB_PATH = "$PWD\backend\.data\qwenpaw.db"
 $env:QWENPAW_HOST = "127.0.0.1"
 $env:QWENPAW_PORT = "8000"
 $env:QWENPAW_COOKIE_SECURE = "0"
@@ -121,7 +117,7 @@ $env:QWENPAW_INITIAL_USER = "admin"
 $env:QWENPAW_INITIAL_PASSWORD_HASH = "<scrypt-hash>"
 # 僅本機測試管理端時啟用；生產環境保持 0。
 $env:QWENPAW_SERVE_STATIC = "1"
-python server\app.py
+python backend\server\app.py
 ```
 
 在另一個終端檢查：
@@ -130,17 +126,17 @@ python server\app.py
 Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8000/api/health
 ```
 
-公開評審 Demo 不需要 API 或登入，直接開啟 `index.html` 即可展示。設定 `QWENPAW_SERVE_STATIC=1` 後，可在本機以 `http://127.0.0.1:8000/admin.html` 同源測試管理端；它只提供白名單靜態資源，不得在生產環境啟用。生產環境使用 `deploy/nginx-qwenpaw-demo.conf` 把靜態檔案與 `/api/` 代理到同一個 HTTPS origin。
+公開評審 Demo 不需要 API 或登入，直接開啟 `frontend/index.html` 即可展示。設定 `QWENPAW_SERVE_STATIC=1` 後，可在本機以 `http://127.0.0.1:8000/admin.html` 同源測試管理端；後端會從 `frontend/` 讀取白名單靜態資源，不得在生產環境啟用。生產環境使用 `deploy/nginx-qwenpaw-demo.conf` 或 `deploy/nginx-frontend-aws.conf.example` 把 `frontend/` 與 `/api/` 代理到同一個 HTTPS origin。
 
 ### 同學電腦與 Docker
 
 跨平台開發不依賴 Windows 路徑或本機已安裝的 QwenPaw Desktop。已安裝 Docker Desktop 的 Windows/macOS 電腦，以及 Ubuntu/Debian，都可用相同容器啟動：
 
-1. 複製 `.env.example` 為本機 `.env`，只在該檔填入使用者自己產生的 `QWENPAW_INITIAL_PASSWORD_HASH`。
-2. 執行 `docker compose up --build`。
+1. 複製 `backend/.env.example` 為本機 `backend/.env`，只在該檔填入使用者自己產生的 `QWENPAW_INITIAL_PASSWORD_HASH`。
+2. 執行 `docker compose -f backend/compose.yaml up --build`。
 3. 開啟 `http://127.0.0.1:8000/admin.html`，容器資料保存在具名 volume，不會進 Git。
 
-Compose 的端口只綁定 `127.0.0.1`，方便本機協作測試；它不是雲端公開部署設定。沒有 Docker 時，Windows PowerShell 使用上一節命令；Linux/macOS 將相同變數以 `export QWENPAW_DB_PATH="$PWD/.data/qwenpaw.db"` 等方式設定後執行 `python3 server/app.py`。未設定 `QWENPAW_DB_PATH` 時，後端會使用專案內的 `.data/qwenpaw.db`，因此全新 clone 不會嘗試寫入 `/var/lib`。
+Compose 的端口只綁定 `127.0.0.1`，方便本機協作測試；它不是雲端公開部署設定。沒有 Docker 時，Windows PowerShell 使用上一節命令；Linux/macOS 將相同變數以 `export QWENPAW_DB_PATH="$PWD/backend/.data/qwenpaw.db"` 等方式設定後執行 `python3 backend/server/app.py`。未設定 `QWENPAW_DB_PATH` 時，後端會使用 `backend/.data/qwenpaw.db`，因此全新 clone 不會嘗試寫入 `/var/lib`。
 
 QwenPaw Desktop 是每位使用者自己的 Agent 工具。若要在 Desktop 內使用 Coding Plan，請在它的「Settings → Models」選擇 `Aliyun Coding Plan (China)`、完成測試連線並選擇模型；這個個人設定不會也不應被 Docker、Git 或專案 `.env` 讀取。
 
@@ -182,7 +178,7 @@ Schema 與可直接用於聯調的樣本位於 `contracts/`。前端只讀取 `G
 Browser -> Tencent Cloud Nginx + static frontend -> /api proxy -> AWS HTTPS API + database + LLM
 ```
 
-騰訊雲應使用 [deploy/nginx-frontend-aws.conf.example](deploy/nginx-frontend-aws.conf.example)，將 `server_name` 與 AWS API 網域替換為正式值；前端的 [runtime-config.js](runtime-config.js) 保持 `apiBase: '/api'`。AWS 的完整回應、驗證與信任邊界見 [contracts/README.md](contracts/README.md)。在 AWS 網域與 TLS 憑證就緒前，不應將管理端當成已可用服務公開。
+騰訊雲應使用 [deploy/nginx-frontend-aws.conf.example](deploy/nginx-frontend-aws.conf.example)，將 `server_name` 與 AWS API 網域替換為正式值；前端的 [runtime-config.js](frontend/runtime-config.js) 保持 `apiBase: '/api'`。AWS 的完整回應、驗證與信任邊界見 [contracts/README.md](contracts/README.md)。在 AWS 網域與 TLS 憑證就緒前，不應將管理端當成已可用服務公開。
 
 這個網站計畫部署於同時運行 Minecraft 的伺服器。比賽期間可先部署純靜態、免登入的 `index.html` + `demo.js`；管理端與 API 應在安全巡檢、TLS、帳戶與角色權限完成後再開放。部署前必須先完成唯讀巡檢，確認現有服務、RAM、磁碟、監聽端口、Linux 防火牆和雲端安全組。不得把網站安裝到 Minecraft 目錄、tmux session 或遊戲帳戶中。
 
@@ -228,10 +224,10 @@ AI Key 只可寫在伺服器的 `/etc/qwenpaw/qwenpaw.env`，檔案權限為 `06
 ## 驗證
 
 ```powershell
-node --check app.js
-node --check demo.js
-python -m py_compile server\app.py
-python -m unittest -v server\test_app.py
+node --check frontend\app.js
+node --check frontend\demo.js
+python -m py_compile backend\server\app.py
+python -m unittest -v backend\server\test_app.py
 git diff --check
 ```
 

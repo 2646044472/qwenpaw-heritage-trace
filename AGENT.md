@@ -22,10 +22,10 @@ details, or images without explicit authorisation and an agreed public scope.
 
 ## Repository Map
 
-- `index.html`, `demo.js`, `styles.css`: public six-step competition demo.
-- `admin.html`, `app.js`: management UI and API client.
-- `server/app.py`: Python standard-library API and SQLite persistence.
-- `assets/`: reviewed static assets only.
+- `frontend/`: public demo, management UI, styles, static assets and browser API client.
+- `backend/server/app.py`: Python standard-library API and SQLite persistence.
+- `backend/`: Docker and local-backend configuration.
+- `contracts/`: versioned frontend-result contract shared with the AWS backend.
 - `deploy/`: Linux systemd, environment, and reverse-proxy templates.
 - `澳憶千尋QwenPawHeritageTrace.docx`: product proposal, not runtime data.
 
@@ -115,8 +115,8 @@ Deployment requirements:
 Before handing off changes:
 
 ```powershell
-node --check app.js
-python -m py_compile server\app.py
+node --check frontend\app.js
+python -m py_compile backend\server\app.py
 ```
 
 For authentication/API changes, create an isolated temporary database and

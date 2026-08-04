@@ -1,16 +1,18 @@
 import json
 import os
 import sqlite3
+import sys
 import tempfile
 import unittest
 from contextlib import closing
 from pathlib import Path
 from unittest.mock import patch
 
-try:
-    import app
-except ModuleNotFoundError:
-    from server import app
+SERVER_ROOT = Path(__file__).resolve().parent
+if str(SERVER_ROOT) not in sys.path:
+    sys.path.insert(0, str(SERVER_ROOT))
+
+import app
 
 
 class WorkflowContractTests(unittest.TestCase):

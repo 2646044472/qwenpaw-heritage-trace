@@ -23,12 +23,13 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+BACKEND_ROOT = Path(__file__).resolve().parent.parent
+REPOSITORY_ROOT = BACKEND_ROOT.parent
 
 
 def load_local_env() -> None:
     """Load local development settings without overriding the deployment environment."""
-    env_path = PROJECT_ROOT / ".env"
+    env_path = BACKEND_ROOT / ".env"
     if not env_path.is_file():
         return
     for raw_line in env_path.read_text(encoding="utf-8").splitlines():
@@ -42,7 +43,7 @@ def load_local_env() -> None:
 
 
 load_local_env()
-DEFAULT_DATA_DIR = PROJECT_ROOT / ".data"
+DEFAULT_DATA_DIR = BACKEND_ROOT / ".data"
 DB_PATH = Path(os.environ.get("QWENPAW_DB_PATH", DEFAULT_DATA_DIR / "qwenpaw.db"))
 HOST = os.environ.get("QWENPAW_HOST", "127.0.0.1")
 PORT = int(os.environ.get("QWENPAW_PORT", "8000"))
@@ -56,7 +57,7 @@ LLM_MODEL = os.environ.get("QWENPAW_LLM_MODEL", "")
 LLM_TIMEOUT_SECONDS = int(os.environ.get("QWENPAW_LLM_TIMEOUT_SECONDS", "30"))
 DRAFT_TTL_SECONDS = 30 * 60
 SERVE_STATIC = os.environ.get("QWENPAW_SERVE_STATIC", "0") == "1"
-STATIC_ROOT = PROJECT_ROOT
+STATIC_ROOT = Path(os.environ.get("QWENPAW_STATIC_ROOT", REPOSITORY_ROOT / "frontend"))
 VERIFICATION_STATUSES = {"supported", "partially_supported", "unsupported", "unverifiable"}
 VERIFICATION_LEVELS = {"source_evidence", "search_extract", "insufficient_evidence"}
 RISK_FLAGS = {"source_conflict", "time_context_loss", "citation_error", "insufficient_locator", "authorization_risk"}

@@ -3,7 +3,7 @@ server {
     listen [::]:80;
     server_name example.com;
 
-    root /var/www/qwenpaw-demo;
+    root /var/www/qwenpaw-demo/frontend;
     index index.html;
 
     access_log /var/log/nginx/qwenpaw-frontend.access.log;

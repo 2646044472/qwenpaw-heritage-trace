@@ -4,10 +4,8 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-COPY server/ /app/server/
-COPY admin.html app.js index.html demo.js styles.css /app/
-COPY assets/ /app/assets/
-COPY vendor/ /app/vendor/
+COPY backend/server/ /app/server/
+COPY frontend/ /app/frontend/
 
 EXPOSE 8000
 CMD ["python", "server/app.py"]
