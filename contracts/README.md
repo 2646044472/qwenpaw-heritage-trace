@@ -1,5 +1,15 @@
 # Local Backend Contract
 
+## Public Heritage Workflow v2
+
+`heritage-workflow.openapi.yaml` is the canonical OpenAPI 3.1 contract for
+`/api/v2/heritage/workflows`. The public boundary exposes only its request,
+status, success, and failure schemas. Agent outputs, claims, normalized source
+bundles, prompts, messages, and transport data remain backend-internal.
+
+The frontend-result v1 files below belong to the separate authenticated
+project administration flow and do not redefine the public Workflow v2 API.
+
 GitHub 只负责同步仓库；前端和后端在同一台电脑上运行：
 
 ```text

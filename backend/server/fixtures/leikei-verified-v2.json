@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0",
+  "case_id": "CASE-LEIKEI",
+  "workflow_status": "finished",
+  "agents": {"miner": {"status": "skipped", "session_id": "private-miner"}, "archivist": {"status": "completed", "session_id": "private-archivist"}, "verifier": {"status": "completed", "session_id": "private-verifier"}},
+  "verification_summary": {"total_claims": 10, "by_status": {"supported": 7, "partially_supported": 2, "unsupported": 0, "unverifiable": 1}, "by_citation_status": {"correct": 7, "partially_incorrect": 2, "incorrect": 0, "not_applicable": 1}, "by_level": {"source_evidence": 7, "bundle_consistency": 2, "unverifiable": 1}, "by_risk_flag": {"authorization_risk": 1}},
+  "revised_asset_card": {
+    "shop_name": {"value": "Lei Kei Dessert and Ice Room", "claim_id": "C1"},
+    "founding_year": {"value": null, "claim_id": "C2"},
+    "street_stall_start_date": {"value": "1950s", "claim_id": "C3"},
+    "first_shop_opening_date": {"value": null, "claim_id": "C4"},
+    "address": {"value": "Macau", "claim_id": "C5"},
+    "product_categories": [{"value": "Traditional desserts", "claim_id": "C6"}],
+    "products": [{"name": "Hand-beaten milk drink", "claim_id": "C7"}],
+    "persons": [{"name": "Third-generation owner", "role": "Owner", "claim_id": "C8"}],
+    "key_events": [{"date": "2018", "description": "Third generation took over", "claim_id": "C9"}],
+    "operations": [{"label": "Traditional preparation methods", "claim_id": "C10"}]
+  },
+  "issues": [{"claim_id": "C2", "issue_type": "unsupported_claim", "description": "The exact founding year is not established.", "recommended_action": "Obtain a dated documentary source."}],
+  "publication_status": "needs_review",
+  "claim_verifications": [{"claim_id": "C1", "status": "supported"}],
+  "raw_output": "private verifier output"
+}
