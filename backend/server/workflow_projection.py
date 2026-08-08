@@ -54,7 +54,7 @@ def status_projection(row: dict) -> dict:
     state = row.get("state") if row.get("state") in STAGES else "input_received"
     failed_stage = row.get("failed_stage")
     statuses = FAILED_AGENTS.get(failed_stage, STAGE_AGENTS.get(state, STAGE_AGENTS["input_received"]))
-    if row.get("route") == "bundle" and statuses[0] in {"not_started", "completed"}:
+    if row.get("route") == "bundle":
         statuses = ("skipped", statuses[1], statuses[2])
     payload = {
         "run_id": row["run_id"], "case_id": row.get("case_id"), "route": row["route"], "state": state,

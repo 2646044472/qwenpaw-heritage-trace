@@ -12,6 +12,7 @@ from pathlib import Path
 
 from workflow_contract import ContractValidationError, validate_schema
 from workflow_projection import result_projection, status_projection
+from workflows.executor import build_executor_from_env
 
 PREFIX = "/api/v2/heritage/workflows"
 FIXTURE_PATH = Path(__file__).resolve().parent / "fixtures" / "leikei-verified-v2.json"
@@ -41,7 +42,7 @@ class WorkflowApiService:
     def __init__(self, connect, now_iso, executor=None) -> None:
         self.connect = connect
         self.now_iso = now_iso
-        self.executor = executor or self._fixture_executor
+        self.executor = executor or build_executor_from_env()
         self.threads: list[threading.Thread] = []
 
     def handle_get(self, handler, path: str) -> bool:

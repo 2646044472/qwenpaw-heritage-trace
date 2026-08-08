@@ -47,7 +47,11 @@ class WorkflowApiTests(unittest.TestCase):
         os.environ["QWENPAW_INITIAL_USER"] = "workflow-test"
         os.environ["QWENPAW_INITIAL_PASSWORD_HASH"] = app.password_hash("test-password")
         app.initialize_database()
-        app.WORKFLOW_API = WorkflowApiService(app.connect, app.now_iso)
+        app.WORKFLOW_API = WorkflowApiService(
+            app.connect,
+            app.now_iso,
+            executor=lambda service, run_id: service._fixture_executor(service, run_id),
+        )
 
     def tearDown(self) -> None:
         app.WORKFLOW_API = self.original_service
@@ -135,6 +139,19 @@ class WorkflowApiTests(unittest.TestCase):
             projected = status_projection(row)
             validate_schema(projected, "WorkflowStatus")
             self.assertEqual(projected["state"], stage)
+
+    def test_bundle_normalization_failure_keeps_miner_skipped(self) -> None:
+        row = {
+            "run_id": "run-stage",
+            "case_id": "CASE-1",
+            "route": "bundle",
+            "state": "completed_with_errors",
+            "failed_stage": "source_normalization_failed",
+            "error_json": '{"errors":[{"path":"$","code":"bad_source","message":"No usable source"}]}',
+        }
+        projected = status_projection(row)
+        validate_schema(projected, "WorkflowStatus")
+        self.assertEqual(projected["agents"]["miner"]["status"], "skipped")
 
 
 if __name__ == "__main__":
