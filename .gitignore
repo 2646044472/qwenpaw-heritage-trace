@@ -18,6 +18,13 @@ __pycache__/
 .vscode/
 .sentry-native/
 
+# QwenPaw deployment state and provider secrets
+/deployment/qwenpaw/secrets/*
+!/deployment/qwenpaw/secrets/.env.example
+!/deployment/qwenpaw/secrets/.gitkeep
+/deployment/qwenpaw/backups/*
+!/deployment/qwenpaw/backups/.gitkeep
+
 # Local bridge state and logs
 *.log
 .tencent_winpty_bridge.json

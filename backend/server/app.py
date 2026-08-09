@@ -22,6 +22,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+from workflow_api import WorkflowApiService, initialize_workflow_schema
+
 
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
 REPOSITORY_ROOT = BACKEND_ROOT.parent
@@ -73,6 +75,9 @@ def connect() -> sqlite3.Connection:
     db.row_factory = sqlite3.Row
     db.execute("PRAGMA foreign_keys = ON")
     return db
+
+
+WORKFLOW_API = WorkflowApiService(connect, now_iso)
 
 
 def password_hash(password: str, salt: bytes | None = None) -> str:
@@ -212,6 +217,7 @@ def initialize_database() -> None:
             CREATE INDEX IF NOT EXISTS workflow_runs_project_id_idx ON workflow_runs(project_id);
             """
         )
+        initialize_workflow_schema(db)
         ensure_column(db, "projects", "latitude", "REAL")
         ensure_column(db, "projects", "longitude", "REAL")
         ensure_column(db, "claims", "claim_code", "TEXT NOT NULL DEFAULT ''")
@@ -791,6 +797,8 @@ class ApiHandler(BaseHTTPRequestHandler):
             status = model_status()
             self.respond_json(HTTPStatus.OK, {"archivist_mode": "live" if status["configured"] else "guided", "model_ready": status["configured"]})
             return
+        if WORKFLOW_API.handle_get(self, path):
+            return
         if path == "/api/session":
             session = self.session()
             if not session:
@@ -858,6 +866,8 @@ class ApiHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         path = urlparse(self.path).path
+        if WORKFLOW_API.handle_post(self, path):
+            return
         if path == "/api/login":
             self.login()
             return

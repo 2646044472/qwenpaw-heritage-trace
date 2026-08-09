@@ -222,6 +222,43 @@ AI Key 只可寫在本機 `backend/.env` 或本機受限環境變數；不可放
 - 真實檔案上傳需採用 MIME/signature 驗證、檔名重寫、大小限制、隔離儲存與惡意檔掃描；目前 Demo 尚未提供上傳端點。
 - 不要用前端路由、localStorage 或 CSS 隱藏來實作安全控制。
 
+## Docker Compose migration
+
+The repository includes a two-service Compose stack. It starts the Heritage
+backend and the official `agentscope/qwenpaw:latest` image on one Compose
+network. The backend uses `http://qwenpaw:8088`; it never reaches a host
+QwenPaw installation or a Windows path.
+
+Before the first start, create a local backend `.env` from
+`backend/.env.example` and provide `QWENPAW_INITIAL_PASSWORD_HASH`. Copy the
+QwenPaw secret template to
+`deployment/qwenpaw/secrets/.env`, then add only the provider/tool variables
+needed by the migrated agents, such as `DASHSCOPE_API_KEY` and
+`TAVILY_API_KEY`. These files are ignored by Git.
+
+```bash
+docker compose up -d --build
+docker compose logs -f
+docker compose ps
+docker compose down
+```
+
+Persistent migration data is deliberately separated from code:
+
+```text
+code                       -> Git
+QwenPaw working data       -> deployment/qwenpaw/working
+QwenPaw secrets            -> deployment/qwenpaw/secrets
+QwenPaw backups            -> deployment/qwenpaw/backups
+```
+
+The working directory contains the migrated Heritage agent configuration,
+persona/instruction files, skills, and static memory. Chat history, sessions,
+tool-result caches, runtime artifacts, credentials, and temporary files are
+not copied. The same Compose file is intended to run unchanged on a future
+Linux VM: clone the repository, copy the persistent deployment data and
+secrets, then run `docker compose up -d --build`.
+
 ## 驗證
 
 ```powershell
