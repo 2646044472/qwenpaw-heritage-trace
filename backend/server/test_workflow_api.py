@@ -21,6 +21,7 @@ import app
 from workflow_api import WorkflowApiService
 from workflow_contract import CONTRACT_PATH, ContractValidationError, validate_schema
 from workflow_projection import status_projection
+from workflows.executor import WorkflowExecutor
 
 PREFIX = "/api/v2/heritage/workflows"
 
@@ -76,6 +77,32 @@ class WorkflowApiTests(unittest.TestCase):
                 return payload
             time.sleep(0.005)
         self.fail("workflow did not become terminal")
+
+    def test_real_execution_is_default_and_fixture_requires_explicit_flag(self) -> None:
+        original = os.environ.pop("QWENPAW_WORKFLOW_EXECUTOR", None)
+        try:
+            service = WorkflowApiService(app.connect, app.now_iso)
+            self.assertIsInstance(service.executor, WorkflowExecutor)
+            os.environ["QWENPAW_WORKFLOW_EXECUTOR"] = "fixture"
+            fixture_service = WorkflowApiService(app.connect, app.now_iso)
+            self.assertEqual(fixture_service.executor.__func__, fixture_service._fixture_executor.__func__)
+        finally:
+            if original is None:
+                os.environ.pop("QWENPAW_WORKFLOW_EXECUTOR", None)
+            else:
+                os.environ["QWENPAW_WORKFLOW_EXECUTOR"] = original
+
+    def test_invalid_executor_mode_is_rejected(self) -> None:
+        original = os.environ.get("QWENPAW_WORKFLOW_EXECUTOR")
+        os.environ["QWENPAW_WORKFLOW_EXECUTOR"] = "automatic-fallback"
+        try:
+            with self.assertRaises(ValueError):
+                WorkflowApiService(app.connect, app.now_iso)
+        finally:
+            if original is None:
+                os.environ.pop("QWENPAW_WORKFLOW_EXECUTOR", None)
+            else:
+                os.environ["QWENPAW_WORKFLOW_EXECUTOR"] = original
 
     def test_openapi_31_contains_only_checkpoint_paths(self) -> None:
         document = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))

@@ -1,11 +1,10 @@
-"""Safe subprocess adapter for the Coordinator's deterministic runtime."""
+"""In-process adapter for the repository-owned deterministic runtime."""
 
 from __future__ import annotations
 
-import json
-import subprocess
-import sys
 from pathlib import Path
+
+from . import workflow_runtime
 
 
 class RuntimeError(Exception):
@@ -17,26 +16,23 @@ class WorkflowRuntime:
         self.config = config
 
     def run(self, command: str, *args: str, timeout: float | None = None) -> dict:
-        if not self.config.runtime_script.is_file():
-            raise RuntimeError("workflow_runtime_not_found")
         try:
-            completed = subprocess.run(
-                [sys.executable, str(self.config.runtime_script), command, *args],
-                shell=False,
-                capture_output=True,
-                timeout=timeout or self.config.overall_timeout,
-            )
-        except subprocess.TimeoutExpired as exc:
-            raise RuntimeError("workflow_runtime_timeout") from exc
-        if completed.returncode != 0:
-            raise RuntimeError("workflow_runtime_failed")
-        try:
-            payload = json.loads(completed.stdout.decode("utf-8"))
-        except (UnicodeDecodeError, ValueError) as exc:
-            raise RuntimeError("workflow_runtime_invalid_control") from exc
-        if not isinstance(payload, dict):
-            raise RuntimeError("workflow_runtime_invalid_control")
-        return payload
+            options = _options(args)
+            if command == "prepare":
+                return workflow_runtime.prepare(options["--input"], options["--runtime-root"])
+            if command == "transition":
+                return workflow_runtime.transition(options["--run-dir"], options["--to"])
+            if command == "normalize":
+                return workflow_runtime.normalize(options["--run-dir"], options.get("--input"), options.get("--session-id"))
+            if command == "validate-archivist":
+                return workflow_runtime.validate_archivist_command(options["--run-dir"], options["--input"], options["--session-id"])
+            if command == "finalize":
+                return workflow_runtime.finalize_command(options["--run-dir"], options["--input"], options["--session-id"])
+            if command == "fail":
+                return workflow_runtime.fail(options["--run-dir"], options["--stage"], options["--code"], options["--message"])
+        except (KeyError, OSError, ValueError) as exc:
+            raise RuntimeError("workflow_runtime_failed") from exc
+        raise RuntimeError("workflow_runtime_command_not_supported")
 
     @staticmethod
     def stage(run_dir: str, filename: str, session_id: str, response: str) -> Path:
@@ -46,3 +42,8 @@ class WorkflowRuntime:
         target.write_bytes(f"[SESSION: {session_id}]\n{response}".encode("utf-8"))
         return target
 
+
+def _options(args: tuple[str, ...]) -> dict[str, str]:
+    if len(args) % 2:
+        raise ValueError("runtime arguments must be option/value pairs")
+    return {args[index]: args[index + 1] for index in range(0, len(args), 2)}

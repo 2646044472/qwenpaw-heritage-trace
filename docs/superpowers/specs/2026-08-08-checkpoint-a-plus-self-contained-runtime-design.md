@@ -66,7 +66,7 @@ The client reconstructs the final assistant text from ordered SSE output without
 
 All settings come from environment variables:
 
-- `QWENPAW_API_BASE_URL` (default `http://127.0.0.1:8088`);
+- `QWENPAW_BASE_URL` (default `http://127.0.0.1:8088`);
 - `QWENPAW_API_TOKEN` (optional bearer token);
 - `QWENPAW_API_TIMEOUT_SECONDS`;
 - `QWENPAW_API_RECONNECT_ATTEMPTS`;

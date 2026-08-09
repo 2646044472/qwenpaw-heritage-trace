@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-CONTRACT_PATH = Path(__file__).resolve().parents[2] / "contracts" / "heritage-workflow.openapi.yaml"
+CONTRACT_PATH = Path(__file__).resolve().parents[1] / "contracts" / "heritage-workflow.openapi.yaml"
 
 
 class ContractValidationError(ValueError):

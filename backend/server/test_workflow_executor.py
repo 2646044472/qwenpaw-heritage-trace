@@ -17,6 +17,7 @@ if str(SERVER_ROOT) not in sys.path:
 from workflow_api import WorkflowApiService, initialize_workflow_schema
 from workflows.config import WorkflowConfig
 from workflows.executor import WorkflowExecutor
+from workflows.runtime import WorkflowRuntime
 
 
 class FakeClient:
@@ -30,6 +31,46 @@ class FakeClient:
     def chat(self, agent_id, message, session_id):
         self.calls.append((agent_id, message, session_id))
         return '{"fake":"agent-output"}'
+
+
+class ScriptedClient(FakeClient):
+    def __init__(self, responses):
+        super().__init__({"Paw-Miner", "Paw-Archivist", "Paw-Verifier"})
+        self.responses = responses
+
+    def chat(self, agent_id, message, session_id):
+        self.calls.append((agent_id, message, session_id))
+        return json.dumps(self.responses[agent_id], ensure_ascii=False)
+
+
+def real_runtime_outputs():
+    claims = []
+    card = {}
+    for index, field in enumerate(("shop_name", "founding_year", "street_stall_start_date", "first_shop_opening_date", "address"), start=1):
+        claim_id = f"C{index:03d}"
+        value = "Lei Kei" if field == "shop_name" else None
+        source_ids = ["S1"] if field == "shop_name" else []
+        claims.append({"claim_id": claim_id, "field": field, "value": value, "extraction_status": "extracted" if source_ids else "unknown", "source_ids": source_ids, "verification_ceiling": "source_evidence" if source_ids else "unverifiable", "note": None, "publication_restriction": None})
+        card[field] = {"value": value, "claim_id": claim_id}
+    card.update({"product_categories": [], "products": [], "persons": [], "key_events": [], "operations": []})
+    archivist = {
+        "case_id": "CASE-REAL-RUNTIME",
+        "archivist_mode": "completed",
+        "input_completeness": {"source_bundle_received": True, "source_count": 1},
+        "source_index": [{"source_id": "S1", "content_type": "original_text", "has_evidence": True, "verification_ceiling": "source_evidence", "authorization": None, "limits": None}],
+        "asset_card": card,
+        "claims": claims,
+        "story_claims": [],
+        "cultural_tags": [],
+        "pending_fields": [{"field": claim["field"], "reason": "Source does not provide this field"} for claim in claims if not claim["source_ids"]],
+        "handoff_status": "ready_for_verification",
+    }
+    verifications = []
+    for claim in claims:
+        supported = bool(claim["source_ids"])
+        verifications.append({"claim_id": claim["claim_id"], "status": "supported" if supported else "unverifiable", "risk_flags": [], "citation_status": "correct" if supported else "not_applicable", "verification_level": "source_evidence" if supported else "unverifiable", "source_ids_checked": claim["source_ids"], "valid_source_ids": claim["source_ids"], "invalid_source_ids": [], "reason": "Source supports claim" if supported else "No source evidence"})
+    verifier = {"case_id": "CASE-REAL-RUNTIME", "claim_verifications": verifications, "issues": [], "publication_status": "needs_review", "publication_risks": [], "revised_asset_card": card}
+    return archivist, verifier
 
 
 class FakeRuntime:
@@ -83,7 +124,20 @@ class WorkflowExecutorTests(unittest.TestCase):
             initialize_workflow_schema(db)
         self.service = WorkflowApiService(connect, lambda: "2026-08-08T00:00:00+00:00", executor=lambda *_: None)
         self.fixture = json.loads((SERVER_ROOT / "fixtures" / "leikei-verified-v2.json").read_text(encoding="utf-8"))
-        self.config = WorkflowConfig(Path(self.temp.name), Path(self.temp.name) / "runtime", "http://localhost", "/api", "Heritage-Coordinator", "Paw-Miner", "Paw-Archivist", "Paw-Verifier", 10, 30)
+        self.config = WorkflowConfig(
+            runtime_root=Path(self.temp.name) / "runtime",
+            api_base_url="http://localhost",
+            api_prefix="/api",
+            api_token=None,
+            coordinator_id="Heritage-Coordinator",
+            miner_id="Paw-Miner",
+            archivist_id="Paw-Archivist",
+            verifier_id="Paw-Verifier",
+            agent_timeout=10,
+            overall_timeout=30,
+            reconnect_attempts=0,
+            executor_mode="real",
+        )
 
     def tearDown(self):
         self.temp.cleanup()
@@ -112,6 +166,20 @@ class WorkflowExecutorTests(unittest.TestCase):
         self.assertNotIn("Paw-Miner", [call[0] for call in client.calls])
         with closing(self.connect()) as db:
             self.assertEqual(self.service._row(db, "run-bundle")["state"], "finished")
+
+    def test_bundle_uses_repository_runtime_and_verifier_revised_card(self):
+        request = {"source_bundle": {"case_id": "CASE-REAL-RUNTIME", "shop_name": "Lei Kei", "sources": [{"source_id": "S1", "content_type": "original_text", "content": "Lei Kei", "evidence": [{"text": "Lei Kei", "locator": "p. 1"}]}]}}
+        with closing(self.connect()) as db, db:
+            db.execute("INSERT INTO heritage_workflow_runs (run_id, case_id, route, state, request_json, created_at, updated_at) VALUES ('run-real-runtime', 'CASE-REAL-RUNTIME', 'bundle', 'input_received', ?, 'now', 'now')", (json.dumps(request),))
+        archivist, verifier = real_runtime_outputs()
+        client = ScriptedClient({"Paw-Archivist": archivist, "Paw-Verifier": verifier})
+        WorkflowExecutor(self.config, client=client, runtime=WorkflowRuntime(self.config))(self.service, "run-real-runtime")
+        with closing(self.connect()) as db:
+            row = self.service._row(db, "run-real-runtime")
+        self.assertEqual(row["state"], "finished", row)
+        result = json.loads(row["result_json"])
+        self.assertEqual(result["asset_card"], verifier["revised_asset_card"])
+        self.assertEqual(result["agents"]["miner"]["status"], "skipped")
 
 
 if __name__ == "__main__":

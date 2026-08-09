@@ -12,7 +12,8 @@ from pathlib import Path
 
 from workflow_contract import ContractValidationError, validate_schema
 from workflow_projection import result_projection, status_projection
-from workflows.executor import build_executor_from_env
+from workflows.config import WorkflowConfig
+from workflows.executor import WorkflowExecutor
 
 PREFIX = "/api/v2/heritage/workflows"
 FIXTURE_PATH = Path(__file__).resolve().parent / "fixtures" / "leikei-verified-v2.json"
@@ -42,7 +43,11 @@ class WorkflowApiService:
     def __init__(self, connect, now_iso, executor=None) -> None:
         self.connect = connect
         self.now_iso = now_iso
-        self.executor = executor or build_executor_from_env()
+        if executor is not None:
+            self.executor = executor
+        else:
+            config = WorkflowConfig.from_env()
+            self.executor = self._fixture_executor if config.executor_mode == "fixture" else WorkflowExecutor(config)
         self.threads: list[threading.Thread] = []
 
     def handle_get(self, handler, path: str) -> bool:
@@ -123,6 +128,15 @@ class WorkflowApiService:
         error = {"errors": [{"path": "$", "code": code, "message": message}]}
         with closing(self.connect()) as db, db:
             db.execute("UPDATE heritage_workflow_runs SET state = 'completed_with_errors', failed_stage = ?, error_json = ?, updated_at = ? WHERE run_id = ?", (failed_stage, json.dumps(error), self.now_iso(), run_id))
+
+    def finish_failure(self, run_id: str, result: dict) -> None:
+        errors = result.get("errors") if isinstance(result.get("errors"), list) else []
+        failed_stage = result.get("failed_stage", "finalization_failed")
+        with closing(self.connect()) as db, db:
+            db.execute(
+                "UPDATE heritage_workflow_runs SET state = 'completed_with_errors', failed_stage = ?, result_json = ?, error_json = ?, updated_at = ? WHERE run_id = ?",
+                (failed_stage, json.dumps(result, ensure_ascii=False), json.dumps({"errors": errors}, ensure_ascii=False), self.now_iso(), run_id),
+            )
 
     def _status(self, handler, run_id: str) -> None:
         with closing(self.connect()) as db:

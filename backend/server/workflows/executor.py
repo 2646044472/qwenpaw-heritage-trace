@@ -37,13 +37,13 @@ class WorkflowExecutor:
                 control = self._ok(self.runtime.run("prepare", "--input", str(request_path), "--runtime-root", str(self.config.runtime_root)), "input_invalid")
                 run_dir = control["run_dir"]
                 required = control.get("required_agents") or ([self.config.archivist_id, self.config.verifier_id] if row["route"] == "bundle" else [self.config.miner_id, self.config.archivist_id, self.config.verifier_id])
-                available = {item.get("id") for item in self.client.list_agents() if isinstance(item, dict)}
-                missing = [agent for agent in required if agent not in available]
-                if missing:
-                    raise DomainFailure("agent_resolution_failed", "agent_not_found", f"Required agent {missing[0]} was not found")
+                listed = [item.get("id") for item in self.client.list_agents() if isinstance(item, dict)]
+                unresolved = [agent for agent in required if listed.count(agent) != 1]
+                if unresolved:
+                    raise DomainFailure("agent_resolution_failed", "agent_not_found", f"Required agent {unresolved[0]} was not resolved exactly once")
                 if row["route"] == "mine":
-                    service.transition(run_id, "miner_running")
                     self._transition(run_dir, "miner_running")
+                    service.transition(run_id, "miner_running")
                     session = new_session_id(self.config.coordinator_id, self.config.miner_id)
                     message = "[Agent Heritage-Coordinator requesting] Return exactly one complete public_source_bundle JSON object.\n" + row["request_json"]
                     staged = self.runtime.stage(run_dir, "miner-raw-attempt-1.txt", session, self.client.chat(self.config.miner_id, message, session))
@@ -52,25 +52,25 @@ class WorkflowExecutor:
                     self._ok(self.runtime.run("normalize", "--run-dir", run_dir), "source_normalization_failed")
                 service.transition(run_id, "sources_normalized")
                 bundle = (Path(run_dir) / "normalized_bundle.json").read_text(encoding="utf-8")
-                service.transition(run_id, "archivist_running")
                 self._transition(run_dir, "archivist_running")
+                service.transition(run_id, "archivist_running")
                 self._agent_stage(run_dir, "archivist", self.config.archivist_id, bundle, "validate-archivist", "archivist_output_incomplete")
                 service.transition(run_id, "archivist_validated")
                 archivist = (Path(run_dir) / "archivist_output.json").read_text(encoding="utf-8")
                 handoff = json.dumps({"source_bundle": json.loads(bundle), "archivist_output": json.loads(archivist)}, ensure_ascii=False)
-                service.transition(run_id, "verifier_running")
                 self._transition(run_dir, "verifier_running")
+                service.transition(run_id, "verifier_running")
                 self._agent_stage(run_dir, "verifier", self.config.verifier_id, handoff, "finalize", "verifier_output_incomplete")
                 service.transition(run_id, "finalizing")
                 result = json.loads((Path(run_dir) / "result.json").read_text(encoding="utf-8"))
                 service.finish(run_id, result)
         except DomainFailure as exc:
             self._runtime_fail(run_dir, exc.stage, exc.code, exc.message)
-            service.fail(run_id, exc.stage, exc.code, exc.message)
+            self._persist_failure(service, run_id, run_dir, exc.stage, exc.code, exc.message)
         except QwenPawError as exc:
             stage = "agent_resolution_failed" if "listing" in str(exc) else self._transport_stage(service, run_id)
             self._runtime_fail(run_dir, stage, "qwenpaw_transport_failed", "QwenPaw Agent transport failed")
-            service.fail(run_id, stage, "qwenpaw_transport_failed", "QwenPaw Agent transport failed")
+            self._persist_failure(service, run_id, run_dir, stage, "qwenpaw_transport_failed", "QwenPaw Agent transport failed")
         except (RuntimeError, OSError, ValueError, KeyError):
             stage = "finalization_failed" if run_dir else "input_invalid"
             service.fail(run_id, stage, "workflow_runtime_failed", "Workflow runtime failed")
@@ -112,6 +112,17 @@ class WorkflowExecutor:
             pass
 
     @staticmethod
+    def _persist_failure(service, run_id, run_dir, stage, code, message) -> None:
+        result_path = Path(run_dir) / "result.json" if run_dir else None
+        if result_path and result_path.is_file():
+            try:
+                service.finish_failure(run_id, json.loads(result_path.read_text(encoding="utf-8")))
+                return
+            except (OSError, ValueError):
+                pass
+        service.fail(run_id, stage, code, message)
+
+    @staticmethod
     def _transport_stage(service, run_id: str) -> str:
         with closing(service.connect()) as db:
             state = service._row(db, run_id)["state"]
@@ -119,4 +130,7 @@ class WorkflowExecutor:
 
 
 def build_executor_from_env():
-    return WorkflowExecutor(WorkflowConfig.from_env())
+    config = WorkflowConfig.from_env()
+    if config.executor_mode != "real":
+        raise ValueError("fixture executor must be selected by WorkflowApiService")
+    return WorkflowExecutor(config)
