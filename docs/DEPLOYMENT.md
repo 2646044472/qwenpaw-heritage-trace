@@ -31,6 +31,21 @@ The installer may request administrator permission.  That is expected: Docker
 needs the local virtualization/WSL components.  Do not continue until both
 commands return versions.
 
+#### If Docker Desktop says WSL is missing
+
+Windows Home uses the WSL 2 backend.  Open **PowerShell as Administrator** and
+run:
+
+```powershell
+wsl --install --no-distribution
+```
+
+Restart Windows when prompted, open Docker Desktop again, and wait for it to
+say the engine is running.  `--no-distribution` installs only the Docker
+prerequisite; it does not download an Ubuntu desktop or add a Linux user.  If
+Windows reports that virtualization is disabled, enable CPU virtualization in
+BIOS/UEFI before retrying.
+
 ### macOS or Linux
 
 Install Docker Desktop (macOS) or Docker Engine plus the Compose plugin (Linux)
