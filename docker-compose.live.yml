@@ -1,0 +1,62 @@
+# Live-agent overlay. Combine it with docker-compose.yml; do not run this file
+# by itself. It switches the existing API to real workflow execution and adds
+# an official QwenPaw image configured with the repository's safe template.
+services:
+  api:
+    environment:
+      QWENPAW_WORKFLOW_EXECUTOR: real
+      QWENPAW_BASE_URL: http://qwenpaw:8088
+      QWENPAW_API_PREFIX: /api
+      QWENPAW_WORKFLOW_RUNTIME_ROOT: /var/lib/heritage-trace/workflow-runtime
+    depends_on:
+      qwenpaw:
+        condition: service_healthy
+
+  qwenpaw-bootstrap:
+    image: alpine:3.21
+    volumes:
+      - qwenpaw_working:/target
+      - ./deployment/qwenpaw/working-template:/template:ro
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        if [ ! -f /target/.heritage-template-version ]; then
+          cp -a /template/. /target/
+        fi
+    restart: "no"
+
+  qwenpaw:
+    # Pin this in a local .env (QWENPAW_IMAGE=...) when a competition needs a
+    # tested release rather than the latest tag.
+    image: ${QWENPAW_IMAGE:-agentscope/qwenpaw:latest}
+    init: true
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      QWENPAW_WORKING_DIR: /app/working
+      QWENPAW_SECRET_DIR: /app/working.secret
+      QWENPAW_AUTH_ENABLED: "false"
+      QWENPAW_TOOL_GUARD_ENABLED: "true"
+      QWENPAW_SKILL_SCAN_MODE: warn
+    ports:
+      - "127.0.0.1:8088:8088"
+    volumes:
+      - qwenpaw_working:/app/working
+      - qwenpaw_secrets:/app/working.secret
+      - qwenpaw_backups:/app/working.backups
+    depends_on:
+      qwenpaw-bootstrap:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8088/api/agents', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 20s
+
+volumes:
+  qwenpaw_working:
+  qwenpaw_secrets:
+  qwenpaw_backups:

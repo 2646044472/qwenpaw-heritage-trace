@@ -1,0 +1,1 @@
+{"id":"Paw-Archivist","name":"Paw-Archivist","description":"Structures supplied sources into claims without asserting verification.","workspace_dir":"/app/working/workspaces/Paw-Archivist","channels":{"console":{"enabled":true}},"heartbeat":{"enabled":false},"mcp":{"clients":{}},"system_prompt_files":["AGENTS.md"]}

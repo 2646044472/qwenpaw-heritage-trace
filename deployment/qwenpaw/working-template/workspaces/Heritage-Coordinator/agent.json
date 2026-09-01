@@ -1,0 +1,1 @@
+{"id":"Heritage-Coordinator","name":"Heritage-Coordinator","description":"Coordinates the heritage workflow. It does not invent historical facts.","workspace_dir":"/app/working/workspaces/Heritage-Coordinator","channels":{"console":{"enabled":true}},"heartbeat":{"enabled":false},"mcp":{"clients":{}},"system_prompt_files":["AGENTS.md"]}

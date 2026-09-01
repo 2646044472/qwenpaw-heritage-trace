@@ -1,0 +1,19 @@
+{
+  "agents": {
+    "active_agent": "Heritage-Coordinator",
+    "agent_order": ["Heritage-Coordinator", "Paw-Miner", "Paw-Archivist", "Paw-Verifier"],
+    "profiles": {
+      "Heritage-Coordinator": {"id": "Heritage-Coordinator", "name": "Heritage-Coordinator", "enabled": true, "workspace_dir": "/app/working/workspaces/Heritage-Coordinator"},
+      "Paw-Miner": {"id": "Paw-Miner", "name": "Paw-Miner", "enabled": true, "workspace_dir": "/app/working/workspaces/Paw-Miner"},
+      "Paw-Archivist": {"id": "Paw-Archivist", "name": "Paw-Archivist", "enabled": true, "workspace_dir": "/app/working/workspaces/Paw-Archivist"},
+      "Paw-Verifier": {"id": "Paw-Verifier", "name": "Paw-Verifier", "enabled": true, "workspace_dir": "/app/working/workspaces/Paw-Verifier"}
+    },
+    "defaults": {"heartbeat": {"enabled": false}}
+  },
+  "channels": {},
+  "mcp": {"clients": {}},
+  "tools": {},
+  "security": {},
+  "user_timezone": "Asia/Shanghai",
+  "skill_paths": []
+}

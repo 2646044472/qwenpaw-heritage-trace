@@ -1,50 +1,41 @@
+name: heritage-trace
+
+# Default competition-demo stack. It deliberately has no model dependency:
+# the API runs its deterministic fixture workflow and the browser talks to it
+# through the Next.js server-side proxy.
 services:
-  backend:
+  api:
     build:
       context: .
-      dockerfile: backend/Dockerfile
+      dockerfile: services/api/Dockerfile
     env_file:
-      - path: ./backend/.env
+      - path: ./.env
         required: false
     environment:
       QWENPAW_HOST: 0.0.0.0
       QWENPAW_PORT: "8000"
-      QWENPAW_BASE_URL: http://qwenpaw:8088
-      QWENPAW_API_PREFIX: /api
-      QWENPAW_WORKFLOW_EXECUTOR: real
-      QWENPAW_WORKFLOW_RUNTIME_ROOT: /app/.data/workflow-runtime
-    ports:
-      - "8000:8000"
+      QWENPAW_DB_PATH: /var/lib/heritage-trace/qwenpaw.db
+      QWENPAW_WORKFLOW_EXECUTOR: fixture
     volumes:
-      - ./backend/.data:/app/.data
-    depends_on:
-      qwenpaw:
-        condition: service_healthy
+      - heritage_trace_data:/var/lib/heritage-trace
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3)"]
       interval: 10s
       timeout: 5s
       retries: 12
-      start_period: 10s
+      start_period: 5s
 
-  qwenpaw:
-    image: agentscope/qwenpaw:latest
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
     environment:
-      QWENPAW_WORKING_DIR: /app/working
-      QWENPAW_SECRET_DIR: /app/working.secret
-      QWENPAW_AUTH_ENABLED: "false"
-    env_file:
-      - path: ./deployment/qwenpaw/secrets/.env
-        required: false
+      API_BASE_URL: http://api:8000
     ports:
-      - "8088:8088"
-    volumes:
-      - ./deployment/qwenpaw/working:/app/working
-      - ./deployment/qwenpaw/secrets:/app/working.secret
-      - ./deployment/qwenpaw/backups:/app/working.backups
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8088/api/agents', timeout=3)"]
-      interval: 10s
-      timeout: 5s
-      retries: 18
-      start_period: 20s
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  heritage_trace_data:

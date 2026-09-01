@@ -1,0 +1,1 @@
+{"id":"Paw-Miner","name":"Paw-Miner","description":"Finds candidate public sources and returns a structured source bundle only.","workspace_dir":"/app/working/workspaces/Paw-Miner","channels":{"console":{"enabled":true}},"heartbeat":{"enabled":false},"mcp":{"clients":{}},"system_prompt_files":["AGENTS.md"]}

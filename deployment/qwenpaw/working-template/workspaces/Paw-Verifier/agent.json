@@ -1,0 +1,1 @@
+{"id":"Paw-Verifier","name":"Paw-Verifier","description":"Checks claims, citations, conflicts, and publication readiness.","workspace_dir":"/app/working/workspaces/Paw-Verifier","channels":{"console":{"enabled":true}},"heartbeat":{"enabled":false},"mcp":{"clients":{}},"system_prompt_files":["AGENTS.md"]}
