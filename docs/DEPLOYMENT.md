@@ -92,29 +92,25 @@ Fixture mode is complete without a `.env` file.  It uses the fixed
 
 Only do this after the fixture demo works.
 
-1. Make a local, ignored provider environment file:
-
-   ```powershell
-   Copy-Item .env.example .env
-   notepad .env
-   ```
-
-2. Add the model-provider key issued for this presentation computer (for
-   example `DASHSCOPE_API_KEY`).  Never use or paste a personal Coding Plan
-   key.  Never commit `.env`.
-3. Start the extended stack:
+1. Start the extended stack:
 
    ```powershell
    docker compose -f docker-compose.yml -f docker-compose.live.yml up --build
    ```
 
-4. Open the app at `http://localhost:3000`.  QwenPaw Console is local-only at
+2. Open the app at `http://localhost:3000`.  QwenPaw Console is local-only at
    `http://127.0.0.1:8088`.  It must show these agents before a real run can
    dispatch: Heritage-Coordinator, Paw-Miner, Paw-Archivist, Paw-Verifier.
+3. In that local Console, configure the provider URL, model ID, and key for
+   this presentation computer. QwenPaw persists the configuration only in its
+   local named secret volume. An ignored root `.env` is an alternative for
+   provider variables supported by the selected QwenPaw release; never commit
+   it or use a personal Coding Plan key.
 
 The live stack stores working data, QwenPaw secrets, and backups in named
-Docker volumes.  It does not put provider keys in the Git worktree.  To stop it
-use the matching command with `down`:
+Docker volumes. It does not put provider keys in the Git worktree. The volumes
+survive ordinary `down`, so the local Console model configuration remains for
+the next run. To stop it use the matching command with `down`:
 
 ```powershell
 docker compose -f docker-compose.yml -f docker-compose.live.yml down

@@ -54,9 +54,11 @@ runtime state only.
 
 ## Start live QwenPaw mode
 
-1. Copy `.env.example` to `.env`.
-2. Set a model-provider key and model settings for the computer on which the
-   demo will run.  Do not put a Coding Plan key in this file.
+1. Open QwenPaw Console after starting the live stack and configure the local
+   provider endpoint, model, and key for that computer. QwenPaw saves this
+   configuration in its local named secret volume. Alternatively use the
+   ignored `.env` file when the chosen QwenPaw release supports provider
+   environment variables. Do not use a Coding Plan key.
 3. Start the live stack:
 
    ```powershell
@@ -72,9 +74,11 @@ The API checks that these four template agents are present before dispatch:
 - `Paw-Archivist`
 - `Paw-Verifier`
 
-QwenPaw working files, secrets, and backups use Docker named volumes.  The
-repository keeps only templates and an environment-variable example; `.env`,
-databases, volume state, provider keys, sessions, and credentials are ignored.
+QwenPaw working files, secrets, and backups use local Docker named volumes.
+They persist across ordinary `docker compose down` commands; do not use
+`down -v` if you want to keep the local model configuration. The repository
+keeps only templates and an environment-variable example; `.env`, databases,
+volume state, provider keys, sessions, and credentials are ignored.
 
 ## Environment variables
 

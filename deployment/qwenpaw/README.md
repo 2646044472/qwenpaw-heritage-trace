@@ -12,9 +12,13 @@ paths.
 - `qwenpaw_secrets` for QwenPaw-managed secrets; and
 - `qwenpaw_backups` for backups.
 
-Provider credentials belong in the ignored repository-root `.env` file. The
-live composition intentionally exposes the QwenPaw console only at
-`127.0.0.1:8088`. The fixture demo does not start QwenPaw and needs no key.
+Configure provider credentials in the local QwenPaw Console; QwenPaw keeps
+them in `qwenpaw_secrets`, a local Docker volume outside Git. An ignored
+repository-root `.env` is also supported for provider variables when the local
+QwenPaw release supports them. The live composition intentionally exposes the
+console only at `127.0.0.1:8088`. The fixture demo does not start QwenPaw and
+needs no key. Ordinary `docker compose down` preserves the volumes; only
+`down -v` deletes this local configuration.
 
 If a local QwenPaw image/release uses a different configuration schema or
 provider-variable name, set `QWENPAW_IMAGE` and the provider variables in the

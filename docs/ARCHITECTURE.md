@@ -47,12 +47,13 @@ discoverable.  The coordinator drives the remaining role-specific agents and
 the API maps their output to the same Workflow v2 result contract used in
 fixture mode.
 
-QwenPaw runtime folders are deliberately Docker volumes: `qwenpaw_data`,
+QwenPaw runtime folders are deliberately Docker volumes: `qwenpaw_working`,
 `qwenpaw_secrets`, and `qwenpaw_backups`.  Template workspaces contain only
 role instructions and output expectations.  They contain no login state,
 credentials, sessions, history/checkpoint databases, personal paths, or
 automatic publishing capability.  The console binds only to `127.0.0.1:8088`.
 
-Model provider credentials are supplied by each demo machine in ignored local
-environment files.  The repository does not require, contain, or use a
-personal Coding Plan key.
+Model provider credentials are configured per demo machine in QwenPaw Console
+(persisted only in its local secret volume) or in ignored local environment
+files. The repository does not require, contain, or use a personal Coding Plan
+key.
