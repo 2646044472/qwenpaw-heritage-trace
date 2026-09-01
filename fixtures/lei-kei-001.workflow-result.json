@@ -1,0 +1,32 @@
+{
+  "schema_version": "2.0",
+  "shop_id": "lei-kei-001",
+  "case_id": "CASE-LEI-KEI-DEMO",
+  "workflow_status": "finished",
+  "agents": {
+    "miner": {"status": "completed", "session_id": null},
+    "archivist": {"status": "completed", "session_id": null},
+    "verifier": {"status": "completed", "session_id": null}
+  },
+  "verification_summary": {
+    "total_claims": 5,
+    "by_status": {"supported": 3, "partially_supported": 1, "unsupported": 0, "unverifiable": 1},
+    "by_citation_status": {"correct": 3, "partially_incorrect": 1, "incorrect": 0, "not_applicable": 1},
+    "by_level": {"source_evidence": 3, "bundle_consistency": 1, "unverifiable": 1},
+    "by_risk_flag": {"insufficient_locator": 1}
+  },
+  "asset_card": {
+    "shop_name": {"value": "禮記雪糕", "claim_id": "lei-kei-001-name"},
+    "founding_year": {"value": 1933, "claim_id": "lei-kei-001-founding-year"},
+    "street_stall_start_date": {"value": null, "claim_id": "lei-kei-001-street-stall"},
+    "first_shop_opening_date": {"value": null, "claim_id": "lei-kei-001-first-shop"},
+    "address": {"value": "澳門荷蘭園", "claim_id": "lei-kei-001-address"},
+    "product_categories": [{"value": "雪糕及冰凍甜品", "claim_id": "lei-kei-001-category"}],
+    "products": [{"name": "椰子雪糕", "claim_id": "lei-kei-001-product"}],
+    "persons": [{"name": "禮記團隊", "role": "商戶", "claim_id": "lei-kei-001-person"}],
+    "key_events": [{"date": "1933", "description": "Demo 資產卡中的固定年份訊號", "claim_id": "lei-kei-001-event"}],
+    "operations": [{"label": "現場示範用固定商戶訊號", "claim_id": "lei-kei-001-operation"}]
+  },
+  "issues": [{"claim_id": "lei-kei-001-first-shop", "issue_type": "insufficient_locator", "description": "這是比賽 Demo 的固定資料。", "recommended_action": "現場展示時說明其為 demo data。"}],
+  "publication_status": "needs_review"
+}
