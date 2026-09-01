@@ -17,6 +17,7 @@ function status(workflowStatus: WorkflowStatus["workflow_status"]): WorkflowStat
 
   return {
     run_id: "run-demo-001",
+    shop_id: "lei-kei-001",
     case_id: "demo-lei-kei-001",
     route: "mine",
     state,
@@ -43,7 +44,7 @@ describe("Heritage Workflow API adapter", () => {
       .mockResolvedValueOnce(jsonResponse(result, 200));
 
     const output = await runHeritageWorkflow(
-      { shop_name: "李記餅家", case_id: "demo-lei-kei-001" },
+      { shop_id: "lei-kei-001", shop_name: "李記餅家", case_id: "demo-lei-kei-001" },
       { baseUrl: "https://heritage.test/", fetchImpl, pollIntervalMs: 0 },
     );
 
@@ -53,6 +54,7 @@ describe("Heritage Workflow API adapter", () => {
     expect(fetchImpl.mock.calls[1]?.[0]).toBe("https://heritage.test/api/v2/heritage/workflows/run-demo-001");
     expect(fetchImpl.mock.calls[2]?.[0]).toBe("https://heritage.test/api/v2/heritage/workflows/run-demo-001/result");
     expect(JSON.parse(String(fetchImpl.mock.calls[0]?.[1]?.body))).toEqual({
+      shop_id: "lei-kei-001",
       shop_name: "李記餅家",
       case_id: "demo-lei-kei-001",
     });
@@ -69,7 +71,7 @@ describe("Heritage Workflow API adapter", () => {
       .mockResolvedValueOnce(jsonResponse(result, 200));
 
     await runHeritageWorkflowWithFallback(
-      { shop_name: "Test shop", case_id: "demo-lei-kei-001" },
+      { shop_id: "lei-kei-001", shop_name: "Test shop", case_id: "demo-lei-kei-001" },
       { baseUrl: "https://heritage.test", fetchImpl, pollIntervalMs: 0, onStatus: (value) => observed.push(value) },
     );
 
@@ -80,6 +82,7 @@ describe("Heritage Workflow API adapter", () => {
   it("returns a failed terminal result without treating it as a transport error", async () => {
     const failed: FailedResult = {
       schema_version: "2.0",
+      shop_id: "lei-kei-001",
       case_id: "demo-failed",
       workflow_status: "completed_with_errors",
       failed_stage: "verifier_output_incomplete",
@@ -91,7 +94,7 @@ describe("Heritage Workflow API adapter", () => {
       .mockResolvedValueOnce(jsonResponse(status("completed_with_errors"), 202))
       .mockResolvedValueOnce(jsonResponse(failed, 200));
 
-    const output = await runHeritageWorkflow({ shop_name: "Test shop" }, { fetchImpl, pollIntervalMs: 0 });
+    const output = await runHeritageWorkflow({ shop_id: "lei-kei-001", shop_name: "Test shop" }, { fetchImpl, pollIntervalMs: 0 });
 
     expect(output.workflow_status).toBe("completed_with_errors");
     if (output.workflow_status === "completed_with_errors") {
@@ -102,7 +105,7 @@ describe("Heritage Workflow API adapter", () => {
   it("falls back to a contract-valid shared demo result when the API is unavailable", async () => {
     const fetchImpl = vi.fn<typeof fetch>().mockRejectedValue(new Error("Backend offline"));
 
-    const output = await runHeritageWorkflowWithFallback({ shop_name: "李記餅家" }, { fetchImpl, fallback: true });
+    const output = await runHeritageWorkflowWithFallback({ shop_id: "lei-kei-001", shop_name: "李記餅家" }, { fetchImpl, fallback: true });
 
     expect(output.source).toBe("demo-fallback");
     expect(output.result.workflow_status).toBe("finished");
@@ -112,6 +115,7 @@ describe("Heritage Workflow API adapter", () => {
   it("keeps a valid FailedResult on the api source instead of falling back", async () => {
     const failed: FailedResult = {
       schema_version: "2.0",
+      shop_id: "lei-kei-001",
       case_id: "demo-failed",
       workflow_status: "completed_with_errors",
       failed_stage: "verifier_output_incomplete",
@@ -124,7 +128,7 @@ describe("Heritage Workflow API adapter", () => {
       .mockResolvedValueOnce(jsonResponse(failed, 200));
 
     const output = await runHeritageWorkflowWithFallback(
-      { shop_name: "Test shop" },
+      { shop_id: "lei-kei-001", shop_name: "Test shop" },
       { fetchImpl, pollIntervalMs: 0 },
     );
 
@@ -135,7 +139,7 @@ describe("Heritage Workflow API adapter", () => {
   it("does not turn an aborted request into demo fallback", async () => {
     const fetchImpl = vi.fn<typeof fetch>().mockRejectedValue(new DOMException("User cancelled.", "AbortError"));
 
-    await expect(runHeritageWorkflowWithFallback({ shop_name: "Test shop" }, { fetchImpl })).rejects.toMatchObject({
+    await expect(runHeritageWorkflowWithFallback({ shop_id: "lei-kei-001", shop_name: "Test shop" }, { fetchImpl })).rejects.toMatchObject({
       code: "aborted",
     });
   });
@@ -146,7 +150,7 @@ describe("Heritage Workflow API adapter", () => {
     const fetchImpl = vi.fn<typeof fetch>();
 
     await expect(
-      runHeritageWorkflow({ shop_name: "李記餅家" }, { fetchImpl, signal: controller.signal }),
+      runHeritageWorkflow({ shop_id: "lei-kei-001", shop_name: "李記餅家" }, { fetchImpl, signal: controller.signal }),
     ).rejects.toMatchObject({ code: "aborted" });
     expect(fetchImpl).not.toHaveBeenCalled();
   });
@@ -154,7 +158,7 @@ describe("Heritage Workflow API adapter", () => {
   it("rejects contract-invalid status payloads at the adapter boundary", async () => {
     const fetchImpl = vi.fn<typeof fetch>().mockResolvedValueOnce(jsonResponse({ run_id: "missing-fields" }, 202));
 
-    await expect(runHeritageWorkflow({ shop_name: "李記餅家" }, { fetchImpl })).rejects.toMatchObject({
+    await expect(runHeritageWorkflow({ shop_id: "lei-kei-001", shop_name: "李記餅家" }, { fetchImpl })).rejects.toMatchObject({
       code: "invalid_response",
     });
   });
@@ -167,7 +171,7 @@ describe("Heritage Workflow API adapter", () => {
         }),
     );
 
-    await expect(runHeritageWorkflow({ shop_name: "李記餅家" }, { fetchImpl, timeoutMs: 5 })).rejects.toMatchObject({
+    await expect(runHeritageWorkflow({ shop_id: "lei-kei-001", shop_name: "李記餅家" }, { fetchImpl, timeoutMs: 5 })).rejects.toMatchObject({
       code: "timeout",
     });
   });

@@ -80,6 +80,7 @@ describe("GovernmentCommandCenter", () => {
     const fetchImpl = vi.fn<typeof fetch>();
     const status = {
       run_id: "run-87b1de429bdd0e5f",
+      shop_id: "lei-kei-001",
       case_id: "CASE-LAIKEI-001",
       route: "mine" as const,
       state: "finished" as const,

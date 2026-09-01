@@ -73,6 +73,7 @@ export function getDemoWorkflowResult(shopId: string, shopName: string): Success
 
   return {
     schema_version: "2.0",
+    shop_id: "lei-kei-001",
     case_id: `demo-${shopId}`,
     workflow_status: "finished",
     agents: completedAgents,
