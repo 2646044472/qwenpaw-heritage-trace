@@ -1,3 +1,7 @@
+# Reference material is local-only and may contain archives, runtime snapshots, or credentials.
+/reference/
+/.review-docx4/
+
 # Runtime data and local credentials
 .data/
 *.db
@@ -10,26 +14,28 @@
 *.p12
 *.pfx
 
-# Python and editor artifacts
+# Python artifacts
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .mypy_cache/
-.vscode/
-.sentry-native/
 
-# QwenPaw deployment state and provider secrets
+# Node and Next.js artifacts
+node_modules/
+.next/
+coverage/
+*.tsbuildinfo
+
+# QwenPaw live-runtime state and provider secrets
 /deployment/qwenpaw/secrets/*
 !/deployment/qwenpaw/secrets/.env.example
 !/deployment/qwenpaw/secrets/.gitkeep
 /deployment/qwenpaw/backups/*
 !/deployment/qwenpaw/backups/.gitkeep
 
-# Local bridge state and logs
+# Local development artifacts
+.vscode/
+.vercel/
 *.log
-.tencent_winpty_bridge.json
-.tencent_winpty_bridge.log
-
-# Operating-system files
 .DS_Store
 Thumbs.db
