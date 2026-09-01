@@ -138,7 +138,7 @@ export function MerchantTopicResponse({
         onClick={onGenerate}
         type="button"
       >
-        {presentation?.action.generateLabel ?? "生成小紅書內容"}
+        {presentation?.action.generateLabel ?? "生成商戶內容草稿"}
       </button>
     </div>
   );

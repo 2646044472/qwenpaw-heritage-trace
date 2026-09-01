@@ -17,7 +17,7 @@ describe("MerchantDataConsole", () => {
     expect(screen.getByText(shop.shop_id)).toBeVisible();
     expect(screen.getByRole("heading", { name: "曝光事件" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "情緒訊號" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "小紅書內容" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Demo 內容表現" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "文化資料核實檔案" })).toBeVisible();
 
     const metrics = screen.getByLabelText("關鍵指標");

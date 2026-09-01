@@ -13,7 +13,7 @@ import { MerchantPublicationPanel } from "./merchant-publication-panel";
 import { MerchantSentimentTable } from "./merchant-sentiment-table";
 import { MerchantWorkflowDossier } from "./merchant-workflow-dossier";
 
-const publicationLabels = { draft: "草稿", confirmed: "已確認", published: "已發佈" } as const;
+const publicationLabels = { draft: "草稿", confirmed: "已確認", published: "模擬已發佈" } as const;
 
 export function MerchantDataConsole({
   shop,
@@ -48,7 +48,7 @@ export function MerchantDataConsole({
     { label: "曝光記錄", value: exposureCount, icon: BarChart3 },
     { label: "情緒訊號", value: sentimentCount, icon: Heart },
     { label: "收藏動作", value: savedCount, icon: Bookmark },
-    { label: "發佈狀態", value: publicationLabels[telemetry.publication.status], icon: Send },
+    { label: "模擬發佈", value: publicationLabels[telemetry.publication.status], icon: Send },
   ];
 
   return (

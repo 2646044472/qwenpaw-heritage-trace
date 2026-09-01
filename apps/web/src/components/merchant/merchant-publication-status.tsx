@@ -11,7 +11,7 @@ type MerchantPublicationStatusProps = {
 const steps: { id: string; state: PublicationFlowState; label: string }[] = [
   { id: "draft", state: "ready", label: "內容草稿" },
   { id: "confirm", state: "publishing", label: "商戶確認" },
-  { id: "publish", state: "published", label: "發佈到小紅書" },
+  { id: "publish", state: "published", label: "模擬發佈（Demo）" },
 ];
 
 const progressIndex: Record<PublicationFlowState, number> = {
@@ -37,7 +37,7 @@ export function MerchantPublicationStatus({ state, postId, publishedAt }: Mercha
   return (
     <div aria-live="polite" className="border-heritage-border border-t pt-4">
       <ol
-        aria-label="小紅書發佈進度"
+        aria-label="模擬發佈進度"
         className="flex flex-wrap items-center gap-x-2 gap-y-2 text-muted-foreground text-xs"
       >
         {steps.map((step, index) => {
@@ -71,14 +71,14 @@ export function MerchantPublicationStatus({ state, postId, publishedAt }: Mercha
       {state === "publishing" ? (
         <p className="mt-3 flex items-center gap-2 text-foreground/80 text-sm">
           <LoaderCircle aria-hidden="true" className="size-4 animate-spin text-heritage" />
-          正在發佈到小紅書
+          正在模擬發佈
         </p>
       ) : null}
-      {state === "failed" ? <p className="mt-3 text-destructive text-sm">發佈未完成，請稍後再試。</p> : null}
+      {state === "failed" ? <p className="mt-3 text-destructive text-sm">模擬發佈未完成，請稍後再試。</p> : null}
       {state === "published" ? (
         <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-heritage-success text-sm">
           <CheckCircle2 aria-hidden="true" className="size-4" />
-          <span>發佈已完成</span>
+          <span>模擬發佈已完成</span>
           {postId && publishedAt ? (
             <span className="text-muted-foreground">
               {postId} · {formatPublishedAt(publishedAt)}

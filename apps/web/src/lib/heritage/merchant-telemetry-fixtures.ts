@@ -241,7 +241,7 @@ const MERCHANT_TELEMETRY_FIXTURES: MerchantTelemetry[] = [
     publication: {
       platform: "xiaohongshu",
       status: "published",
-      post_id: "xhs-sun-fong-20260801",
+      post_id: "demo-sun-fong-20260801",
       created_at: "2026-08-01T08:00:00.000Z",
       published_at: "2026-08-01T09:00:00.000Z",
       metrics: { impressions: 132, saves: 21, comments: 8 },
@@ -363,7 +363,7 @@ const MERCHANT_TELEMETRY_FIXTURES: MerchantTelemetry[] = [
     publication: {
       platform: "xiaohongshu",
       status: "confirmed",
-      post_id: "xhs-tak-hing-20260806",
+      post_id: "demo-tak-hing-20260806",
       created_at: "2026-08-06T08:00:00.000Z",
       published_at: null,
       metrics: { impressions: 0, saves: 0, comments: 0 },

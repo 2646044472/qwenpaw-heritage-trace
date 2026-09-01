@@ -40,25 +40,25 @@ export function MerchantDraftPreview({
   const publishing = state === "publishing";
   const published = state === "published";
   let reviewStatusLabel = "待確認";
-  let publishActionLabel = "確認並發佈";
+  let publishActionLabel = "模擬發佈";
   if (publishing) {
-    reviewStatusLabel = "發佈中";
-    publishActionLabel = "正在發佈到小紅書";
+    reviewStatusLabel = "模擬發佈中";
+    publishActionLabel = "正在模擬發佈";
   } else if (published) {
-    reviewStatusLabel = "已完成";
-    publishActionLabel = "發佈已完成";
+    reviewStatusLabel = "模擬完成";
+    publishActionLabel = "模擬發佈已完成";
   }
 
   return (
     <section
-      aria-label={presentation?.draft ? "小紅書草稿" : "小紅書內容預覽"}
+      aria-label={presentation?.draft ? "商戶內容草稿" : "商戶內容預覽"}
       className="rounded-2xl border border-heritage-border bg-heritage-surface p-4 sm:p-5"
     >
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="font-medium text-[#b54235] text-xs">小紅書</p>
+          <p className="font-medium text-[#b54235] text-xs">商戶內容 · Demo</p>
           <h3 className="mt-1 font-heritage-display font-semibold text-foreground text-xl">
-            {presentation?.draft ? "小紅書草稿" : "小紅書內容預覽"}
+            {presentation?.draft ? "商戶內容草稿" : "商戶內容預覽"}
           </h3>
         </div>
         <span className="rounded-full bg-[#fff0ed] px-2.5 py-1 font-medium text-[#b54235] text-xs">
@@ -130,6 +130,7 @@ export function MerchantDraftPreview({
           {publishActionLabel}
         </button>
       </div>
+      <p className="mt-3 text-muted-foreground text-xs">此按鈕只改變 Demo 畫面，不會向任何社交平台發帖。</p>
       <div className="mt-5">
         <MerchantPublicationStatus postId={postId} publishedAt={publishedAt} state={state} />
       </div>

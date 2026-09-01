@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import type { PublicationEvent } from "@/lib/heritage/merchant-telemetry-types";
 
-const statusLabels = { draft: "草稿", confirmed: "已確認", published: "已發佈" } as const;
+const statusLabels = { draft: "草稿", confirmed: "已確認", published: "模擬已發佈" } as const;
 
 function formatTime(value: string | null) {
   if (!value) return "—";
@@ -19,9 +19,9 @@ export function MerchantPublicationPanel({ publication }: { publication: Publica
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="font-heritage-display font-semibold text-xl" id="publication-heading">
-            小紅書內容
+            Demo 內容表現
           </h2>
-          <p className="mt-1 text-muted-foreground text-sm">已確認內容與發佈表現</p>
+          <p className="mt-1 text-muted-foreground text-sm">固定 Demo 訊號；不會發布到社交平台</p>
         </div>
         <Badge
           className={
@@ -35,11 +35,11 @@ export function MerchantPublicationPanel({ publication }: { publication: Publica
       </div>
       <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
         <div>
-          <dt className="text-muted-foreground">貼文 ID</dt>
+          <dt className="text-muted-foreground">Demo 內容 ID</dt>
           <dd className="mt-1 font-mono">{publication.post_id ?? "尚未建立"}</dd>
         </div>
         <div>
-          <dt className="text-muted-foreground">發佈時間</dt>
+          <dt className="text-muted-foreground">模擬發佈時間</dt>
           <dd className="mt-1">{formatTime(publication.published_at)}</dd>
         </div>
         <div>
