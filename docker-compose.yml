@@ -16,6 +16,8 @@ services:
       QWENPAW_PORT: "8000"
       QWENPAW_DB_PATH: /var/lib/heritage-trace/qwenpaw.db
       QWENPAW_WORKFLOW_EXECUTOR: fixture
+    ports:
+      - "127.0.0.1:8000:8000"
     volumes:
       - heritage_trace_data:/var/lib/heritage-trace
     healthcheck:
