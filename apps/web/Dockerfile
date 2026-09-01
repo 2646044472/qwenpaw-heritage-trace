@@ -6,7 +6,9 @@ ENV NODE_ENV=production \
     PORT=3000
 
 COPY apps/web/package.json apps/web/package-lock.json ./
-RUN npm ci
+# The image builds TypeScript/Next.js and runs the package's prepare hook;
+# install devDependencies explicitly even though the final runtime is production.
+RUN npm ci --include=dev
 
 COPY apps/web/ ./
 COPY packages/contracts/ /workspace/packages/contracts/
