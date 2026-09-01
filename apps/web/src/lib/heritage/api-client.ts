@@ -5,6 +5,11 @@ export const WORKFLOW_PATH = "/api/v2/heritage/workflows";
 export const HERITAGE_API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? process.env.API_BASE_URL ?? "";
 
+// Fixture workflows return almost immediately; a real three-agent QwenPaw run
+// normally takes longer. Keep the browser attached long enough for a live
+// competition demonstration to receive its terminal result.
+export const DEFAULT_WORKFLOW_TIMEOUT_MS = 120_000;
+
 export type WorkflowRequest = MiningRequest | BundleRequest;
 
 export type WorkflowSource = "api" | "demo-fallback";
@@ -218,7 +223,7 @@ export async function runHeritageWorkflow(
   const fetchImpl = options.fetchImpl ?? fetch;
   const baseUrl = normalizeBaseUrl(options.baseUrl ?? HERITAGE_API_BASE_URL);
 
-  const timeoutMs = options.timeoutMs ?? 30_000;
+  const timeoutMs = options.timeoutMs ?? DEFAULT_WORKFLOW_TIMEOUT_MS;
   const pollIntervalMs = options.pollIntervalMs ?? 1_000;
   const requestContext = createRequestContext(timeoutMs, options.signal);
 

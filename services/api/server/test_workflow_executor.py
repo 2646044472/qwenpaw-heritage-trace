@@ -8,6 +8,7 @@ import sys
 import tempfile
 import unittest
 from contextlib import closing
+from dataclasses import replace
 from pathlib import Path
 
 SERVER_ROOT = Path(__file__).resolve().parent
@@ -225,6 +226,27 @@ class WorkflowExecutorTests(unittest.TestCase):
         self.assertEqual(json.loads(row["result_json"])["agents"]["miner"]["status"], "failed")
         self.assertEqual(json.loads(row["result_json"])["agents"]["archivist"]["status"], "not_started")
         self.assertEqual([call[0] for call in client.calls], ["Paw-Miner"])
+
+    def test_miner_receives_explicit_fixed_demo_source_when_configured(self):
+        demo_source = Path(self.temp.name) / "demo-source.json"
+        demo_source.write_text('{"fixture_kind":"competition_demo_source","source":{"source_id":"DEMO-S1"}}', encoding="utf-8")
+        executor = WorkflowExecutor(replace(self.config, demo_source_path=demo_source), client=FakeClient(set()), runtime=FakeRuntime(self.config.runtime_root, self.fixture))
+
+        message = executor._miner_message('{"case_id":"CASE-1","shop_name":"禮記雪糕"}')
+
+        self.assertIn("Competition demo material", message)
+        self.assertIn("competition_demo_source", message)
+        self.assertIn("DEMO-S1", message)
+
+    def test_fixed_demo_agent_message_forbids_agent_expansion(self):
+        demo_source = Path(self.temp.name) / "demo-source.json"
+        demo_source.write_text("{}", encoding="utf-8")
+        executor = WorkflowExecutor(replace(self.config, demo_source_path=demo_source), client=FakeClient(set()), runtime=FakeRuntime(self.config.runtime_root, self.fixture))
+
+        message = executor._agent_message("archivist", json.dumps({"case_id": "CASE-1", "shop_name": "禮記雪糕", "sources": []}))
+
+        self.assertIn("return the supplied example object exactly as-is", message)
+        self.assertIn("Do not infer, add, remove", message)
 
 
 if __name__ == "__main__":

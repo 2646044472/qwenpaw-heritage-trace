@@ -120,6 +120,13 @@ use the matching command with `down`:
 docker compose -f docker-compose.yml -f docker-compose.live.yml down
 ```
 
+For a repeatable competition run, the live overlay supplies Miner with
+`fixtures/lei-kei-001.live-demo-source.json`: a clearly labelled fictional
+source pack. This lets all three specialist Agents execute while preserving the
+Demo-data boundary. Replace `QWENPAW_DEMO_SOURCE_PATH` in local `.env` when
+testing an operator-supplied source pack; never present the bundled fixture as
+independently verified history.
+
 ## Troubleshooting
 
 | Symptom | Check / action |

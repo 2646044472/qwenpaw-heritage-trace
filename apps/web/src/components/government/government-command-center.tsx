@@ -42,6 +42,7 @@ const priorityShortLabel: Record<AttentionPriority, string> = { low: "低", medi
 function workflowErrorLabel(code: string) {
   if (code === "timeout") return "分析流程逾時，請稍後重試。";
   if (code === "aborted") return "分析流程已中止。";
+  if (code === "workflow_failed") return "分析流程已完成，但資料格式需要修正後再審視。";
   return "分析流程暫時無法啟動，請稍後重試。";
 }
 

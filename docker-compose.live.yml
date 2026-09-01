@@ -8,6 +8,10 @@ services:
       QWENPAW_BASE_URL: http://qwenpaw:8088
       QWENPAW_API_PREFIX: /api
       QWENPAW_WORKFLOW_RUNTIME_ROOT: /var/lib/heritage-trace/workflow-runtime
+      # The live competition demo gives Miner a fixed, explicitly labelled
+      # fictional source. Operators can override this in ignored .env for a
+      # separate source pack.
+      QWENPAW_DEMO_SOURCE_PATH: /workspace/fixtures/lei-kei-001.live-demo-source.json
     depends_on:
       qwenpaw:
         condition: service_healthy

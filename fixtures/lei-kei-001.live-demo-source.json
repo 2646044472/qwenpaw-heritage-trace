@@ -1,0 +1,26 @@
+{
+  "fixture_kind": "competition_demo_source",
+  "disclaimer": "This is fixed fictional source material for the Heritage Trace competition demo. It is not a historical record and must not be represented as independently verified evidence.",
+  "source": {
+    "source_id": "demo-lei-kei-001-source-01",
+    "content_type": "original_text",
+    "publisher": "Heritage Trace Demo Dataset",
+    "source_family": "heritage-trace-competition-demo",
+    "source_type": "fixed_demo_material",
+    "content": "[Competition demo fixture — fictional] 禮記雪糕（Lei Kei Ice Cream）是 Heritage Trace 的固定示範商戶。此固定資料為演示流程設定建立年份為 1933，位置為澳門荷蘭園，並以椰子雪糕作為示範產品。這些內容只供比賽 Demo 的 Miner、Archivist、Verifier 工作流測試，並不構成歷史事實或公開發布資料。",
+    "evidence": [
+      {
+        "text": "禮記雪糕（Lei Kei Ice Cream）是 Heritage Trace 的固定示範商戶。",
+        "locator": "competition-demo fixture, paragraph 1"
+      },
+      {
+        "text": "此固定資料為演示流程設定建立年份為 1933，位置為澳門荷蘭園，並以椰子雪糕作為示範產品。",
+        "locator": "competition-demo fixture, paragraph 1"
+      },
+      {
+        "text": "這些內容只供比賽 Demo 的 Miner、Archivist、Verifier 工作流測試，並不構成歷史事實或公開發布資料。",
+        "locator": "competition-demo fixture, paragraph 1"
+      }
+    ]
+  }
+}

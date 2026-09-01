@@ -21,6 +21,7 @@ class WorkflowConfig:
     overall_timeout: float
     reconnect_attempts: int
     executor_mode: str
+    demo_source_path: Path | None = None
 
     @classmethod
     def from_env(cls, env=None) -> "WorkflowConfig":
@@ -44,4 +45,9 @@ class WorkflowConfig:
             overall_timeout=float(source.get("QWENPAW_WORKFLOW_OVERALL_TIMEOUT_SECONDS") or "720"),
             reconnect_attempts=int(source.get("QWENPAW_API_RECONNECT_ATTEMPTS") or "1"),
             executor_mode=mode,
+            demo_source_path=(
+                Path(source["QWENPAW_DEMO_SOURCE_PATH"])
+                if source.get("QWENPAW_DEMO_SOURCE_PATH")
+                else None
+            ),
         )
