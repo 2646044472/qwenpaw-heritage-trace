@@ -12,7 +12,9 @@ RUN npm ci --include=dev --no-audit --no-fund
 
 COPY apps/web/ ./
 COPY packages/contracts/ /workspace/packages/contracts/
-RUN npm run workflow:types:check && npm run build
+# Regenerate the contract types with the pinned dependency version, then build.
+# This keeps the image reproducible even when generated formatting changes.
+RUN npm run workflow:types && npm run build
 
 EXPOSE 3000
 CMD ["npm", "run", "start"]
