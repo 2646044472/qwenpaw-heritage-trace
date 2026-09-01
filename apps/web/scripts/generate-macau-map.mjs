@@ -1,0 +1,117 @@
+import { writeFile } from "node:fs/promises";
+
+const BASE = "https://www.dsec.gov.mo/CensusGIS/rest/services/DSECUnidade/Building2020BaseCNv3/MapServer";
+const OUT = new URL("../src/components/government/macau-map-geometry.ts", import.meta.url);
+const EXTENT = { xmin: 18536.7217795573, ymin: 8163.48490623796, xmax: 26422.385156711, ymax: 21477.6220520839 };
+const MARGIN = 58;
+const scale = Math.min((1000 - MARGIN * 2) / (EXTENT.xmax - EXTENT.xmin), (1000 - MARGIN * 2) / (EXTENT.ymax - EXTENT.ymin));
+const drawnW = (EXTENT.xmax - EXTENT.xmin) * scale;
+const drawnH = (EXTENT.ymax - EXTENT.ymin) * scale;
+const ox = (1000 - drawnW) / 2;
+const oy = (1000 - drawnH) / 2;
+const toSvg = ([x, y]) => [ox + (x - EXTENT.xmin) * scale, oy + (EXTENT.ymax - y) * scale];
+
+const layers = {
+  districts: 0,
+  streets: 4,
+  bridges: 5,
+  green: 7,
+  buildings: 10,
+  blocks: 17,
+  land: 19,
+};
+
+async function json(url) {
+  const response = await fetch(url, { headers: { "User-Agent": "Heritage-Trace-Macau-Map/1.0" } });
+  if (!response.ok) throw new Error(`${response.status} ${url}`);
+  const body = await response.json();
+  if (body.error) throw new Error(`${body.error.message}: ${url}`);
+  return body;
+}
+
+async function fetchLayer(id) {
+  const ids = await json(`${BASE}/${id}/query?where=1%3D1&returnIdsOnly=true&f=json`);
+  const objectIds = ids.objectIds ?? [];
+  const features = [];
+  // DSEC returns 404 for some large geometry batches; 200 keeps every layer reliable.
+  for (let i = 0; i < objectIds.length; i += 200) {
+    const batch = objectIds.slice(i, i + 200).join(",");
+    const data = await json(`${BASE}/${id}/query?objectIds=${batch}&outFields=*&returnGeometry=true&outSR=3064&f=json`);
+    features.push(...(data.features ?? []));
+  }
+  return features;
+}
+
+function sqSegDist(p, a, b) {
+  let x = a[0], y = a[1], dx = b[0] - x, dy = b[1] - y;
+  if (dx || dy) {
+    const t = ((p[0] - x) * dx + (p[1] - y) * dy) / (dx * dx + dy * dy);
+    if (t > 1) { x = b[0]; y = b[1]; } else if (t > 0) { x += dx * t; y += dy * t; }
+  }
+  dx = p[0] - x; dy = p[1] - y;
+  return dx * dx + dy * dy;
+}
+function simplify(points, tolerance) {
+  if (points.length <= 2) return points;
+  const sq = tolerance * tolerance;
+  const keep = new Uint8Array(points.length); keep[0] = keep[points.length - 1] = 1;
+  const stack = [[0, points.length - 1]];
+  while (stack.length) {
+    const [first, last] = stack.pop(); let max = sq, index = -1;
+    for (let i = first + 1; i < last; i++) { const d = sqSegDist(points[i], points[first], points[last]); if (d > max) { max = d; index = i; } }
+    if (index >= 0) { keep[index] = 1; stack.push([first, index], [index, last]); }
+  }
+  return points.filter((_, i) => keep[i]);
+}
+const r = (n) => Math.round(n * 10) / 10;
+function pathFromParts(parts, tolerance, close) {
+  return parts.map((part) => {
+    const pts = simplify(part, tolerance).map(toSvg);
+    if (pts.length < 2) return "";
+    return `M${pts.map(([x, y]) => `${r(x)} ${r(y)}`).join("L")}${close ? "Z" : ""}`;
+  }).join("");
+}
+function geometryPath(feature, tolerance) {
+  const g = feature.geometry ?? {};
+  if (g.rings) return pathFromParts(g.rings, tolerance, true);
+  if (g.paths) return pathFromParts(g.paths, tolerance, false);
+  return "";
+}
+function lineLength(feature) {
+  return (feature.geometry?.paths ?? []).reduce((sum, part) => sum + part.slice(1).reduce((s, p, i) => s + Math.hypot(p[0] - part[i][0], p[1] - part[i][1]), 0), 0);
+}
+function polygonArea(feature) {
+  return Math.abs(feature.attributes?.["Shape.area"] ?? feature.attributes?.Shape_Area ?? 0);
+}
+
+const data = {};
+for (const [name, id] of Object.entries(layers)) {
+  console.log(`Fetching ${name} (${id})`);
+  data[name] = await fetchLayer(id);
+}
+
+const roads = data.streets.map((f) => ({ f, len: lineLength(f) })).sort((a, b) => b.len - a.len);
+const majorCut = Math.max(35, Math.round(roads.length * 0.12));
+const secondaryCut = Math.max(160, Math.round(roads.length * 0.55));
+const majorRoads = roads.slice(0, majorCut).map(({ f }) => geometryPath(f, 4)).filter(Boolean);
+const secondaryRoads = roads.slice(majorCut, secondaryCut).map(({ f }) => geometryPath(f, 7)).filter(Boolean);
+const localRoads = roads.slice(secondaryCut, Math.min(roads.length, 300)).map(({ f }) => geometryPath(f, 11)).filter(Boolean);
+const buildings = data.buildings.filter((f) => polygonArea(f) > 120).sort((a, b) => polygonArea(b) - polygonArea(a)).slice(0, 900);
+const blocks = data.blocks.filter((f) => polygonArea(f) > 500).slice(0, 700);
+
+const geometry = {
+  land: data.land.map((f) => geometryPath(f, 2)).filter(Boolean),
+  green: data.green.map((f) => geometryPath(f, 5)).filter(Boolean),
+  blocks: blocks.map((f) => geometryPath(f, 6)).filter(Boolean),
+  buildings: buildings.map((f) => geometryPath(f, 8)).filter(Boolean),
+  majorRoads,
+  secondaryRoads,
+  localRoads,
+  bridges: data.bridges.map((f) => geometryPath(f, 2)).filter(Boolean),
+  districts: data.districts.map((f) => geometryPath(f, 3)).filter(Boolean),
+};
+
+const source = `/* AUTO-GENERATED by scripts/generate-macau-map.mjs. Do not hand edit.\n * Source: DSEC Building2020BaseCNv3 MapServer, EPSG:3064. Retrieved ${new Date().toISOString().slice(0, 10)}.\n * Layers: land 19, streets 4, bridges 5, green 7, buildings 10, blocks 17, districts 0.\n * Uniform SVG transform: scale=${scale}, offset=(${ox}, ${oy}), viewBox 0 0 1000 1000.\n */\nexport const MACAU_MAP_GEOMETRY = ${JSON.stringify(geometry)} as const;\nexport const MACAU_MAP_STATS = ${JSON.stringify({ majorRoads: majorRoads.length, secondaryRoads: secondaryRoads.length, localRoads: localRoads.length, blocks: blocks.length, buildings: buildings.length })} as const;\n`;
+await writeFile(OUT, source, "utf8");
+console.log(`Wrote ${OUT.pathname}`);
+console.log(JSON.stringify({ bytes: Buffer.byteLength(source), ...JSON.parse(JSON.stringify({ majorRoads: majorRoads.length, secondaryRoads: secondaryRoads.length, localRoads: localRoads.length, blocks: blocks.length, buildings: buildings.length })) }, null, 2));

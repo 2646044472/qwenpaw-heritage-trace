@@ -1,0 +1,274 @@
+"use client";
+
+import { type PointerEvent, useCallback, useEffect, useRef, useState, type WheelEvent } from "react";
+
+import { LocateFixed, Minus, Plus, Store } from "lucide-react";
+
+import type { AttentionPriority, DemoShopSeed, HeritageShop } from "@/lib/heritage/application-types";
+
+import { MACAU_MAP_GEOMETRY } from "./macau-map-geometry";
+
+const priorityLabels: Record<AttentionPriority, string> = { low: "狀態良好", medium: "需要審視", high: "高度關注" };
+const markerTone: Record<AttentionPriority, string> = {
+  low: "text-attention-low",
+  medium: "text-attention-review",
+  high: "text-attention-high",
+};
+type Marker = { seed: DemoShopSeed; shop: HeritageShop; position: { x: number; y: number } };
+type View = { scale: number; x: number; y: number };
+type DragState = { id: number; x: number; y: number; viewX: number; viewY: number; moved: boolean };
+const INITIAL: View = { scale: 1.08, x: 0, y: 0 };
+const MIN_SCALE = 1;
+const MAX_SCALE = 3.5;
+const WORLD_SIZE = 1000;
+const FOCUS_SCALE = 1.6;
+
+function Paths({ paths, className }: { paths: readonly string[]; className: string }) {
+  const occurrences = new Map<string, number>();
+  return (
+    <g className={className}>
+      {paths.map((path) => {
+        const occurrence = occurrences.get(path) ?? 0;
+        occurrences.set(path, occurrence + 1);
+        return <path d={path} key={`${path}-${occurrence}`} />;
+      })}
+    </g>
+  );
+}
+
+function MapArtwork() {
+  const geometry = MACAU_MAP_GEOMETRY;
+  return (
+    <>
+      <rect className="fill-background" height={WORLD_SIZE} width={WORLD_SIZE} />
+      <Paths className="fill-card stroke-heritage-border/70 [stroke-width:1.35]" paths={geometry.land} />
+      <Paths className="fill-heritage-soft/60 stroke-heritage-border/50 [stroke-width:.42]" paths={geometry.green} />
+      <Paths className="fill-muted/70 stroke-border/50 [stroke-width:.55]" paths={geometry.blocks} />
+      <Paths className="fill-card-foreground/10 stroke-border/40 [stroke-width:.5]" paths={geometry.buildings} />
+      <Paths className="fill-none stroke-muted-foreground/25 [stroke-width:.75]" paths={geometry.localRoads} />
+      <Paths className="fill-none stroke-muted-foreground/40 [stroke-width:1.05]" paths={geometry.secondaryRoads} />
+      <Paths
+        className="fill-none stroke-heritage-gold/55 [stroke-linecap:round] [stroke-linejoin:round] [stroke-width:1.85]"
+        paths={geometry.majorRoads}
+      />
+      <Paths
+        className="fill-none stroke-heritage-gold/40 [stroke-linecap:round] [stroke-width:2.4]"
+        paths={geometry.bridges}
+      />
+      <Paths
+        className="fill-none stroke-heritage/45 [stroke-dasharray:4_5] [stroke-width:.9]"
+        paths={geometry.districts}
+      />
+      <g className="fill-heritage-gold/85 font-serif text-[19px]">
+        <text x="350" y="255">
+          澳門半島
+        </text>
+        <text x="455" y="585">
+          氹仔
+        </text>
+        <text x="455" y="745">
+          路氹
+        </text>
+        <text x="455" y="870">
+          路環
+        </text>
+      </g>
+    </>
+  );
+}
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+export function calculateMapFocus(
+  position: { x: number; y: number },
+  width: number,
+  height: number,
+  panelOpen: boolean,
+): View {
+  const renderedScale = Math.min(width, height) / WORLD_SIZE;
+  const baseX = (width - WORLD_SIZE * renderedScale) / 2 + position.x * renderedScale;
+  const baseY = (height - WORLD_SIZE * renderedScale) / 2 + position.y * renderedScale;
+  let panelWidth = 0;
+  if (width >= 1280) panelWidth = 520;
+  else if (width >= 768) panelWidth = 440;
+  const visibleWidth = panelOpen ? Math.max(width - panelWidth - 24, width * 0.55) : width;
+  const targetX = visibleWidth / 2;
+  const targetY = height * 0.48;
+  return {
+    scale: FOCUS_SCALE,
+    x: targetX - width / 2 - FOCUS_SCALE * (baseX - width / 2),
+    y: targetY - height / 2 - FOCUS_SCALE * (baseY - height / 2),
+  };
+}
+
+export function MacauMonitoringMap({
+  markers,
+  selectedShopId,
+  onSelect,
+  hoveredShopId,
+  onHover,
+}: {
+  markers: Marker[];
+  selectedShopId: string | null;
+  onSelect: (id: string) => void;
+  hoveredShopId: string | null;
+  onHover: (id: string | null) => void;
+}) {
+  const [view, setView] = useState(INITIAL);
+  const [isDragging, setIsDragging] = useState(false);
+  const drag = useRef<DragState | null>(null);
+  const viewport = useRef<HTMLDivElement | null>(null);
+  const previousSelection = useRef<string | null | undefined>(undefined);
+  const constrain = useCallback((next: View): View => {
+    const rect = viewport.current?.getBoundingClientRect();
+    const scale = clamp(next.scale, MIN_SCALE, MAX_SCALE);
+    const maxX = Math.max(0, ((rect?.width ?? 800) * (scale - 1)) / 2 + 80);
+    const maxY = Math.max(0, ((rect?.height ?? 700) * (scale - 1)) / 2 + 80);
+    return { scale, x: clamp(next.x, -maxX, maxX), y: clamp(next.y, -maxY, maxY) };
+  }, []);
+  const zoomAt = useCallback(
+    (delta: number, clientX?: number, clientY?: number) => {
+      setView((current) => {
+        const rect = viewport.current?.getBoundingClientRect();
+        const scale = clamp(current.scale + delta, MIN_SCALE, MAX_SCALE);
+        if (!rect || clientX === undefined || clientY === undefined) return constrain({ ...current, scale });
+        const ratio = scale / current.scale;
+        const px = clientX - rect.left - rect.width / 2;
+        const py = clientY - rect.top - rect.height / 2;
+        return constrain({ scale, x: px - (px - current.x) * ratio, y: py - (py - current.y) * ratio });
+      });
+    },
+    [constrain],
+  );
+  const handleWheel = (event: WheelEvent<SVGSVGElement>) => {
+    event.preventDefault();
+    zoomAt(event.deltaY < 0 ? 0.18 : -0.18, event.clientX, event.clientY);
+  };
+  const handlePointerDown = (event: PointerEvent<SVGSVGElement>) => {
+    if ((event.target as Element).closest("[data-map-marker]")) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    drag.current = {
+      id: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      viewX: view.x,
+      viewY: view.y,
+      moved: false,
+    };
+  };
+  const handlePointerMove = (event: PointerEvent<SVGSVGElement>) => {
+    const start = drag.current;
+    if (start?.id !== event.pointerId) return;
+    const dx = event.clientX - start.x,
+      dy = event.clientY - start.y;
+    if (!start.moved && Math.hypot(dx, dy) < 4) return;
+    start.moved = true;
+    setIsDragging(true);
+    setView((current) => constrain({ ...current, x: start.viewX + dx, y: start.viewY + dy }));
+  };
+  const handlePointerUp = (event: PointerEvent<SVGSVGElement>) => {
+    if (drag.current?.id !== event.pointerId) return;
+    drag.current = null;
+    setIsDragging(false);
+  };
+  const selected = markers.find((marker) => marker.seed.shop_id === selectedShopId);
+  useEffect(() => {
+    if (previousSelection.current === selectedShopId) return;
+    previousSelection.current = selectedShopId;
+    if (!selected) {
+      setView(INITIAL);
+      return;
+    }
+    const rect = viewport.current?.getBoundingClientRect();
+    if (!rect) return;
+    setView(constrain(calculateMapFocus(selected.position, rect.width, rect.height, true)));
+  }, [constrain, selected, selectedShopId]);
+  return (
+    <div className="relative h-full min-h-[560px] touch-none select-none overflow-hidden bg-background" ref={viewport}>
+      <svg
+        aria-label="澳門地理底圖及文化商戶位置"
+        className="absolute inset-0 size-full cursor-grab active:cursor-grabbing"
+        onPointerCancel={handlePointerUp}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onWheel={handleWheel}
+        preserveAspectRatio="xMidYMid meet"
+        role="img"
+        style={{
+          transform: `translate(${view.x}px,${view.y}px) scale(${view.scale})`,
+          transformOrigin: "center",
+          transition: isDragging ? "none" : "transform 320ms cubic-bezier(.2,.8,.2,1)",
+        }}
+        viewBox="0 0 1000 1000"
+      >
+        <MapArtwork />
+        {markers.map(({ seed, shop, position }) => {
+          const priority = shop.insight.attention_priority;
+          const active = seed.shop_id === selectedShopId;
+          const highlighted = active || seed.shop_id === hoveredShopId;
+          return (
+            <a
+              aria-label={`${seed.name}，${priorityLabels[priority]}`}
+              className={`cursor-pointer outline-none ${markerTone[priority]}`}
+              data-map-marker=""
+              href={`?shop=${encodeURIComponent(seed.shop_id)}`}
+              key={seed.shop_id}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                onSelect(seed.shop_id);
+              }}
+              onFocus={() => onHover(seed.shop_id)}
+              onBlur={() => onHover(null)}
+              onMouseEnter={() => onHover(seed.shop_id)}
+              onMouseLeave={() => onHover(null)}
+            >
+              <g transform={`translate(${position.x} ${position.y})`}>
+                {active ? <circle className="fill-current opacity-20" r="29" /> : null}
+                <circle
+                  className="fill-background stroke-current transition-[r] duration-300"
+                  r={highlighted ? 15 : 10}
+                  strokeWidth={active ? 4 : 2.5}
+                />
+                <foreignObject className="pointer-events-none overflow-visible" height="14" width="14" x="-7" y="-7">
+                  {highlighted ? <Store className="size-3.5" /> : null}
+                </foreignObject>
+              </g>
+            </a>
+          );
+        })}
+      </svg>
+      <div className="pointer-events-none absolute top-5 left-5 rounded-lg border border-border/70 bg-card/95 px-4 py-3 text-foreground shadow-xl backdrop-blur-sm">
+        <p className="font-heritage-display font-semibold">澳門文化商戶監察</p>
+        <p className="mt-1 text-muted-foreground text-xs">拖動地圖探索 · 滾輪縮放</p>
+      </div>
+      <div className="absolute top-5 right-5 flex flex-col overflow-hidden rounded-lg border border-border/70 bg-card/95 text-foreground shadow-xl">
+        <button
+          aria-label="放大地圖"
+          className="flex size-10 items-center justify-center hover:bg-accent"
+          onClick={() => zoomAt(0.2)}
+          type="button"
+        >
+          <Plus className="size-4" />
+        </button>
+        <button
+          aria-label="縮小地圖"
+          className="flex size-10 items-center justify-center border-border border-t hover:bg-accent"
+          onClick={() => zoomAt(-0.2)}
+          type="button"
+        >
+          <Minus className="size-4" />
+        </button>
+        <button
+          aria-label="顯示全澳"
+          className="flex size-10 items-center justify-center border-border border-t hover:bg-accent"
+          onClick={() => setView(INITIAL)}
+          type="button"
+        >
+          <LocateFixed className="size-4" />
+        </button>
+      </div>
+    </div>
+  );
+}

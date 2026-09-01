@@ -1,0 +1,1690 @@
+[
+    {
+        "shop_id":  "lei-kei-001",
+        "identity":  {
+                         "name_zh":  "禮記雪糕",
+                         "name_en":  "Lai Kei Ice Cream",
+                         "category":  "冰室／特色小吃",
+                         "district":  "澳門半島",
+                         "area":  "荷蘭園",
+                         "address":  "澳門荷蘭園大馬路12號地下",
+                         "coordinates":  {
+                                             "lat":  22.1989,
+                                             "lng":  113.5475
+                                         },
+                         "established_year":  1933,
+                         "description_zh":  "1933年創辦的澳門老字號冰室，早期以手推車沿街售賣雪糕，1960年代遷至荷蘭園現址，店內保留傳統冰室格局。",
+                         "image":  null
+                     },
+        "heritage":  {
+                         "summary_zh":  "禮記雪糕由鄺禮敬於1933年創辦，最初以手推車沿街售賣雪糕，其後開設店舖並於1960年代遷至荷蘭園。品牌以紅豆雪條、雪糕磚、雪糕三文治等自製冰品，以及沿用至今的「孖辮妹」商標著稱。現址仍保存彩色紙皮石、木製圓桌、卡座及歷年雪糕杯等傳統冰室元素。",
+                         "publication_status":  "publishable",
+                         "founding_year":  1933,
+                         "street_stall_start_date":  "1933",
+                         "first_shop_opening_date":  null,
+                         "product_categories":  [
+                                                    "雪糕",
+                                                    "冰品",
+                                                    "特色小吃"
+                                                ],
+                         "products":  [
+                                          "紅豆雪條",
+                                          "雪糕磚",
+                                          "雪糕三文治"
+                                      ],
+                         "persons":  [
+                                         {
+                                             "name":  "鄺禮敬",
+                                             "role":  "創辦人"
+                                         },
+                                         {
+                                             "name":  "鄺永燦",
+                                             "role":  "第三代傳承人"
+                                         }
+                                     ],
+                         "key_events":  [
+                                            {
+                                                "date":  "1933",
+                                                "description":  "鄺禮敬創辦禮記雪糕，初期以手推車沿街售賣雪糕。"
+                                            },
+                                            {
+                                                "date":  "1960",
+                                                "description":  "1960年代遷至荷蘭園大馬路現址經營。"
+                                            }
+                                        ],
+                         "operations":  [
+                                            "自家製雪糕類產品",
+                                            "保留傳統冰室空間與歷史陳設"
+                                        ]
+                     },
+        "evidence":  [
+                         {
+                             "id":  "lei-kei-mgto-01",
+                             "type":  "government",
+                             "title":  "禮記雪糕",
+                             "publisher":  "澳門特別行政區政府旅遊局",
+                             "url":  "https://www.macaotourism.gov.mo/zh-hant/step-out-macao/st-lazarus-parish/lai-kei-ice-cream",
+                             "published_at":  null,
+                             "excerpt":  "政府旅遊資料記載禮記雪糕由鄺禮敬於1933年創辦，最初以手推車擺賣，1960年代遷至荷蘭園現址，並列明現址及第三代傳承資料。",
+                             "supports":  [
+                                              "identity.name_zh",
+                                              "identity.address",
+                                              "identity.established_year",
+                                              "identity.description_zh",
+                                              "heritage.summary_zh",
+                                              "heritage.founding_year",
+                                              "heritage.street_stall_start_date",
+                                              "heritage.persons",
+                                              "heritage.key_events",
+                                              "heritage.products",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "lei-kei-merchant-02",
+                             "type":  "merchant",
+                             "title":  "禮記雪糕 Lai Kei Ice Cream",
+                             "publisher":  "禮記雪糕官方網站",
+                             "url":  "https://laikei-icecream.com/",
+                             "published_at":  null,
+                             "excerpt":  "商戶官方網站列明禮記雪糕由第三代經營，主打自家製雪糕，並列出紅豆冰、椰子雪糕、紅豆雪條、雪糕磚及雪糕三文治等產品，以及傳統冰室陳設。",
+                             "supports":  [
+                                              "identity.name_en",
+                                              "heritage.products",
+                                              "heritage.persons",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         }
+                     ],
+        "signals":  {
+                        "exposure":  {
+                                         "current":  null,
+                                         "previous":  null,
+                                         "history":  [
+
+                                                     ]
+                                     },
+                        "sentiment":  {
+                                          "label":  null,
+                                          "score":  null,
+                                          "summary_zh":  null
+                                      }
+                    },
+        "government":  {
+                           "activity":  [
+
+                                        ]
+                       },
+        "merchant":  {
+                         "recommended_actions":  [
+                                                     {
+                                                         "id":  "lei-kei-action-01",
+                                                         "title_zh":  "整理冰室空間故事",
+                                                         "description_zh":  "可根據已核實的1960年代現址、傳統冰室格局與歷史陳設，整理一篇店舖空間與雪糕文化介紹。",
+                                                         "kind":  "content"
+                                                     }
+                                                 ],
+                         "publication":  {
+                                             "platform":  "xiaohongshu",
+                                             "status":  "draft",
+                                             "metrics":  {
+                                                             "impressions":  null,
+                                                             "saves":  null,
+                                                             "comments":  null
+                                                         }
+                                         }
+                     },
+        "hunter":  {
+                       "short_description_zh":  "1933年創辦的澳門老冰室，仍可看到傳統冰室格局，並品嚐自家製雪糕與雪條。",
+                       "why_recommended_zh":  [
+                                                  "有政府旅遊資料直接記錄其1933年創辦歷史。",
+                                                  "現址保留1960至70年代冰室風格與歷史陳設。",
+                                                  "適合作為荷蘭園一帶的短途文化飲食停留點。"
+                                              ],
+                       "visit_minutes":  20,
+                       "route_rank":  7
+                   }
+    },
+    {
+        "shop_id":  "fong-kei-002",
+        "identity":  {
+                         "name_zh":  "晃記餅家",
+                         "name_en":  "Fong Kei",
+                         "category":  "傳統餅家",
+                         "district":  "氹仔",
+                         "area":  "官也街",
+                         "address":  "澳門氹仔官也街14號",
+                         "coordinates":  {
+                                             "lat":  22.1563,
+                                             "lng":  113.559
+                                         },
+                         "established_year":  1902,
+                         "description_zh":  "源自1902年的氹仔百年餅家，前身為茶樓，後轉為專營中式餅食，現由家族第四代傳承。",
+                         "image":  null
+                     },
+        "heritage":  {
+                         "summary_zh":  "晃記以創辦人高晃之名命名，其前身茶樓於1902年已開始營運，後來結束茶市並專營餅店。店舖多年保持傳統格局，產品包括老婆餅、雞仔餅、杏仁餅、合桃酥及香蕉糕等。2018年由第四代高子棋接班。",
+                         "publication_status":  "publishable",
+                         "founding_year":  1902,
+                         "street_stall_start_date":  null,
+                         "first_shop_opening_date":  null,
+                         "product_categories":  [
+                                                    "中式餅食",
+                                                    "澳門手信"
+                                                ],
+                         "products":  [
+                                          "老婆餅",
+                                          "肉切酥",
+                                          "鮑魚酥",
+                                          "雞仔餅",
+                                          "金桃酥",
+                                          "合桃酥",
+                                          "杏仁餅",
+                                          "加蛋餅",
+                                          "香蕉糕"
+                                      ],
+                         "persons":  [
+                                         {
+                                             "name":  "高晃",
+                                             "role":  "創辦人"
+                                         },
+                                         {
+                                             "name":  "高子棋",
+                                             "role":  "第四代傳承人"
+                                         }
+                                     ],
+                         "key_events":  [
+                                            {
+                                                "date":  "1902",
+                                                "description":  "晃記前身茶樓已開始營運。"
+                                            },
+                                            {
+                                                "date":  "2018",
+                                                "description":  "第四代傳承人高子棋接班。"
+                                            }
+                                        ],
+                         "operations":  [
+                                            "沿用家族傳承配方",
+                                            "部分傳統餅食維持人手製作"
+                                        ]
+                     },
+        "evidence":  [
+                         {
+                             "id":  "fong-kei-mgto-01",
+                             "type":  "government",
+                             "title":  "晃記餅家",
+                             "publisher":  "澳門特別行政區政府旅遊局",
+                             "url":  "https://www.macaotourism.gov.mo/zh-hant/shopping/souvenirs/fong-kei",
+                             "published_at":  null,
+                             "excerpt":  "政府旅遊資料記載晃記前身於1902年營運、創辦人高晃、第四代接班年份、傳統產品及官也街地址。",
+                             "supports":  [
+                                              "identity.address",
+                                              "identity.established_year",
+                                              "heritage.summary_zh",
+                                              "heritage.founding_year",
+                                              "heritage.products",
+                                              "heritage.persons",
+                                              "heritage.key_events",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "fong-kei-merchant-02",
+                             "type":  "merchant",
+                             "title":  "晃記餅家 – 百年老號・馳名港澳",
+                             "publisher":  "晃記餅家官方網站",
+                             "url":  "https://www.fongkei.com/",
+                             "published_at":  null,
+                             "excerpt":  "商戶官方網站列明晃記由高晃創立，1902年已營運，前身為茶樓後轉為餅家，並保留人手製作傳統餅食及官也街店址資料。",
+                             "supports":  [
+                                              "identity.address",
+                                              "identity.established_year",
+                                              "heritage.founding_year",
+                                              "heritage.products",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         }
+                     ],
+        "signals":  {
+                        "exposure":  {
+                                         "current":  null,
+                                         "previous":  null,
+                                         "history":  [
+
+                                                     ]
+                                     },
+                        "sentiment":  {
+                                          "label":  null,
+                                          "score":  null,
+                                          "summary_zh":  null
+                                      }
+                    },
+        "government":  {
+                           "activity":  [
+
+                                        ]
+                       },
+        "merchant":  {
+                         "recommended_actions":  [
+                                                     {
+                                                         "id":  "fong-kei-action-01",
+                                                         "title_zh":  "呈現四代傳承脈絡",
+                                                         "description_zh":  "可把1902年茶樓前身、轉型餅家及2018年第四代接班整理成簡短文化時間線。",
+                                                         "kind":  "content"
+                                                     }
+                                                 ],
+                         "publication":  {
+                                             "platform":  "xiaohongshu",
+                                             "status":  "draft",
+                                             "metrics":  {
+                                                             "impressions":  null,
+                                                             "saves":  null,
+                                                             "comments":  null
+                                                         }
+                                         }
+                     },
+        "hunter":  {
+                       "short_description_zh":  "官也街上的百年餅家，源自1902年，店內仍延續家族傳承的中式餅食。",
+                       "why_recommended_zh":  [
+                                                  "創辦歷史可追溯至1902年。",
+                                                  "現由第四代家族成員傳承。",
+                                                  "位於氹仔舊城區官也街。"
+                                              ],
+                       "visit_minutes":  15,
+                       "route_rank":  9
+                   }
+    },
+    {
+        "shop_id":  "chui-heong-003",
+        "identity":  {
+                         "name_zh":  "最香餅家",
+                         "name_en":  "Pastelaria Chui Heong",
+                         "category":  "傳統餅家",
+                         "district":  "澳門半島",
+                         "area":  "夜呣街",
+                         "address":  "澳門夜呣街12號B地下A座",
+                         "coordinates":  {
+                                             "lat":  22.1992,
+                                             "lng":  113.549
+                                         },
+                         "established_year":  1957,
+                         "description_zh":  "1957年創辦的家庭式餅家，以手工炭燒杏仁餅著稱。",
+                         "image":  null
+                     },
+        "heritage":  {
+                         "summary_zh":  "最香餅家始創於1957年，最初設於三層樓街，由李繼煜製作餅食、黎愛珍挑着產品外出售賣。1980年代遷至夜呣街，延續店內工場與零售並置的模式，以手工炭燒杏仁餅及傳統中式餅食為主要特色。",
+                         "publication_status":  "publishable",
+                         "founding_year":  1957,
+                         "street_stall_start_date":  null,
+                         "first_shop_opening_date":  "1957",
+                         "product_categories":  [
+                                                    "杏仁餅",
+                                                    "中式餅食"
+                                                ],
+                         "products":  [
+                                          "粒粒杏仁餅",
+                                          "鮮奶合桃餅",
+                                          "蛋黃肉心杏仁餅"
+                                      ],
+                         "persons":  [
+                                         {
+                                             "name":  "李繼煜",
+                                             "role":  "創辦人"
+                                         },
+                                         {
+                                             "name":  "黎愛珍",
+                                             "role":  "早期共同經營者"
+                                         },
+                                         {
+                                             "name":  "李志勇",
+                                             "role":  "第二代傳承人"
+                                         },
+                                         {
+                                             "name":  "李俊明",
+                                             "role":  "第三代傳承人"
+                                         }
+                                     ],
+                         "key_events":  [
+                                            {
+                                                "date":  "1957",
+                                                "description":  "最香餅家創辦，最初在三層樓街經營。"
+                                            },
+                                            {
+                                                "date":  "1980",
+                                                "description":  "1980年代遷至夜呣街。"
+                                            }
+                                        ],
+                         "operations":  [
+                                            "手工製作杏仁餅",
+                                            "使用傳統炭燒方式製餅"
+                                        ]
+                     },
+        "evidence":  [
+                         {
+                             "id":  "chui-heong-mgto-01",
+                             "type":  "government",
+                             "title":  "最香餅家",
+                             "publisher":  "澳門特別行政區政府旅遊局",
+                             "url":  "https://www.macaotourism.gov.mo/zh-hant/shopping/souvenirs/pastelaria-chui-heong",
+                             "published_at":  null,
+                             "excerpt":  "政府旅遊資料記錄1957年創辦、三層樓街起家、1980年代遷址、創辦及傳承人物與主要產品。",
+                             "supports":  [
+                                              "identity.address",
+                                              "identity.established_year",
+                                              "heritage.summary_zh",
+                                              "heritage.founding_year",
+                                              "heritage.first_shop_opening_date",
+                                              "heritage.persons",
+                                              "heritage.key_events",
+                                              "heritage.products",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "chui-heong-ipim-02",
+                             "type":  "government",
+                             "title":  "Almond cake - Pastelaria Chui Heong",
+                             "publisher":  "澳門貿易投資促進局商匯館",
+                             "url":  "https://macaoideas.ipim.gov.mo/en/product/230",
+                             "published_at":  null,
+                             "excerpt":  "商匯館資料確認最香餅家地址及傳統炭燒、手工製作杏仁餅的產品特色。",
+                             "supports":  [
+                                              "identity.address",
+                                              "heritage.products",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         }
+                     ],
+        "signals":  {
+                        "exposure":  {
+                                         "current":  null,
+                                         "previous":  null,
+                                         "history":  [
+
+                                                     ]
+                                     },
+                        "sentiment":  {
+                                          "label":  null,
+                                          "score":  null,
+                                          "summary_zh":  null
+                                      }
+                    },
+        "government":  {
+                           "activity":  [
+
+                                        ]
+                       },
+        "merchant":  {
+                         "recommended_actions":  [
+                                                     {
+                                                         "id":  "chui-heong-action-01",
+                                                         "title_zh":  "記錄炭燒製餅工藝",
+                                                         "description_zh":  "可集中介紹自1957年延續至今的手工炭燒杏仁餅工藝與家庭式餅店歷史。",
+                                                         "kind":  "content"
+                                                     }
+                                                 ],
+                         "publication":  {
+                                             "platform":  "xiaohongshu",
+                                             "status":  "draft",
+                                             "metrics":  {
+                                                             "impressions":  null,
+                                                             "saves":  null,
+                                                             "comments":  null
+                                                         }
+                                         }
+                     },
+        "hunter":  {
+                       "short_description_zh":  "1957年創辦的傳統餅家，以手工炭燒杏仁餅及店內工場製作方式見稱。",
+                       "why_recommended_zh":  [
+                                                  "創辦年份與遷址歷史有政府資料支持。",
+                                                  "仍保留傳統手工炭燒製餅特色。",
+                                                  "可從飲食角度理解澳門手信製作文化。"
+                                              ],
+                       "visit_minutes":  15,
+                       "route_rank":  4
+                   }
+    },
+    {
+        "shop_id":  "lok-kei-004",
+        "identity":  {
+                         "name_zh":  "六記粥麵",
+                         "name_en":  "Lok Kei",
+                         "category":  "粥麵店",
+                         "district":  "澳門半島",
+                         "area":  "沙梨頭",
+                         "address":  "澳門沙梨頭仁慕巷1號D地下利源大廈",
+                         "coordinates":  {
+                                             "lat":  22.2025,
+                                             "lng":  113.5358
+                                         },
+                         "established_year":  1945,
+                         "description_zh":  "1945年由流動麵檔起步，1966年開設首間餐廳，後於1970年遷至沙梨頭現址的傳統粥麵店，以竹升麵、蝦籽撈麵及水蟹粥等菜式見稱。",
+                         "image":  null
+                     },
+        "heritage":  {
+                         "summary_zh":  "六記粥麵1945年由流動麵檔起步，1966年開設首間餐廳，1970年遷至沙梨頭現址。店家延續以竹竿製作竹升麵的工藝，並以蝦籽撈麵、水蟹粥及家傳粥麵菜式見稱。",
+                         "publication_status":  "publishable",
+                         "founding_year":  1945,
+                         "street_stall_start_date":  "1945",
+                         "first_shop_opening_date":  "1966",
+                         "product_categories":  [
+                                                    "竹升麵",
+                                                    "粥品",
+                                                    "粵式小食"
+                                                ],
+                         "products":  [
+                                          "蝦籽撈麵",
+                                          "水蟹粥",
+                                          "米通鯪魚球",
+                                          "錦鹵炸雲吞",
+                                          "鳳爪拼大腸",
+                                          "雲吞麵",
+                                          "蝦籽麵"
+                                      ],
+                         "persons":  [
+                                         {
+                                             "name":  "李六",
+                                             "role":  "創辦人"
+                                         },
+                                         {
+                                             "name":  "李明佳",
+                                             "role":  "第二代傳承人"
+                                         },
+                                         {
+                                             "name":  "李文龍",
+                                             "role":  "第三代傳承人；2019年起任經理"
+                                         }
+                                     ],
+                         "key_events":  [
+                                            {
+                                                "date":  "1945",
+                                                "description":  "創辦人李六在澳門以流動麵檔形式開始經營。"
+                                            },
+                                            {
+                                                "date":  "1966",
+                                                "description":  "離開流動車檔，在關閘附近開設首間餐廳。"
+                                            },
+                                            {
+                                                "date":  "1970",
+                                                "description":  "遷至沙梨頭仁慕巷一帶，延續至今。"
+                                            },
+                                            {
+                                                "date":  "2019",
+                                                "description":  "第三代傳承人李文龍接任經理。"
+                                            }
+                                        ],
+                         "operations":  [
+                                            "製作傳統竹升麵",
+                                            "以竹竿搥打麵團製麵",
+                                            "店主自行炒製蝦籽"
+                                        ]
+                     },
+        "evidence":  [
+                         {
+                             "id":  "lok-kei-mgto-01",
+                             "type":  "government",
+                             "title":  "六記粥麵",
+                             "publisher":  "澳門特別行政區政府旅遊局",
+                             "url":  "https://www.macaotourism.gov.mo/zh-hant/dining/specialty-foods/coffee-shops-and-noodle-shops/lok-kei",
+                             "published_at":  null,
+                             "excerpt":  "政府旅遊資料列明六記地址、竹升麵與水蟹粥等主要菜式，以及2001年澳門美食節相關事件。",
+                             "supports":  [
+                                              "identity.address",
+                                              "identity.description_zh",
+                                              "heritage.summary_zh",
+                                              "heritage.products",
+                                              "heritage.key_events",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "lok-kei-michelin-02",
+                             "type":  "publication",
+                             "title":  "六記粥麵（沙梨頭）",
+                             "publisher":  "MICHELIN Guide",
+                             "url":  "https://guide.michelin.com/mo/zh_HK/macau-region/macau/restaurant/luk-kei-noodle",
+                             "published_at":  null,
+                             "excerpt":  "米其林指南列出六記粥麵沙梨頭地址、必比登推介、竹升麵、蝦籽撈麵、水蟹粥及傳統製作方式。",
+                             "supports":  [
+                                              "identity.address",
+                                              "heritage.products",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "lok-kei-revistamacau-03",
+                             "type":  "publication",
+                             "title":  "Marcas Típicas de Macau",
+                             "publisher":  "《澳門》雜誌",
+                             "url":  "https://www.revistamacau.com.mo/2021/09/03/marcas-tipicas-de-macau-2/",
+                             "published_at":  "2021-09-03",
+                             "excerpt":  "《澳門》雜誌記錄六記於1945年以流動麵檔起步、1966年開設首間餐廳、1970年遷至沙梨頭，並記載李文龍及竹升麵工藝。",
+                             "supports":  [
+                                              "identity.established_year",
+                                              "heritage.founding_year",
+                                              "heritage.street_stall_start_date",
+                                              "heritage.first_shop_opening_date",
+                                              "heritage.persons",
+                                              "heritage.key_events",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "lok-kei-xinhua-04",
+                             "type":  "publication",
+                             "title":  "竹竿「升」起民間米其林——探訪澳門老字號之三",
+                             "publisher":  "新華社",
+                             "url":  "https://big5.news.cn/gate/big5/www.news.cn/gangao/2022-05/02/c_1128616233.htm",
+                             "published_at":  "2022-05-02",
+                             "excerpt":  "新華社資料記載六記於1945年由李六創辦，傳至李明佳及李文龍，並介紹竹升麵的手工製作。",
+                             "supports":  [
+                                              "identity.established_year",
+                                              "heritage.founding_year",
+                                              "heritage.persons",
+                                              "heritage.key_events",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         }
+                     ],
+        "signals":  {
+                        "exposure":  {
+                                         "current":  null,
+                                         "previous":  null,
+                                         "history":  [
+
+                                                     ]
+                                     },
+                        "sentiment":  {
+                                          "label":  null,
+                                          "score":  null,
+                                          "summary_zh":  null
+                                      }
+                    },
+        "government":  {
+                           "activity":  [
+
+                                        ]
+                       },
+        "merchant":  {
+                         "recommended_actions":  [
+                                                     {
+                                                         "id":  "lok-kei-action-01",
+                                                         "title_zh":  "整理竹升麵與家傳菜式資料",
+                                                         "description_zh":  "可用已核實的蝦籽撈麵、水蟹粥及家傳菜式資料製作產品文化介紹。",
+                                                         "kind":  "content"
+                                                     }
+                                                 ],
+                         "publication":  {
+                                             "platform":  "xiaohongshu",
+                                             "status":  "draft",
+                                             "metrics":  {
+                                                             "impressions":  null,
+                                                             "saves":  null,
+                                                             "comments":  null
+                                                         }
+                                         }
+                     },
+        "hunter":  {
+                       "short_description_zh":  "1945年由流動麵檔發展而來的沙梨頭粥麵店，仍以竹升麵、蝦籽撈麵及水蟹粥等傳統菜式為主。",
+                       "why_recommended_zh":  [
+                                                  "流動麵檔、1966年首間餐廳及1970年遷至沙梨頭的歷史有文史資料支持。",
+                                                  "李六、李明佳至李文龍的三代傳承脈絡有公開資料記錄。",
+                                                  "竹升麵製作工藝可連結澳門粵式麵食文化。"
+                                              ],
+                       "visit_minutes":  20,
+                       "route_rank":  2
+                   }
+    },
+    {
+        "shop_id":  "ving-kei-005",
+        "identity":  {
+                         "name_zh":  "榮記豆腐麵食",
+                         "name_en":  "Estabelecimento de Comidas Ving Kei Sopa de Fitas",
+                         "category":  "豆製品／麵食",
+                         "district":  "澳門半島",
+                         "area":  "果欄街",
+                         "address":  "澳門果欄街47號A地下",
+                         "coordinates":  {
+                                             "lat":  22.2021,
+                                             "lng":  113.5396
+                                         },
+                         "established_year":  null,
+                         "description_zh":  "源於澳門內港街頭的豆製品及麵食店，以傳統明火製作豆腐花及豆製品。",
+                         "image":  null
+                     },
+        "heritage":  {
+                         "summary_zh":  "榮記源於澳門內港街頭，官方資料形容其豆製品傳承超過半世紀。製作過程包括選料、磨豆、煮漿及撞漿成型，並維持明火製作方式。",
+                         "publication_status":  "publishable",
+                         "founding_year":  null,
+                         "street_stall_start_date":  null,
+                         "first_shop_opening_date":  null,
+                         "product_categories":  [
+                                                    "豆製品",
+                                                    "麵食",
+                                                    "傳統小食"
+                                                ],
+                         "products":  [
+                                          "冷豆腐花",
+                                          "熱豆腐花",
+                                          "豆腐",
+                                          "麵食"
+                                      ],
+                         "persons":  [
+
+                                     ],
+                         "key_events":  [
+                                            {
+                                                "date":  "1950年代",
+                                                "description":  "官方及文史資料均形容榮記源於澳門內港街頭，豆製品傳承超過半世紀；澳門記憶資料標示1958年相關時期。"
+                                            }
+                                        ],
+                         "operations":  [
+                                            "明火製作",
+                                            "磨豆",
+                                            "煮漿",
+                                            "撞漿成型"
+                                        ]
+                     },
+        "evidence":  [
+                         {
+                             "id":  "ving-kei-mgto-01",
+                             "type":  "government",
+                             "title":  "榮記豆腐麵食",
+                             "publisher":  "澳門特別行政區政府旅遊局",
+                             "url":  "https://www.macaotourism.gov.mo/zh-hant/step-out-macao/central/estabelecimento-de-comidas-ving-kei-sopa-de-fitas",
+                             "published_at":  null,
+                             "excerpt":  "政府旅遊資料記錄榮記源於內港街頭、豆品傳承超過半世紀、果欄街地址及傳統明火製豆工序。",
+                             "supports":  [
+                                              "identity.address",
+                                              "identity.description_zh",
+                                              "heritage.summary_zh",
+                                              "heritage.products",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "ving-kei-dsedt-02",
+                             "type":  "government",
+                             "title":  "Distinctive Shops – 榮記豆腐麵食",
+                             "publisher":  "澳門經濟及科技發展局",
+                             "url":  "https://www.dsedt.gov.mo/lcp/en_US/store_detail.jsp?id=40",
+                             "published_at":  null,
+                             "excerpt":  "經科局資料列明榮記源於內港街頭、豆製品傳承超過半世紀、果欄街地址，以及磨豆、煮漿、撞漿成型等工序。",
+                             "supports":  [
+                                              "identity.address",
+                                              "identity.description_zh",
+                                              "heritage.summary_zh",
+                                              "heritage.operations",
+                                              "heritage.products"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "ving-kei-macaumemory-03",
+                             "type":  "heritage",
+                             "title":  "榮記豆腐麵食",
+                             "publisher":  "澳門基金會「澳門記憶」文史網",
+                             "url":  "https://www.macaumemory.mo/entries_74b1920a49664049beee366e1ae3508b",
+                             "published_at":  null,
+                             "excerpt":  "澳門記憶記錄榮記為開業六十多年的澳門老字號小吃店，以豆腐花及豆製品配搭麵食見稱，並列出果欄街47號A地下地址；頁面主題資料標示1958年相關時期。",
+                             "supports":  [
+                                              "identity.address",
+                                              "heritage.summary_zh",
+                                              "heritage.products",
+                                              "heritage.key_events"
+                                          ],
+                             "status":  "verified"
+                         }
+                     ],
+        "signals":  {
+                        "exposure":  {
+                                         "current":  null,
+                                         "previous":  null,
+                                         "history":  [
+
+                                                     ]
+                                     },
+                        "sentiment":  {
+                                          "label":  null,
+                                          "score":  null,
+                                          "summary_zh":  null
+                                      }
+                    },
+        "government":  {
+                           "activity":  [
+
+                                        ]
+                       },
+        "merchant":  {
+                         "recommended_actions":  [
+                                                     {
+                                                         "id":  "ving-kei-action-01",
+                                                         "title_zh":  "記錄傳統製豆工序",
+                                                         "description_zh":  "可把磨豆、煮漿、撞漿成型與明火製作等已核實工序整理為文化內容。",
+                                                         "kind":  "content"
+                                                     }
+                                                 ],
+                         "publication":  {
+                                             "platform":  "xiaohongshu",
+                                             "status":  "draft",
+                                             "metrics":  {
+                                                             "impressions":  null,
+                                                             "saves":  null,
+                                                             "comments":  null
+                                                         }
+                                         }
+                     },
+        "hunter":  {
+                       "short_description_zh":  "果欄街上的傳統豆品店，仍以磨豆、煮漿和撞漿等方式製作豆腐花。",
+                       "why_recommended_zh":  [
+                                                  "傳統製作程序有政府資料直接記錄。",
+                                                  "可從小店製作工藝理解澳門街坊飲食文化。"
+                                              ],
+                       "visit_minutes":  15,
+                       "route_rank":  3
+                   }
+    },
+    {
+        "shop_id":  "medan-006",
+        "identity":  {
+                         "name_zh":  "美丹小食店",
+                         "name_en":  "Medan Indonesian Restaurant",
+                         "category":  "印尼歸僑飲食",
+                         "district":  "澳門半島",
+                         "area":  "高士德",
+                         "address":  "澳門士多鳥拜斯大馬路18號C翠華大廈地下E鋪",
+                         "coordinates":  {
+                                             "lat":  22.1971,
+                                             "lng":  113.5522
+                                         },
+                         "established_year":  1972,
+                         "description_zh":  "由印尼歸僑李綴治於1972年創辦的印尼小食店，保存澳門歸僑社群的飲食記憶。",
+                         "image":  null
+                     },
+        "heritage":  {
+                         "summary_zh":  "美丹小食店由印尼歸僑李綴治於1972年在文第士街創辦，1975年遷往高士德一帶。店家長期製作印尼糕點與巴東菜等食品，2013年由第二代接手，2014年再由第三代蘇家圖接手。",
+                         "publication_status":  "publishable",
+                         "founding_year":  1972,
+                         "street_stall_start_date":  null,
+                         "first_shop_opening_date":  "1972",
+                         "product_categories":  [
+                                                    "印尼食品",
+                                                    "歸僑食品",
+                                                    "糕點"
+                                                ],
+                         "products":  [
+                                          "咖喱雜飯",
+                                          "椰汁糯米雞",
+                                          "九層糕",
+                                          "巴東菜"
+                                      ],
+                         "persons":  [
+                                         {
+                                             "name":  "李綴治",
+                                             "role":  "創辦人"
+                                         },
+                                         {
+                                             "name":  "李志勤",
+                                             "role":  "第二代傳承人"
+                                         },
+                                         {
+                                             "name":  "李志謙",
+                                             "role":  "第二代傳承人"
+                                         },
+                                         {
+                                             "name":  "蘇家圖",
+                                             "role":  "第三代傳承人"
+                                         }
+                                     ],
+                         "key_events":  [
+                                            {
+                                                "date":  "1972",
+                                                "description":  "李綴治在文第士街創辦第一家美丹小食店。"
+                                            },
+                                            {
+                                                "date":  "1975",
+                                                "description":  "遷往高士德大馬路一帶繼續經營。"
+                                            },
+                                            {
+                                                "date":  "2013",
+                                                "description":  "由第二代李志勤及李志謙接手。"
+                                            },
+                                            {
+                                                "date":  "2014",
+                                                "description":  "由家族第三代蘇家圖接手。"
+                                            }
+                                        ],
+                         "operations":  [
+                                            "沿用傳統印尼食品製作程序",
+                                            "持續製作歸僑家族食品"
+                                        ]
+                     },
+        "evidence":  [
+                         {
+                             "id":  "medan-mgto-01",
+                             "type":  "government",
+                             "title":  "美丹小食店",
+                             "publisher":  "澳門特別行政區政府旅遊局",
+                             "url":  "https://www.macaotourism.gov.mo/zh-hant/dining/specialty-foods/special-snacks/medan-indonesian-restaurant",
+                             "published_at":  null,
+                             "excerpt":  "政府資料直接記錄1972年創辦、1975年遷址、三代傳承人物、主要印尼食品及現址。",
+                             "supports":  [
+                                              "identity.address",
+                                              "identity.established_year",
+                                              "heritage.summary_zh",
+                                              "heritage.founding_year",
+                                              "heritage.first_shop_opening_date",
+                                              "heritage.products",
+                                              "heritage.persons",
+                                              "heritage.key_events",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "medan-merchant-02",
+                             "type":  "merchant",
+                             "title":  "美丹小食店 Medan",
+                             "publisher":  "美丹小食店官方網站",
+                             "url":  "https://medanmacao.com/",
+                             "published_at":  null,
+                             "excerpt":  "商戶官方網站列明美丹於1972年由印尼歸僑李綴治在澳門創辦，沿用傳統手工方法製作印尼糕點及小食。",
+                             "supports":  [
+                                              "identity.established_year",
+                                              "heritage.founding_year",
+                                              "heritage.products",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "medan-macaumemory-03",
+                             "type":  "heritage",
+                             "title":  "美丹小食店：昔日門面",
+                             "publisher":  "澳門基金會「澳門記憶」文史網",
+                             "url":  "https://macaumemory.mo/entries_4bd66837a2b241fe8efbcf8654371ecb?cid=c24ce043920948b1b855c54fa4db9acf",
+                             "published_at":  null,
+                             "excerpt":  "澳門記憶記錄李綴治於1972年在文第士街創辦美丹，1975年遷往高士德大馬路，並列出其澳門特色老店背景。",
+                             "supports":  [
+                                              "identity.established_year",
+                                              "heritage.founding_year",
+                                              "heritage.first_shop_opening_date",
+                                              "heritage.key_events"
+                                          ],
+                             "status":  "verified"
+                         }
+                     ],
+        "signals":  {
+                        "exposure":  {
+                                         "current":  null,
+                                         "previous":  null,
+                                         "history":  [
+
+                                                     ]
+                                     },
+                        "sentiment":  {
+                                          "label":  null,
+                                          "score":  null,
+                                          "summary_zh":  null
+                                      }
+                    },
+        "government":  {
+                           "activity":  [
+
+                                        ]
+                       },
+        "merchant":  {
+                         "recommended_actions":  [
+                                                     {
+                                                         "id":  "medan-action-01",
+                                                         "title_zh":  "整理澳門印尼歸僑飲食故事",
+                                                         "description_zh":  "可從創辦人的印尼歸僑背景、1972年開店及三代傳承切入，介紹澳門多元社群飲食史。",
+                                                         "kind":  "content"
+                                                     }
+                                                 ],
+                         "publication":  {
+                                             "platform":  "xiaohongshu",
+                                             "status":  "draft",
+                                             "metrics":  {
+                                                             "impressions":  null,
+                                                             "saves":  null,
+                                                             "comments":  null
+                                                         }
+                                         }
+                     },
+        "hunter":  {
+                       "short_description_zh":  "1972年由印尼歸僑創辦的小食店，透過糕點與巴東菜保留澳門歸僑飲食記憶。",
+                       "why_recommended_zh":  [
+                                                  "創辦人與創辦年份有政府資料直接支持。",
+                                                  "三代傳承脈絡完整。",
+                                                  "能呈現澳門華人、東南亞歸僑與本地飲食之間的文化交流。"
+                                              ],
+                       "visit_minutes":  20,
+                       "route_rank":  8
+                   }
+    },
+    {
+        "shop_id":  "si-heung-007",
+        "identity":  {
+                         "name_zh":  "時香",
+                         "name_en":  "Si Heung",
+                         "category":  "花生瓜子／傳統零食",
+                         "district":  "澳門半島",
+                         "area":  "皇子街",
+                         "address":  "澳門皇子街27號",
+                         "coordinates":  {
+                                             "lat":  22.1937,
+                                             "lng":  113.5407
+                                         },
+                         "established_year":  1962,
+                         "description_zh":  "1962年起在皇子街經營的傳統零食店，以花生、瓜子及涼果等食品為主。",
+                         "image":  null
+                     },
+        "heritage":  {
+                         "summary_zh":  "時香自1962年起一直在皇子街售賣花生、瓜子及傳統零食，店內仍保存舊式招牌、鐵皮車與木製櫥櫃等老店元素。現由第二代岑姓店主經營。",
+                         "publication_status":  "publishable",
+                         "founding_year":  1962,
+                         "street_stall_start_date":  null,
+                         "first_shop_opening_date":  "1962",
+                         "product_categories":  [
+                                                    "花生",
+                                                    "瓜子",
+                                                    "涼果",
+                                                    "傳統零食"
+                                                ],
+                         "products":  [
+                                          "魚皮花生",
+                                          "蝦子花生",
+                                          "南乳花生",
+                                          "甘草花生",
+                                          "瓜子",
+                                          "話梅",
+                                          "杏脯乾",
+                                          "甘草檸檬"
+                                      ],
+                         "persons":  [
+                                         {
+                                             "name":  "岑先生",
+                                             "role":  "第二代傳承人"
+                                         }
+                                     ],
+                         "key_events":  [
+                                            {
+                                                "date":  "1962",
+                                                "description":  "開始在皇子街售賣花生、瓜子等零食。"
+                                            }
+                                        ],
+                         "operations":  [
+                                            "花生炸製",
+                                            "花生炒製",
+                                            "花生焗製"
+                                        ]
+                     },
+        "evidence":  [
+                         {
+                             "id":  "si-heung-mgto-01",
+                             "type":  "government",
+                             "title":  "時香",
+                             "publisher":  "澳門特別行政區政府旅遊局",
+                             "url":  "https://www.macaotourism.gov.mo/zh-hant/shopping/souvenirs/si-heung",
+                             "published_at":  null,
+                             "excerpt":  "政府資料記錄店舖自1962年起一直在皇子街售賣花生瓜子，並列明第二代傳承、製作方式、產品及地址。",
+                             "supports":  [
+                                              "identity.address",
+                                              "identity.established_year",
+                                              "heritage.summary_zh",
+                                              "heritage.founding_year",
+                                              "heritage.first_shop_opening_date",
+                                              "heritage.products",
+                                              "heritage.persons",
+                                              "heritage.key_events",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "si-heung-dsedt-02",
+                             "type":  "government",
+                             "title":  "特色店 – 時香",
+                             "publisher":  "澳門經濟及科技發展局",
+                             "url":  "https://www.dsedt.gov.mo/lcp/zh_MO/store_detail.jsp?id=9",
+                             "published_at":  null,
+                             "excerpt":  "經科局資料記錄時香皇子街地址、1960年代懷舊店面、花生瓜子加工方式、產品口味及不添加防腐劑的店方資料。",
+                             "supports":  [
+                                              "identity.address",
+                                              "heritage.summary_zh",
+                                              "heritage.products",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "si-heung-macaumemory-03",
+                             "type":  "heritage",
+                             "title":  "時香花生瓜子",
+                             "publisher":  "澳門基金會「澳門記憶」文史網",
+                             "url":  "https://www.macaumemory.mo/interaction/memory_ea255c7c29ec45a0b36674ff8f09c5dc",
+                             "published_at":  "2024-10-09",
+                             "excerpt":  "澳門記憶資料記錄時香花生瓜子創於1962年，並保存舊日澳門零食店的歷史影像及店舖資料。",
+                             "supports":  [
+                                              "identity.name_zh",
+                                              "identity.established_year",
+                                              "heritage.founding_year",
+                                              "heritage.first_shop_opening_date"
+                                          ],
+                             "status":  "verified"
+                         }
+                     ],
+        "signals":  {
+                        "exposure":  {
+                                         "current":  null,
+                                         "previous":  null,
+                                         "history":  [
+
+                                                     ]
+                                     },
+                        "sentiment":  {
+                                          "label":  null,
+                                          "score":  null,
+                                          "summary_zh":  null
+                                      }
+                    },
+        "government":  {
+                           "activity":  [
+
+                                        ]
+                       },
+        "merchant":  {
+                         "recommended_actions":  [
+                                                     {
+                                                         "id":  "si-heung-action-01",
+                                                         "title_zh":  "記錄皇子街老店空間",
+                                                         "description_zh":  "可利用已核實的1962年起店史、舊式招牌、鐵皮車與木櫥櫃資料，整理街區老店故事。",
+                                                         "kind":  "content"
+                                                     }
+                                                 ],
+                         "publication":  {
+                                             "platform":  "xiaohongshu",
+                                             "status":  "draft",
+                                             "metrics":  {
+                                                             "impressions":  null,
+                                                             "saves":  null,
+                                                             "comments":  null
+                                                         }
+                                         }
+                     },
+        "hunter":  {
+                       "short_description_zh":  "自1962年留在皇子街的傳統零食店，仍可看到舊式招牌與老店陳設。",
+                       "why_recommended_zh":  [
+                                                  "店址與經營歷史超過半世紀並有政府資料支持。",
+                                                  "傳統花生加工與街舖空間均具有可觀察的文化特色。"
+                                              ],
+                       "visit_minutes":  10,
+                       "route_rank":  5
+                   }
+    },
+    {
+        "shop_id":  "mok-yi-kei-008",
+        "identity":  {
+                         "name_zh":  "莫義記",
+                         "name_en":  "Mercearia de Mok Yi Kei",
+                         "category":  "傳統甜品／小食",
+                         "district":  "氹仔",
+                         "area":  "官也街",
+                         "address":  "澳門氹仔官也街9號A鋪",
+                         "coordinates":  {
+                                             "lat":  22.156,
+                                             "lng":  113.5586
+                                         },
+                         "established_year":  null,
+                         "description_zh":  "官方旅遊資料將莫義記源流追溯至20世紀20年代氹仔小販檔；澳門記憶另記載1938年開始經營小販檔、1954年在官也街開設店舖，現以大菜糕、木糠布甸及雪糕等甜品為主。",
+                         "image":  null
+                     },
+        "heritage":  {
+                         "summary_zh":  "莫義記的歷史有不同來源表述：澳門旅遊局將源流追溯至20世紀20年代氹仔小販檔；澳門記憶記載1938年開始經營小販檔、1954年在官也街開設店舖。現由第三代傳承，產品包括大菜糕、木糠布甸、焦糖布甸、榴槤雪糕及燕窩雪糕。",
+                         "publication_status":  "needs_review",
+                         "founding_year":  null,
+                         "street_stall_start_date":  null,
+                         "first_shop_opening_date":  "1954",
+                         "product_categories":  [
+                                                    "甜品",
+                                                    "雪糕",
+                                                    "傳統小食"
+                                                ],
+                         "products":  [
+                                          "大菜糕",
+                                          "木糠布甸",
+                                          "焦糖布甸",
+                                          "貓山王榴槤雪糕",
+                                          "燕窩雪糕"
+                                      ],
+                         "persons":  [
+                                         {
+                                             "name":  "莫炳權",
+                                             "role":  "第三代傳承人"
+                                         },
+                                         {
+                                             "name":  "梁葵枝",
+                                             "role":  "第三代共同經營者"
+                                         }
+                                     ],
+                         "key_events":  [
+                                            {
+                                                "date":  "1920年代",
+                                                "description":  "澳門旅遊局資料將莫義記源流追溯至20世紀20年代氹仔官也街至地堡街一帶的小販檔。"
+                                            },
+                                            {
+                                                "date":  "1938",
+                                                "description":  "澳門記憶資料記載莫義記前身開始經營小販檔。"
+                                            },
+                                            {
+                                                "date":  "1954",
+                                                "description":  "澳門記憶資料記載莫義記在官也街開設店舖。"
+                                            }
+                                        ],
+                         "operations":  [
+                                            "自行研製甜品產品",
+                                            "大菜糕及雪糕產品製作"
+                                        ]
+                     },
+        "evidence":  [
+                         {
+                             "id":  "mok-yi-kei-mgto-01",
+                             "type":  "government",
+                             "title":  "莫義記",
+                             "publisher":  "澳門特別行政區政府旅遊局",
+                             "url":  "https://www.macaotourism.gov.mo/zh-hant/step-out-macao/taipa/mercearia-de-mok-yi-kei",
+                             "published_at":  null,
+                             "excerpt":  "政府旅遊資料將莫義記源流追溯至20世紀20年代氹仔小販檔，並記錄第三代傳承、主要甜品及官也街地址。",
+                             "supports":  [
+                                              "identity.address",
+                                              "identity.description_zh",
+                                              "heritage.summary_zh",
+                                              "heritage.products",
+                                              "heritage.key_events"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "mok-yi-kei-mgto-02",
+                             "type":  "government",
+                             "title":  "澳門特色老店",
+                             "publisher":  "澳門特別行政區政府旅遊局",
+                             "url":  "https://www.macaotourism.gov.mo/zh-hant/events/whatson/7699/",
+                             "published_at":  null,
+                             "excerpt":  "政府旅遊資料補充莫義記店名來源、第三代莫炳權及梁葵枝、產品演變和官也街地址。",
+                             "supports":  [
+                                              "heritage.persons",
+                                              "heritage.products",
+                                              "identity.address"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "mok-yi-kei-dsedt-03",
+                             "type":  "government",
+                             "title":  "特色店 – 莫義記",
+                             "publisher":  "澳門經濟及科技發展局",
+                             "url":  "https://www.dsedt.gov.mo/lcp/zh_MO/store_detail.jsp?id=74",
+                             "published_at":  null,
+                             "excerpt":  "經科局資料列出莫義記的店址、電話、特色甜品及源流資料。",
+                             "supports":  [
+                                              "identity.address",
+                                              "heritage.summary_zh",
+                                              "heritage.products",
+                                              "heritage.key_events"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "mok-yi-kei-macaumemory-04",
+                             "type":  "heritage",
+                             "title":  "莫義記：重塑後門面",
+                             "publisher":  "澳門基金會「澳門記憶」文史網",
+                             "url":  "https://www.macaumemory.mo/entries_7cc1e907862c4635bd882367115b16c2",
+                             "published_at":  null,
+                             "excerpt":  "澳門記憶資料記錄莫義記前身於1938年開始經營小販檔，1954年在官也街開店，並補充其店舖歷史。",
+                             "supports":  [
+                                              "heritage.first_shop_opening_date",
+                                              "heritage.key_events",
+                                              "identity.address"
+                                          ],
+                             "status":  "verified"
+                         }
+                     ],
+        "signals":  {
+                        "exposure":  {
+                                         "current":  null,
+                                         "previous":  null,
+                                         "history":  [
+
+                                                     ]
+                                     },
+                        "sentiment":  {
+                                          "label":  null,
+                                          "score":  null,
+                                          "summary_zh":  null
+                                      }
+                    },
+        "government":  {
+                           "activity":  [
+
+                                        ]
+                       },
+        "merchant":  {
+                         "recommended_actions":  [
+                                                     {
+                                                         "id":  "mok-yi-kei-action-01",
+                                                         "title_zh":  "補充早期小販口述資料",
+                                                         "description_zh":  "現有官方資料只能將源流概括追溯至20世紀20年代，可進一步訪談店方確認更精確的起始年份及早期經營位置。",
+                                                         "kind":  "interview"
+                                                     }
+                                                 ],
+                         "publication":  {
+                                             "platform":  "xiaohongshu",
+                                             "status":  "draft",
+                                             "metrics":  {
+                                                             "impressions":  null,
+                                                             "saves":  null,
+                                                             "comments":  null
+                                                         }
+                                         }
+                     },
+        "hunter":  {
+                       "short_description_zh":  "澳門旅遊局將其源流追溯至20世紀20年代氹仔小販檔，澳門記憶則記載1938年起經營及1954年在官也街開店；現以大菜糕、木糠布甸及雪糕等甜品為主。",
+                       "why_recommended_zh":  [
+                                                  "官方旅遊及文史資料均記錄其由氹仔小販檔發展至官也街店舖。",
+                                                  "第三代傳承及大菜糕、木糠布甸、榴槤雪糕等產品有公開資料支持。",
+                                                  "不同來源對早期年份有20世紀20年代與1938年兩種表述，適合以待覆核方式呈現。"
+                                              ],
+                       "visit_minutes":  15,
+                       "route_rank":  10
+                   }
+    },
+    {
+        "shop_id":  "ng-teng-kei-009",
+        "identity":  {
+                         "name_zh":  "吳廷記糕餅小食",
+                         "name_en":  "Pastelaria Ng Teng Kei",
+                         "category":  "傳統糕餅小食",
+                         "district":  "澳門半島",
+                         "area":  "下環",
+                         "address":  "澳門下環街15號怡豐大廈A座地下",
+                         "coordinates":  {
+                                             "lat":  22.1875,
+                                             "lng":  113.5356
+                                         },
+                         "established_year":  1949,
+                         "description_zh":  "1949年創立、由街頭擔挑檔及車仔檔發展而來的下環糕餅小食店，現仍製作紅豆餅及冬季限定冷糕。政府旅遊頁概稱創立於20世紀50年代，具體年代以文史資料記載為準並標記待覆核。",
+                         "image":  null
+                     },
+        "heritage":  {
+                         "summary_zh":  "吳廷記由吳毓全與許清蘭於1949年創立，早期以擔挑檔、車仔檔在街邊售賣糕點；1954年起紮根下環街，2010年在下環街市及街外店舖開設固定店面。店家傳承三代，以紅豆餅及冷糕為代表食品。政府旅遊頁概稱創立於20世紀50年代，故出版狀態標記為待覆核。",
+                         "publication_status":  "needs_review",
+                         "founding_year":  1949,
+                         "street_stall_start_date":  "1949",
+                         "first_shop_opening_date":  "2010-10-31",
+                         "product_categories":  [
+                                                    "傳統糕點",
+                                                    "街頭小食"
+                                                ],
+                         "products":  [
+                                          "紅豆餅",
+                                          "冷糕"
+                                      ],
+                         "persons":  [
+                                         {
+                                             "name":  "吳毓全",
+                                             "role":  "創辦人"
+                                         },
+                                         {
+                                             "name":  "許清蘭",
+                                             "role":  "共同創辦人"
+                                         },
+                                         {
+                                             "name":  "吳國榮",
+                                             "role":  "第二代傳人"
+                                         },
+                                         {
+                                             "name":  "吳志光",
+                                             "role":  "第三代傳人"
+                                         }
+                                     ],
+                         "key_events":  [
+                                            {
+                                                "date":  "1949",
+                                                "description":  "吳毓全與許清蘭創立吳廷記，早期以擔挑檔及車仔檔售賣糕點。"
+                                            },
+                                            {
+                                                "date":  "1954",
+                                                "description":  "店家自此紮根澳門下環街。"
+                                            },
+                                            {
+                                                "date":  "2010-06-28",
+                                                "description":  "在下環街市內開設固定店面。"
+                                            },
+                                            {
+                                                "date":  "2010-10-31",
+                                                "description":  "在下環街市對面街外開設現時較知名的店面。"
+                                            }
+                                        ],
+                         "operations":  [
+                                            "傳統手工糕餅製作",
+                                            "紅豆餅現包現煎",
+                                            "冷糕按季節製作"
+                                        ]
+                     },
+        "evidence":  [
+                         {
+                             "id":  "ng-teng-kei-mgto-01",
+                             "type":  "government",
+                             "title":  "吳廷記糕餅小食",
+                             "publisher":  "澳門特別行政區政府旅遊局",
+                             "url":  "https://www.macaotourism.gov.mo/zh-hant/dining/specialty-foods/special-snacks/pastelaria-ng-teng-kei",
+                             "published_at":  null,
+                             "excerpt":  "政府資料記錄店舖創立於20世紀50年代、由街邊小販車開始、傳承三代，以及冷糕與紅豆餅製作特色。",
+                             "supports":  [
+                                              "identity.description_zh",
+                                              "heritage.summary_zh",
+                                              "heritage.products",
+                                              "heritage.key_events",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "ng-teng-kei-iam-02",
+                             "type":  "government",
+                             "title":  "食安心商戶名單",
+                             "publisher":  "澳門市政署食品安全資訊",
+                             "url":  "https://www.iam.gov.mo/foodsafety/file?p=foodsafetyinfo%2FList23%2F9_e5659e16f6b215fba32b753c5149f312.pdf",
+                             "published_at":  "2025-10-08",
+                             "excerpt":  "市政署商戶名單列出吳廷記糕餅小食地址為澳門下環街15號怡豐大廈A座地下。",
+                             "supports":  [
+                                              "identity.address"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "ng-teng-kei-macaumemory-03",
+                             "type":  "heritage",
+                             "title":  "吳廷記糕餅小食：昔日門面",
+                             "publisher":  "澳門基金會「澳門記憶」文史網",
+                             "url":  "https://www.macaumemory.mo/entries_1316a5c2eeed4997a7dd71e6691f4be5",
+                             "published_at":  "2022-05-03",
+                             "excerpt":  "澳門記憶記錄吳廷記1949年創立、自1954年起紮根下環街，並記載創辦人吳毓全及店址。",
+                             "supports":  [
+                                              "identity.established_year",
+                                              "heritage.founding_year",
+                                              "heritage.street_stall_start_date",
+                                              "heritage.persons",
+                                              "heritage.key_events"
+                                          ],
+                             "status":  "needs_review"
+                         },
+                         {
+                             "id":  "ng-teng-kei-revistamacau-04",
+                             "type":  "publication",
+                             "title":  "Marcas Típicas de Macau",
+                             "publisher":  "《澳門》雜誌",
+                             "url":  "https://www.revistamacau.com.mo/2021/09/03/marcas-tipicas-de-macau-2/",
+                             "published_at":  "2021-09-03",
+                             "excerpt":  "《澳門》雜誌記載吳廷記家族於1949年開始經營、1954年轉至下環、2010年開設街市內及街外店面，並列出吳國榮及吳志光等傳承人物。",
+                             "supports":  [
+                                              "identity.established_year",
+                                              "heritage.founding_year",
+                                              "heritage.street_stall_start_date",
+                                              "heritage.first_shop_opening_date",
+                                              "heritage.persons",
+                                              "heritage.key_events",
+                                              "heritage.products",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "needs_review"
+                         }
+                     ],
+        "signals":  {
+                        "exposure":  {
+                                         "current":  null,
+                                         "previous":  null,
+                                         "history":  [
+
+                                                     ]
+                                     },
+                        "sentiment":  {
+                                          "label":  null,
+                                          "score":  null,
+                                          "summary_zh":  null
+                                      }
+                    },
+        "government":  {
+                           "activity":  [
+
+                                        ]
+                       },
+        "merchant":  {
+                         "recommended_actions":  [
+                                                     {
+                                                         "id":  "ng-teng-kei-action-01",
+                                                         "title_zh":  "確認精確創辦年份",
+                                                         "description_zh":  "現有政府資料只記錄創辦於20世紀50年代，可向店方確認具體年份，再完善時間線。",
+                                                         "kind":  "interview"
+                                                     },
+                                                     {
+                                                         "id":  "ng-teng-kei-action-02",
+                                                         "title_zh":  "記錄季節性冷糕工藝",
+                                                         "description_zh":  "可根據官方資料整理冷糕只於秋冬製作的原因，以及紅豆餅現包現煎的傳統工序。",
+                                                         "kind":  "content"
+                                                     }
+                                                 ],
+                         "publication":  {
+                                             "platform":  "xiaohongshu",
+                                             "status":  "draft",
+                                             "metrics":  {
+                                                             "impressions":  null,
+                                                             "saves":  null,
+                                                             "comments":  null
+                                                         }
+                                         }
+                     },
+        "hunter":  {
+                       "short_description_zh":  "1949年由街頭擔挑檔及車仔檔發展而來的下環糕餅店，仍製作紅豆餅及冬季限定冷糕；創立年代因來源表述不同，公開資料需標示待覆核。",
+                       "why_recommended_zh":  [
+                                                  "澳門記憶及文史資料記錄1949年創立、1954年紮根下環及2010年開設固定店面。",
+                                                  "紅豆餅與冷糕的手工及季節性製作有政府旅遊資料支持。",
+                                                  "不同來源對創立年代有1949年與20世紀50年代兩種表述，適合以審慎方式呈現老店史料。"
+                                              ],
+                       "visit_minutes":  15,
+                       "route_rank":  6
+                   }
+    },
+    {
+        "shop_id":  "pak-fa-fui-010",
+        "identity":  {
+                         "name_zh":  "同益百花魁醬園有限公司",
+                         "name_en":  "Tong Iec Pak Fa Fui Cheong Un Company Limited",
+                         "category":  "涼果／醬料",
+                         "district":  "澳門半島",
+                         "area":  "筷子基",
+                         "address":  "澳門俾若翰街門牌2E號宏安地下A",
+                         "coordinates":  {
+                                             "lat":  22.2152,
+                                             "lng":  113.5487
+                                         },
+                         "established_year":  1903,
+                         "description_zh":  "1903年創立、1918年遷至澳門的百年涼果與醬料品牌。",
+                         "image":  null
+                     },
+        "heritage":  {
+                         "summary_zh":  "同益百花魁於1903年由李錦、黎其釗及陳謙賢在廣東新會創立，1918年遷至澳門，早期在沙梨頭設廠並於十月初五街設門市。品牌主要製作涼果、醬油及調味產品，現由第四代團隊傳承。",
+                         "publication_status":  "publishable",
+                         "founding_year":  1903,
+                         "street_stall_start_date":  null,
+                         "first_shop_opening_date":  null,
+                         "product_categories":  [
+                                                    "涼果",
+                                                    "醬油",
+                                                    "調味料"
+                                                ],
+                         "products":  [
+                                          "精神薑",
+                                          "蟠桃果",
+                                          "陳皮杏",
+                                          "陳皮梅",
+                                          "頭生抽",
+                                          "甜醋",
+                                          "梅子醬",
+                                          "麵豉醬"
+                                      ],
+                         "persons":  [
+                                         {
+                                             "name":  "李錦",
+                                             "role":  "創辦人"
+                                         },
+                                         {
+                                             "name":  "黎其釗",
+                                             "role":  "創辦人"
+                                         },
+                                         {
+                                             "name":  "陳謙賢",
+                                             "role":  "創辦人"
+                                         },
+                                         {
+                                             "name":  "呂雅珍",
+                                             "role":  "第四代傳承團隊"
+                                         },
+                                         {
+                                             "name":  "雷民強",
+                                             "role":  "第四代傳承團隊"
+                                         },
+                                         {
+                                             "name":  "陳佩珊",
+                                             "role":  "第四代傳承團隊"
+                                         }
+                                     ],
+                         "key_events":  [
+                                            {
+                                                "date":  "1903",
+                                                "description":  "品牌在廣東江門新會創立。"
+                                            },
+                                            {
+                                                "date":  "1918",
+                                                "description":  "遷至澳門，早期在沙梨頭設廠並於十月初五街開設門市。"
+                                            }
+                                        ],
+                         "operations":  [
+                                            "製作涼果",
+                                            "製作醬料",
+                                            "傳統曬製工藝"
+                                        ]
+                     },
+        "evidence":  [
+                         {
+                             "id":  "pak-fa-fui-dsedt-01",
+                             "type":  "government",
+                             "title":  "同益百花魁醬園有限公司",
+                             "publisher":  "澳門經濟及科技發展局",
+                             "url":  "https://www.dsedt.gov.mo/lcp/zh_MO/store_detail.jsp?id=24141",
+                             "published_at":  null,
+                             "excerpt":  "經科局資料記錄1903年創辦、1918年遷澳、創辦人、第四代團隊、主要產品與現時地址。",
+                             "supports":  [
+                                              "identity.address",
+                                              "identity.established_year",
+                                              "heritage.summary_zh",
+                                              "heritage.founding_year",
+                                              "heritage.products",
+                                              "heritage.persons",
+                                              "heritage.key_events"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "pak-fa-fui-ipim-02",
+                             "type":  "government",
+                             "title":  "同益百花魁醬園有限公司",
+                             "publisher":  "澳門貿易投資促進局商匯館",
+                             "url":  "https://macaoideas.ipim.gov.mo/cn/company/view/1",
+                             "published_at":  null,
+                             "excerpt":  "商匯館資料確認品牌創立於1903年、主要經營涼果及醬油調料，並記載祖傳製作及日曬等傳統工藝。",
+                             "supports":  [
+                                              "heritage.founding_year",
+                                              "heritage.product_categories",
+                                              "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "pak-fa-fui-merchant-03",
+                             "type":  "merchant",
+                             "title":  "澳門同益百花魁",
+                             "publisher":  "同益百花魁",
+                             "url":  "https://www.pakfafui.com/%E5%89%AF%E6%9C%AC-%E9%97%9C%E6%96%BC%E6%88%91%E5%80%91-2",
+                             "published_at":  null,
+                             "excerpt":  "品牌官方網站列出澳門門市地址，其中包括俾若翰街／筷子基門市。",
+                             "supports":  [
+                                              "identity.address"
+                                          ],
+                             "status":  "verified"
+                         }
+                     ],
+        "signals":  {
+                        "exposure":  {
+                                         "current":  null,
+                                         "previous":  null,
+                                         "history":  [
+
+                                                     ]
+                                     },
+                        "sentiment":  {
+                                          "label":  null,
+                                          "score":  null,
+                                          "summary_zh":  null
+                                      }
+                    },
+        "government":  {
+                           "activity":  [
+
+                                        ]
+                       },
+        "merchant":  {
+                         "recommended_actions":  [
+                                                     {
+                                                         "id":  "pak-fa-fui-action-01",
+                                                         "title_zh":  "呈現新會至澳門的品牌遷移史",
+                                                         "description_zh":  "可根據1903年新會創立及1918年遷澳的已核實資料，整理品牌與澳門城市商業史的關係。",
+                                                         "kind":  "content"
+                                                     }
+                                                 ],
+                         "publication":  {
+                                             "platform":  "xiaohongshu",
+                                             "status":  "draft",
+                                             "metrics":  {
+                                                             "impressions":  null,
+                                                             "saves":  null,
+                                                             "comments":  null
+                                                         }
+                                         }
+                     },
+        "hunter":  {
+                       "short_description_zh":  "1903年創立、1918年遷至澳門的百年涼果醬料品牌，可從產品理解昔日澳門的食品保存與調味文化。",
+                       "why_recommended_zh":  [
+                                                  "創辦與遷澳年份均有政府資料支持。",
+                                                  "保留涼果、醬料及傳統曬製等食品工藝。",
+                                                  "品牌歷史連結廣東新會與20世紀初澳門商業發展。"
+                                              ],
+                       "visit_minutes":  15,
+                       "route_rank":  1
+                   }
+    }
+]
