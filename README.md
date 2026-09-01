@@ -25,6 +25,10 @@ QwenPaw agents to perform a real workflow.
 
 Prerequisites: Docker Desktop (with Compose v2) is running.
 
+For a completely new computer, including Docker Desktop installation and the
+first-run WSL prompt on Windows, follow [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+before running the command below.
+
 ```powershell
 docker compose up --build
 ```

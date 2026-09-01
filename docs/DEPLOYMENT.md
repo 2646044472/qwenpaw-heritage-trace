@@ -1,0 +1,119 @@
+# New-computer deployment guide
+
+This guide deliberately starts from a computer that has only Git and this
+repository.  The default fixture demo needs **no model account, API key, social
+account, or external data connection**.
+
+## 1. Install Docker Desktop
+
+### Windows 10/11
+
+1. Enable CPU virtualization in BIOS/UEFI if it is disabled.
+2. Open PowerShell and install Docker Desktop:
+
+   ```powershell
+   winget install --id Docker.DockerDesktop --exact --source winget --accept-package-agreements --accept-source-agreements
+   ```
+
+   If `winget` is not available, download Docker Desktop from
+   [Docker's official Windows install page](https://docs.docker.com/desktop/setup/install/windows-install/).
+3. Start **Docker Desktop** from the Start menu.  On its first run, accept the
+   WSL 2 backend option and follow its prompt to install/update WSL.  Restart
+   Windows if it asks you to.
+4. Wait until Docker Desktop reports that its engine is running, then verify:
+
+   ```powershell
+   docker version
+   docker compose version
+   ```
+
+The installer may request administrator permission.  That is expected: Docker
+needs the local virtualization/WSL components.  Do not continue until both
+commands return versions.
+
+### macOS or Linux
+
+Install Docker Desktop (macOS) or Docker Engine plus the Compose plugin (Linux)
+using [Docker's official instructions](https://docs.docker.com/get-started/get-docker/).
+Confirm `docker version` and `docker compose version` before continuing.
+
+## 2. Get the project
+
+```powershell
+git clone <your-repository-url> heritage-trace
+Set-Location heritage-trace
+git switch codex/competition-demo-integration
+```
+
+If the branch has already been merged, use the project default branch instead.
+
+## 3. Run the fixture demo (recommended first run)
+
+```powershell
+docker compose up --build
+```
+
+The initial build downloads the Python and Node images and can take several
+minutes.  Keep this terminal open.  When it is ready, open
+`http://localhost:3000` and select **Government** → 禮記雪糕 → **Run workflow**.
+
+In another PowerShell window, these checks are useful:
+
+```powershell
+curl http://localhost:8000/api/health
+docker compose ps
+```
+
+To stop the stack, press `Ctrl+C` in its terminal, then run:
+
+```powershell
+docker compose down
+```
+
+Fixture mode is complete without a `.env` file.  It uses the fixed
+`lei-kei-001` result and keeps the workflow HTTP lifecycle real.
+
+## 4. Optional: run the live Agent stack
+
+Only do this after the fixture demo works.
+
+1. Make a local, ignored provider environment file:
+
+   ```powershell
+   Copy-Item .env.example .env
+   notepad .env
+   ```
+
+2. Add the model-provider key issued for this presentation computer (for
+   example `DASHSCOPE_API_KEY`).  Never use or paste a personal Coding Plan
+   key.  Never commit `.env`.
+3. Start the extended stack:
+
+   ```powershell
+   docker compose -f docker-compose.yml -f docker-compose.live.yml up --build
+   ```
+
+4. Open the app at `http://localhost:3000`.  QwenPaw Console is local-only at
+   `http://127.0.0.1:8088`.  It must show these agents before a real run can
+   dispatch: Heritage-Coordinator, Paw-Miner, Paw-Archivist, Paw-Verifier.
+
+The live stack stores working data, QwenPaw secrets, and backups in named
+Docker volumes.  It does not put provider keys in the Git worktree.  To stop it
+use the matching command with `down`:
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.live.yml down
+```
+
+## Troubleshooting
+
+| Symptom | Check / action |
+| --- | --- |
+| `docker` is not recognized | Restart PowerShell after installation; confirm Docker Desktop is installed and running. |
+| Docker says WSL needs updating | Follow the Docker Desktop WSL prompt, reboot if requested, then relaunch Docker Desktop. |
+| Port 3000 or 8000 is busy | Stop the conflicting local application, or change the host port in `docker-compose.yml`. |
+| Web shows API unavailable | Run `docker compose ps`; wait for the API health check to become healthy, then refresh. |
+| Live workflow reports an Agent error | Confirm `.env` has a valid provider key, then inspect the local QwenPaw console and all four agent IDs. |
+| Need a fresh demo database | Run `docker compose down -v`, then `docker compose up --build`. This deletes local Docker demo volumes only. |
+
+For the actual presentation sequence, use [DEMO_SCRIPT.md](DEMO_SCRIPT.md).
