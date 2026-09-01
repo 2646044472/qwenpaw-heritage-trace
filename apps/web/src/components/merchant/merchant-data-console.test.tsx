@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { getDemoHeritageShop } from "@/lib/heritage/demo-seeds";
 import { getMerchantTelemetry } from "@/lib/heritage/merchant-telemetry-fixtures";
 
+import { DemoStateProvider } from "../demo/demo-state-provider";
 import { MerchantDataConsole } from "./merchant-data-console";
 
 describe("MerchantDataConsole", () => {
@@ -11,7 +12,11 @@ describe("MerchantDataConsole", () => {
     const shop = getDemoHeritageShop("lei-kei-001");
     const telemetry = getMerchantTelemetry(shop.shop_id);
 
-    render(<MerchantDataConsole shop={shop} telemetry={telemetry} />);
+    render(
+      <DemoStateProvider initialShopId={shop.shop_id}>
+        <MerchantDataConsole shop={shop} telemetry={telemetry} />
+      </DemoStateProvider>,
+    );
 
     expect(screen.getByRole("heading", { name: "商戶數據後台" })).toBeVisible();
     expect(screen.getByText(shop.shop_id)).toBeVisible();
@@ -38,7 +43,11 @@ describe("MerchantDataConsole", () => {
     const shop = getDemoHeritageShop("lei-kei-001");
     const telemetry = { ...getMerchantTelemetry(shop.shop_id), exposure_events: [], sentiment_signals: [] };
 
-    render(<MerchantDataConsole shop={shop} telemetry={telemetry} />);
+    render(
+      <DemoStateProvider initialShopId={shop.shop_id}>
+        <MerchantDataConsole shop={shop} telemetry={telemetry} />
+      </DemoStateProvider>,
+    );
 
     expect(screen.getAllByText("暫無事件")).toHaveLength(2);
   });
@@ -47,7 +56,11 @@ describe("MerchantDataConsole", () => {
     const shop = getDemoHeritageShop("lei-kei-001");
     const telemetry = getMerchantTelemetry(shop.shop_id);
 
-    render(<MerchantDataConsole isLoading shop={shop} telemetry={telemetry} />);
+    render(
+      <DemoStateProvider initialShopId={shop.shop_id}>
+        <MerchantDataConsole isLoading shop={shop} telemetry={telemetry} />
+      </DemoStateProvider>,
+    );
 
     expect(screen.getByRole("status")).toHaveTextContent("正在載入商戶資料");
   });

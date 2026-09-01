@@ -43,6 +43,27 @@ class ScriptedClient(FakeClient):
         return json.dumps(self.responses[agent_id], ensure_ascii=False)
 
 
+class DuplicateAgentClient(FakeClient):
+    def list_agents(self):
+        return [{"id": "Heritage-Coordinator"}, {"id": "Heritage-Coordinator"}, {"id": "Paw-Miner"}, {"id": "Paw-Archivist"}, {"id": "Paw-Verifier"}]
+
+
+class EmptyBundleClient(FakeClient):
+    def chat(self, agent_id, message, session_id):
+        self.calls.append((agent_id, message, session_id))
+        if agent_id == "Paw-Miner":
+            return json.dumps(
+                {
+                    "case_id": "CASE-1",
+                    "shop_name": "Lei Kei",
+                    "bundle_type": "public_source_bundle",
+                    "sources": [],
+                },
+                ensure_ascii=False,
+            )
+        return super().chat(agent_id, message, session_id)
+
+
 def real_runtime_outputs():
     claims = []
     card = {}
@@ -180,6 +201,30 @@ class WorkflowExecutorTests(unittest.TestCase):
         result = json.loads(row["result_json"])
         self.assertEqual(result["asset_card"], verifier["revised_asset_card"])
         self.assertEqual(result["agents"]["miner"]["status"], "skipped")
+
+    def test_duplicate_coordinator_is_rejected_before_any_agent_turn(self):
+        self.insert("mine")
+        client = DuplicateAgentClient({"Heritage-Coordinator", "Paw-Miner", "Paw-Archivist", "Paw-Verifier"})
+        WorkflowExecutor(self.config, client=client, runtime=WorkflowRuntime(self.config))(self.service, "run-mine")
+
+        with closing(self.connect()) as db:
+            row = self.service._row(db, "run-mine")
+        self.assertEqual(row["state"], "completed_with_errors")
+        self.assertEqual(row["failed_stage"], "agent_resolution_failed")
+        self.assertEqual(client.calls, [])
+
+    def test_empty_miner_bundle_stops_before_archivist(self):
+        self.insert("mine")
+        client = EmptyBundleClient({"Heritage-Coordinator", "Paw-Miner", "Paw-Archivist", "Paw-Verifier"})
+        WorkflowExecutor(self.config, client=client, runtime=WorkflowRuntime(self.config))(self.service, "run-mine")
+
+        with closing(self.connect()) as db:
+            row = self.service._row(db, "run-mine")
+        self.assertEqual(row["state"], "completed_with_errors")
+        self.assertEqual(row["failed_stage"], "source_normalization_failed")
+        self.assertEqual(json.loads(row["result_json"])["agents"]["miner"]["status"], "failed")
+        self.assertEqual(json.loads(row["result_json"])["agents"]["archivist"]["status"], "not_started")
+        self.assertEqual([call[0] for call in client.calls], ["Paw-Miner"])
 
 
 if __name__ == "__main__":

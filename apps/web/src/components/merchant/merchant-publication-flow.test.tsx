@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { getDemoHeritageShop } from "@/lib/heritage/demo-seeds";
 
+import { DemoStateProvider } from "../demo/demo-state-provider";
 import { MerchantPawly } from "./merchant-pawly";
 
 describe("Merchant Pawly publication flow", () => {
@@ -10,7 +11,11 @@ describe("Merchant Pawly publication flow", () => {
 
   it("shows completion without fabricating a telemetry receipt", () => {
     vi.useFakeTimers();
-    render(<MerchantPawly shop={getDemoHeritageShop("lei-kei-001")} />);
+    render(
+      <DemoStateProvider initialShopId="lei-kei-001">
+        <MerchantPawly shop={getDemoHeritageShop("lei-kei-001")} />
+      </DemoStateProvider>,
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "最近鋪頭點啊？" }));
     act(() => vi.advanceTimersByTime(700));
@@ -42,7 +47,11 @@ describe("Merchant Pawly publication flow", () => {
   it("renders the recorded receipt and completed publication state when telemetry is published", () => {
     vi.useFakeTimers();
     const legacyTelemetryShop = { ...getDemoHeritageShop("fong-kei-002"), shop_id: "sun-fong-002" };
-    render(<MerchantPawly shop={legacyTelemetryShop} />);
+    render(
+      <DemoStateProvider initialShopId={legacyTelemetryShop.shop_id}>
+        <MerchantPawly shop={legacyTelemetryShop} />
+      </DemoStateProvider>,
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "最近鋪頭點啊？" }));
     act(() => vi.advanceTimersByTime(700));

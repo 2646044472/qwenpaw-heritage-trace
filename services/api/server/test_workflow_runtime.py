@@ -16,6 +16,18 @@ from workflows import workflow_runtime
 
 
 class WorkflowRuntimeTests(unittest.TestCase):
+    def _prepare_mining_run(self, root: Path) -> dict:
+        request = root / "request.json"
+        request.write_text(
+            json.dumps({"case_id": "CASE-DEBUG", "shop_name": "禮記雪糕"}, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        control = workflow_runtime.prepare(request, root / "runtime")
+        self.assertTrue(control["ok"])
+        transitioned = workflow_runtime.transition(control["run_dir"], "miner_running")
+        self.assertTrue(transitioned["ok"])
+        return control
+
     def test_prepare_and_bundle_normalize_use_repo_runtime(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -91,6 +103,76 @@ class WorkflowRuntimeTests(unittest.TestCase):
             )
             self.assertEqual(bundle["case_id"], "CASE-UTF8")
             self.assertEqual(bundle["shop_name"], "禮記雪糕")
+
+    def test_mining_normalize_rejects_empty_evidence_without_advancing_pipeline(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            control = self._prepare_mining_run(root)
+            raw = root / "miner.raw.txt"
+            raw.write_text(
+                json.dumps(
+                    {
+                        "case_id": "CASE-DEBUG",
+                        "shop_name": "禮記雪糕",
+                        "bundle_type": "public_source_bundle",
+                        "sources": [],
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            result = workflow_runtime.normalize(control["run_dir"], raw, "CASE-DEBUG-session")
+
+            self.assertFalse(result["ok"])
+            self.assertTrue(result["terminal"])
+            self.assertEqual(result["failed_stage"], "source_normalization_failed")
+            self.assertEqual(result["errors"][0]["code"], "zero_usable_sources")
+            state = workflow_runtime.load_state(control["run_dir"])
+            self.assertEqual(state["state"], "completed_with_errors")
+            self.assertEqual(state["agents"]["miner"]["status"], "failed")
+
+    def test_archivist_invalid_output_is_retried_once_then_blocks_verification(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            request = root / "request.json"
+            request.write_text(
+                json.dumps(
+                    {
+                        "source_bundle": {
+                            "case_id": "CASE-ARCHIVIST-DEBUG",
+                            "shop_name": "禮記雪糕",
+                            "sources": [
+                                {
+                                    "source_id": "S1",
+                                    "content_type": "original_text",
+                                    "content": "Demo evidence",
+                                    "evidence": [{"text": "Demo evidence", "locator": "p. 1"}],
+                                }
+                            ],
+                        }
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            control = workflow_runtime.prepare(request, root / "runtime")
+            self.assertTrue(workflow_runtime.normalize(control["run_dir"])["ok"])
+            self.assertTrue(workflow_runtime.transition(control["run_dir"], "archivist_running")["ok"])
+            raw = root / "archivist.raw.txt"
+            raw.write_text('[SESSION: archivist-debug]\n{}', encoding="utf-8")
+
+            first = workflow_runtime.validate_archivist_command(control["run_dir"], raw, "archivist-debug")
+            second = workflow_runtime.validate_archivist_command(control["run_dir"], raw, "archivist-debug")
+
+            self.assertTrue(first["retry_required"])
+            self.assertFalse(second["ok"])
+            self.assertTrue(second["terminal"])
+            self.assertEqual(second["failed_stage"], "archivist_output_incomplete")
+            state = workflow_runtime.load_state(control["run_dir"])
+            self.assertEqual(state["state"], "completed_with_errors")
+            self.assertEqual(state["agents"]["archivist"]["status"], "failed")
+            self.assertFalse((Path(control["run_dir"]) / "verifier_output.json").exists())
 
 
 if __name__ == "__main__":

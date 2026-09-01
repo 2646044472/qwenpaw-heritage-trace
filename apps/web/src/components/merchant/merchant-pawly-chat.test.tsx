@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { getDemoHeritageShop } from "@/lib/heritage/demo-seeds";
 
+import { DemoStateProvider } from "../demo/demo-state-provider";
 import { MerchantPawly } from "./merchant-pawly";
 
 describe("Merchant Pawly transcript", () => {
@@ -10,7 +11,11 @@ describe("Merchant Pawly transcript", () => {
 
   it("adds suggested and free-text owner turns to the same conversation", () => {
     vi.useFakeTimers();
-    render(<MerchantPawly shop={getDemoHeritageShop("lei-kei-001")} />);
+    render(
+      <DemoStateProvider initialShopId="lei-kei-001">
+        <MerchantPawly shop={getDemoHeritageShop("lei-kei-001")} />
+      </DemoStateProvider>,
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "最近鋪頭點啊？" }));
     act(() => vi.advanceTimersByTime(700));
