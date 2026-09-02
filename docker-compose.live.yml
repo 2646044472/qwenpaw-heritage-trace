@@ -40,9 +40,9 @@ services:
     tmpfs:
       - /tmp:size=256m
     pids_limit: 512
-    # Pin this in a local .env (QWENPAW_IMAGE=...) when a competition needs a
-    # tested release rather than the latest tag.
-    image: ${QWENPAW_IMAGE:-agentscope/qwenpaw:latest}
+    # Keep the demo reproducible. Operators can override QWENPAW_IMAGE in a
+    # private .env after validating a newer image.
+    image: ${QWENPAW_IMAGE:-agentscope/qwenpaw@sha256:1132da56170f49c63aa583dd1ea3b09c19ce1ab76a1983813b8ad2f220771bcd}
     init: true
     env_file:
       - path: ./.env
