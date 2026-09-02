@@ -37,14 +37,12 @@ services:
 
   qwenpaw:
     restart: unless-stopped
-    read_only: true
     cap_drop:
       - ALL
     security_opt:
       - no-new-privileges:true
     tmpfs:
       - /tmp:size=256m,noexec,nosuid,nodev
-      - /etc/supervisor:size=1m
     pids_limit: 512
     # Pin this in a local .env (QWENPAW_IMAGE=...) when a competition needs a
     # tested release rather than the latest tag.
