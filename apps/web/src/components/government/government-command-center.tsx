@@ -50,7 +50,7 @@ function workflowErrorLabel(code: string) {
 const workflowSteps = [
   { label: "提交 Workflow", hint: "建立個案與 run ID" },
   { label: "檢查 Agent", hint: "確認四個 QwenPaw Agent" },
-  { label: "Miner 整理來源", hint: "收集固定 Demo 材料" },
+  { label: "Miner 整理來源", hint: "收集已接入的來源資料" },
   { label: "規範化來源", hint: "建立可追溯 source bundle" },
   { label: "Archivist 編錄", hint: "建立文化資產卡與 claims" },
   { label: "契約校驗", hint: "確認 Workflow v2 欄位" },
