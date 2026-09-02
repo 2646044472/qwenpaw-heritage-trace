@@ -1,26 +1,49 @@
 {
   "fixture_kind": "competition_demo_source",
   "disclaimer": "This is fixed fictional source material for the Heritage Trace competition demo. It is not a historical record and must not be represented as independently verified evidence.",
-  "source": {
-    "source_id": "demo-lei-kei-001-source-01",
-    "content_type": "original_text",
-    "publisher": "Heritage Trace Demo Dataset",
-    "source_family": "heritage-trace-competition-demo",
-    "source_type": "fixed_demo_material",
-    "content": "[Competition demo fixture — fictional] 禮記雪糕（Lei Kei Ice Cream）是 Heritage Trace 的固定示範商戶。此固定資料為演示流程設定建立年份為 1933，位置為澳門荷蘭園，並以椰子雪糕作為示範產品。這些內容只供比賽 Demo 的 Miner、Archivist、Verifier 工作流測試，並不構成歷史事實或公開發布資料。",
-    "evidence": [
-      {
-        "text": "禮記雪糕（Lei Kei Ice Cream）是 Heritage Trace 的固定示範商戶。",
-        "locator": "competition-demo fixture, paragraph 1"
-      },
-      {
-        "text": "此固定資料為演示流程設定建立年份為 1933，位置為澳門荷蘭園，並以椰子雪糕作為示範產品。",
-        "locator": "competition-demo fixture, paragraph 1"
-      },
-      {
-        "text": "這些內容只供比賽 Demo 的 Miner、Archivist、Verifier 工作流測試，並不構成歷史事實或公開發布資料。",
-        "locator": "competition-demo fixture, paragraph 1"
-      }
-    ]
-  }
+  "sources": [
+    {
+      "source_id": "demo-lei-kei-001-source-01",
+      "content_type": "original_text",
+      "publisher": "Heritage Trace Demo Dataset · 商戶資料卡",
+      "source_family": "heritage-trace-competition-demo",
+      "source_type": "fixed_demo_material",
+      "content": "[Competition demo fixture — fictional] 禮記雪糕（Lei Kei Ice Cream）是 Heritage Trace 的固定示範商戶，演示資料設定建立年份為 1933。",
+      "evidence": [
+        {"text": "禮記雪糕（Lei Kei Ice Cream）是 Heritage Trace 的固定示範商戶。", "locator": "demo merchant card, paragraph 1"},
+        {"text": "演示資料設定建立年份為 1933。", "locator": "demo merchant card, paragraph 1"}
+      ],
+      "url": null,
+      "authorization": "Supplied competition demo material",
+      "limits": "Fictional demo material; not an independently verified historical record."
+    },
+    {
+      "source_id": "demo-lei-kei-001-source-02",
+      "content_type": "original_text",
+      "publisher": "Heritage Trace Demo Dataset · 地點記錄",
+      "source_family": "heritage-trace-competition-demo",
+      "source_type": "fixed_demo_material",
+      "content": "[Competition demo fixture — fictional] 固定地點記錄將禮記雪糕標示為位於澳門荷蘭園。",
+      "evidence": [
+        {"text": "固定地點記錄將禮記雪糕標示為位於澳門荷蘭園。", "locator": "demo location record, paragraph 1"}
+      ],
+      "url": null,
+      "authorization": "Supplied competition demo material",
+      "limits": "Fictional demo material; location is supplied for workflow testing only."
+    },
+    {
+      "source_id": "demo-lei-kei-001-source-03",
+      "content_type": "original_text",
+      "publisher": "Heritage Trace Demo Dataset · 產品記錄",
+      "source_family": "heritage-trace-competition-demo",
+      "source_type": "fixed_demo_material",
+      "content": "[Competition demo fixture — fictional] 固定產品記錄以椰子雪糕作為本輪示範產品。",
+      "evidence": [
+        {"text": "固定產品記錄以椰子雪糕作為本輪示範產品。", "locator": "demo product record, paragraph 1"}
+      ],
+      "url": null,
+      "authorization": "Supplied competition demo material",
+      "limits": "Fictional demo material; product is supplied for workflow testing only."
+    }
+  ]
 }

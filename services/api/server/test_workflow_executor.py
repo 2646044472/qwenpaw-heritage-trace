@@ -289,6 +289,26 @@ class WorkflowExecutorTests(unittest.TestCase):
         self.assertEqual(example["asset_card"]["products"], [{"name": "椰子雪糕", "claim_id": "C006"}])
         self.assertEqual(example["claims"][-1]["field"], "product")
 
+    def test_fixed_demo_archivist_example_keeps_claims_on_distinct_sources(self):
+        payload = json.dumps(
+            {
+                "case_id": "CASE-1",
+                "shop_name": "禮記雪糕",
+                "sources": [
+                    {"source_id": "S1", "content": "建立年份 1933", "content_type": "original_text"},
+                    {"source_id": "S2", "content": "位於澳門荷蘭園", "content_type": "original_text"},
+                    {"source_id": "S3", "content": "產品為椰子雪糕", "content_type": "original_text"},
+                ],
+            },
+            ensure_ascii=False,
+        )
+        example = WorkflowExecutor._archivist_example(payload, fixed_demo=True)
+        claims = {claim["field"]: claim for claim in example["claims"]}
+        self.assertEqual(example["input_completeness"]["source_count"], 3)
+        self.assertEqual(claims["founding_year"]["source_ids"], ["S1"])
+        self.assertEqual(claims["address"]["source_ids"], ["S2"])
+        self.assertEqual(claims["product"]["source_ids"], ["S3"])
+
 
 if __name__ == "__main__":
     unittest.main()

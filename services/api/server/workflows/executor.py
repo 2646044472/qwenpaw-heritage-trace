@@ -129,8 +129,8 @@ class WorkflowExecutor:
             ) from exc
         return (
             message
-            + "\n[Competition demo material: use this supplied fictional source as the only source. "
-            + "Keep its disclaimer and do not browse or add facts.]\n"
+            + "\n[Competition demo material: use these supplied fictional sources as the only sources. "
+            + "Return every distinct source record with its original source_id; keep each source's evidence and disclaimer; do not browse or add facts.]\n"
             + material
         )
 
@@ -309,9 +309,15 @@ class WorkflowExecutor:
                 }
             )
         source_ids = [item["source_id"] for item in source_index if isinstance(item.get("source_id"), str)]
-        supported_ids = source_ids[:1]
+        supported_ids = source_ids
         ceiling = source_index[0].get("verification_ceiling") if supported_ids else "unverifiable"
         shop_name = bundle.get("shop_name") if isinstance(bundle.get("shop_name"), str) else None
+        source_for = {
+            "shop_name": source_ids[:1],
+            "founding_year": source_ids[:1],
+            "address": source_ids[1:2] or source_ids[:1],
+            "product": source_ids[2:3] or source_ids[:1],
+        }
         values = {
             "shop_name": shop_name,
             # These values are only populated for the explicitly labelled
@@ -325,7 +331,8 @@ class WorkflowExecutor:
         claims = []
         card = {}
         for index, (field, value) in enumerate(values.items(), start=1):
-            has_value = value is not None and bool(supported_ids)
+            claim_source_ids = source_for.get(field, supported_ids[:1])
+            has_value = value is not None and bool(claim_source_ids)
             claim_id = f"C{index:03d}"
             claims.append(
                 {
@@ -333,7 +340,7 @@ class WorkflowExecutor:
                     "field": field,
                     "value": value if has_value else None,
                     "extraction_status": "extracted" if has_value else "unknown",
-                    "source_ids": supported_ids if has_value else [],
+                    "source_ids": claim_source_ids if has_value else [],
                     "verification_ceiling": ceiling if has_value else "unverifiable",
                     "note": "Fixed competition demo material" if has_value else "Not supplied by the demo source",
                     "publication_restriction": "Competition demo fixture only; do not present as independently verified history." if has_value else None,
@@ -343,13 +350,14 @@ class WorkflowExecutor:
         products = []
         if fixed_demo and any("椰子雪糕" in str(source.get("content", "")) for source in sources if isinstance(source, dict)):
             claim_id = f"C{len(claims) + 1:03d}"
+            product_source_ids = source_for.get("product", supported_ids[:1])
             claims.append(
                 {
                     "claim_id": claim_id,
                     "field": "product",
                     "value": "椰子雪糕",
                     "extraction_status": "extracted",
-                    "source_ids": supported_ids,
+                    "source_ids": product_source_ids,
                     "verification_ceiling": ceiling,
                     "note": "Fixed competition demo material",
                     "publication_restriction": "Competition demo fixture only; do not present as independently verified history.",
