@@ -89,6 +89,7 @@ export function HunterMap({
   const [motion, setMotion] = useState<"idle" | "dragging" | "settling">("idle");
   const pendingFrame = useRef<number | null>(null);
   const dragRef = useRef<HunterMapDragState | null>(null);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<MapView>(INITIAL_VIEW);
   const routeAddedRef = useRef(false);
   const routeCameraKeyRef = useRef<string | null>(null);
@@ -181,11 +182,33 @@ export function HunterMap({
     frame = window.requestAnimationFrame(animate);
     return () => window.cancelAnimationFrame(frame);
   }, [activeCamera, openingCamera, routeCameraKey, routeJustAdded, setMapView, transitionCamera]);
-  const zoom = (delta: number, deferred = false) =>
+  const zoomAt = (delta: number, clientX?: number, clientY?: number, deferred = false) => {
     setMapView(
-      (current) => ({ ...current, scale: Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, current.scale + delta)) }),
+      (current) => {
+        const nextScale = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, current.scale + delta));
+        if (nextScale === current.scale) return current;
+        const rect = viewportRef.current?.getBoundingClientRect();
+        if (!rect || rect.width === 0 || rect.height === 0) return { ...current, scale: nextScale };
+
+        const baseScale = Math.max(rect.width / 1000, rect.height / 1000);
+        const offsetX = (rect.width - 1000 * baseScale) / 2;
+        const offsetY = (rect.height - 1000 * baseScale) / 2;
+        const screenX = (clientX ?? rect.left + rect.width / 2) - rect.left;
+        const screenY = (clientY ?? rect.top + rect.height / 2) - rect.top;
+        const viewBoxX = (screenX - offsetX) / baseScale;
+        const viewBoxY = (screenY - offsetY) / baseScale;
+        const anchorX = (viewBoxX - current.x) / current.scale;
+        const anchorY = (viewBoxY - current.y) / current.scale;
+
+        return {
+          scale: nextScale,
+          x: viewBoxX - anchorX * nextScale,
+          y: viewBoxY - anchorY * nextScale,
+        };
+      },
       deferred,
     );
+  };
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (event.target instanceof Element && event.target.closest("button")) return;
@@ -213,13 +236,15 @@ export function HunterMap({
   return (
     <div
       className="absolute inset-0 touch-none overflow-hidden bg-[#eaf1ef]"
+      ref={viewportRef}
       onPointerCancel={handlePointerEnd}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerEnd}
       onWheel={(event) => {
         event.preventDefault();
-        zoom(event.deltaY > 0 ? -0.12 : 0.12);
+        const amount = Math.min(0.18, Math.max(0.015, Math.abs(event.deltaY) * 0.0015));
+        zoomAt(event.deltaY > 0 ? -amount : amount, event.clientX, event.clientY, true);
       }}
     >
       <div className="absolute inset-0">
@@ -321,7 +346,7 @@ export function HunterMap({
         <button
           aria-label="放大地圖"
           className="flex size-10 items-center justify-center text-[#29423c] hover:bg-[#edf2ed]"
-          onClick={() => zoom(0.15)}
+          onClick={() => zoomAt(0.15)}
           type="button"
         >
           <Plus className="size-4" />
@@ -329,7 +354,7 @@ export function HunterMap({
         <button
           aria-label="縮小地圖"
           className="flex size-10 items-center justify-center border-[#2f625f]/10 border-t text-[#29423c] hover:bg-[#edf2ed]"
-          onClick={() => zoom(-0.15)}
+          onClick={() => zoomAt(-0.15)}
           type="button"
         >
           <Minus className="size-4" />
