@@ -9,6 +9,20 @@ import { MerchantPawly } from "./merchant-pawly";
 describe("Merchant Pawly publication flow", () => {
   afterEach(() => vi.useRealTimers());
 
+  it("offers a direct Xiaohongshu demo preview from the opening screen", () => {
+    vi.useFakeTimers();
+    render(
+      <DemoStateProvider initialShopId="lei-kei-001">
+        <MerchantPawly shop={getDemoHeritageShop("lei-kei-001")} />
+      </DemoStateProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "預覽小紅書內容（Demo）" }));
+    expect(screen.getByText("Pawly 正在整理已核實資料")).toBeVisible();
+    act(() => vi.advanceTimersByTime(650));
+    expect(screen.getByRole("heading", { name: "小紅書草稿" })).toBeVisible();
+  });
+
   it("shows completion without fabricating a telemetry receipt", () => {
     vi.useFakeTimers();
     render(
@@ -25,13 +39,13 @@ describe("Merchant Pawly publication flow", () => {
     act(() => vi.advanceTimersByTime(700));
     fireEvent.click(screen.getByRole("button", { name: "點樣改善？" }));
     act(() => vi.advanceTimersByTime(700));
-    expect(screen.getByRole("button", { name: "幫我生成商戶內容草稿" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "生成小紅書內容草稿" })).toBeVisible();
 
-    fireEvent.click(screen.getByRole("button", { name: "幫我生成商戶內容草稿" }));
+    fireEvent.click(screen.getByRole("button", { name: "生成小紅書內容草稿" }));
     expect(screen.getByText("Pawly 正在整理已核實資料")).toBeVisible();
 
     act(() => vi.advanceTimersByTime(650));
-    expect(screen.getByRole("heading", { name: "商戶內容草稿" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "小紅書草稿" })).toBeVisible();
     expect(screen.getByRole("button", { name: "模擬發佈" })).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "模擬發佈" }));
@@ -59,7 +73,7 @@ describe("Merchant Pawly publication flow", () => {
     act(() => vi.advanceTimersByTime(700));
     fireEvent.click(screen.getByRole("button", { name: "點樣改善？" }));
     act(() => vi.advanceTimersByTime(700));
-    fireEvent.click(screen.getByRole("button", { name: "生成商戶內容草稿" }));
+    fireEvent.click(screen.getByRole("button", { name: "生成小紅書內容草稿" }));
     act(() => vi.advanceTimersByTime(650));
     fireEvent.click(screen.getByRole("button", { name: "模擬發佈" }));
     act(() => vi.advanceTimersByTime(650));

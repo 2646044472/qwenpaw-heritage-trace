@@ -11,7 +11,7 @@ type MerchantPublicationStatusProps = {
 const steps: { id: string; state: PublicationFlowState; label: string }[] = [
   { id: "draft", state: "ready", label: "內容草稿" },
   { id: "confirm", state: "publishing", label: "商戶確認" },
-  { id: "publish", state: "published", label: "模擬發佈（Demo）" },
+  { id: "publish", state: "published", label: "小紅書模擬發佈（Demo）" },
 ];
 
 const progressIndex: Record<PublicationFlowState, number> = {

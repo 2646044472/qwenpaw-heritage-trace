@@ -51,7 +51,7 @@ export const merchantHeroCopy: Record<string, MerchantHeroCopy> = {
       heading: "我建議：由一杯雪糕講禮記嘅故事",
       body: "與其淨係介紹產品，可以試下將「食雪糕」同「澳門老店記憶」放埋一齊講。",
       pendingFacts: ["創辦年份及早期經營時間線", "個別產品是否由創店時期一直售賣至今"],
-      generateLabel: "幫我生成商戶內容草稿",
+      generateLabel: "生成小紅書內容草稿",
     },
     draft: {
       title: "在澳門食一杯雪糕，也是在吃一段老城記憶 🍨",

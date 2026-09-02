@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { Lightbulb, MessageCircle, PawPrint, TrendingDown } from "lucide-react";
+import { Lightbulb, MessageCircle, PawPrint, Send, TrendingDown } from "lucide-react";
 
 import type { HeritageShop } from "@/lib/heritage/application-types";
 import { HERO_SHOP_ID, createHeritageShopFromWorkflow } from "@/lib/heritage/demo-seeds";
@@ -220,6 +220,15 @@ export function MerchantPawly({ shop }: { shop: HeritageShop }) {
     setPendingRequest("overview");
   }
 
+  function openSocialDraftPreview() {
+    setShowDetailChoices(false);
+    setTurns((current) => [
+      ...current,
+      { id: `owner-xiaohongshu-${Date.now()}`, kind: "text", speaker: "owner", text: "預覽小紅書內容（Demo）" },
+    ]);
+    setPublicationState("generating");
+  }
+
   function sendMessage() {
     const text = composerValue.trim();
     if (!text || isResponding) return;
@@ -363,14 +372,24 @@ export function MerchantPawly({ shop }: { shop: HeritageShop }) {
                   })
               : null}
             {turns.length === 0 ? (
-              <button
-                className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-heritage-border bg-heritage-surface px-4 font-medium text-sm transition-colors hover:border-heritage/60 hover:bg-heritage-success-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
-                onClick={askOpeningPrompt}
-                type="button"
-              >
-                <MessageCircle aria-hidden="true" className="size-4 text-heritage-gold-foreground" />
-                {merchantOpeningPrompt}
-              </button>
+              <>
+                <button
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-heritage-border bg-heritage-surface px-4 font-medium text-sm transition-colors hover:border-heritage/60 hover:bg-heritage-success-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
+                  onClick={askOpeningPrompt}
+                  type="button"
+                >
+                  <MessageCircle aria-hidden="true" className="size-4 text-heritage-gold-foreground" />
+                  {merchantOpeningPrompt}
+                </button>
+                <button
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#efc2ba] bg-[#fff7f5] px-4 font-medium text-[#b54235] text-sm transition-colors hover:border-[#c95043] hover:bg-[#ffefec] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c95043] focus-visible:ring-offset-2"
+                  onClick={openSocialDraftPreview}
+                  type="button"
+                >
+                  <Send aria-hidden="true" className="size-4" />
+                  預覽小紅書內容（Demo）
+                </button>
+              </>
             ) : null}
           </div>
         </section>

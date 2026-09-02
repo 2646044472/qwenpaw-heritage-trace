@@ -51,14 +51,14 @@ export function MerchantDraftPreview({
 
   return (
     <section
-      aria-label={presentation?.draft ? "商戶內容草稿" : "商戶內容預覽"}
+      aria-label={presentation?.draft ? "小紅書草稿" : "小紅書內容預覽"}
       className="rounded-2xl border border-heritage-border bg-heritage-surface p-4 sm:p-5"
     >
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="font-medium text-[#b54235] text-xs">商戶內容 · Demo</p>
+          <p className="font-medium text-[#b54235] text-xs">小紅書內容 · Demo</p>
           <h3 className="mt-1 font-heritage-display font-semibold text-foreground text-xl">
-            {presentation?.draft ? "商戶內容草稿" : "商戶內容預覽"}
+            {presentation?.draft ? "小紅書草稿" : "小紅書內容預覽"}
           </h3>
         </div>
         <span className="rounded-full bg-[#fff0ed] px-2.5 py-1 font-medium text-[#b54235] text-xs">
