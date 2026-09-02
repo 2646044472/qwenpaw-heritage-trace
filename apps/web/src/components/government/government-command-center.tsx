@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, memo, useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -311,7 +311,7 @@ function ActivityList({ activity }: { activity: GovernmentActivity[] }) {
   );
 }
 
-const DetailPanel = memo(function DetailPanel({
+function DetailPanel({
   shop,
   activity,
   analytics,
@@ -429,7 +429,7 @@ const DetailPanel = memo(function DetailPanel({
       </div>
     </aside>
   );
-});
+}
 
 export function GovernmentCommandCenter() {
   const { state, abortWorkflow, selectShop, startWorkflow } = useDemoState();
@@ -447,21 +447,15 @@ export function GovernmentCommandCenter() {
       : workflow.workflowResult?.workflow_status === "completed_with_errors"
         ? "流程已中止，未發布結果"
         : null;
-  const fixtureShop = useMemo(
-    () => (selectedShopId ? getDemoHeritageShop(selectedShopId) : null),
-    [selectedShopId],
-  );
-  const liveShop = useMemo(
-    () =>
-      selectedShopId === HERO_SHOP_ID &&
-      workflow.workflowResult?.workflow_status === "finished" &&
-      workflow.workflowSource !== "idle"
-        ? createHeritageShopFromWorkflow(HERO_SHOP_ID, workflow.workflowResult)
-        : null,
-    [selectedShopId, workflow.workflowResult, workflow.workflowSource],
-  );
+  const fixtureShop = selectedShopId ? getDemoHeritageShop(selectedShopId) : null;
+  const liveShop =
+    selectedShopId === HERO_SHOP_ID &&
+    workflow.workflowResult?.workflow_status === "finished" &&
+    workflow.workflowSource !== "idle"
+      ? createHeritageShopFromWorkflow(HERO_SHOP_ID, workflow.workflowResult)
+      : null;
   const shop = liveShop ?? fixtureShop;
-  const analytics = useMemo(() => (shop ? getGovernmentAnalytics(shop) : null), [shop]);
+  const analytics = shop ? getGovernmentAnalytics(shop) : null;
   const markers = useMemo(
     () =>
       DEMO_SHOP_SEEDS.map((seed) => ({
@@ -484,15 +478,12 @@ export function GovernmentCommandCenter() {
     window.addEventListener("keydown", close);
     return () => window.removeEventListener("keydown", close);
   }, [pathname, router, selectedShopId]);
-  const chooseShop = useCallback(
-    (id: string) => {
-      const next = new URLSearchParams(searchParams.toString());
-      next.set("shop", id);
-      router.replace(`${pathname}?${next.toString()}`, { scroll: false });
-    },
-    [pathname, router, searchParams],
-  );
-  const activity = useMemo(() => (selectedShopId ? getGovernmentActivity(selectedShopId) : []), [selectedShopId]);
+  const chooseShop = (id: string) => {
+    const next = new URLSearchParams(searchParams.toString());
+    next.set("shop", id);
+    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+  };
+  const activity = selectedShopId ? getGovernmentActivity(selectedShopId) : [];
   return (
     <main className="relative h-[calc(100dvh-5rem)] min-h-[640px] overflow-hidden bg-slate-950">
       <div className="grid h-full grid-cols-1 md:grid-cols-[260px_minmax(0,1fr)]">
