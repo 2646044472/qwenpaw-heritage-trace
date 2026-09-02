@@ -67,7 +67,7 @@ const HUNTER_COPY: Record<string, Omit<HunterShopProjection, "shopId" | "name" |
   "tak-hing-003": {
     area: "高士德／三盞燈",
     district: "澳門半島",
-    shortDescription: "沿着竹升麵手藝，認識澳門飲食記憶如何留在今天的街道。",
+    shortDescription: "沿著竹升麵手藝，認識澳門飲食記憶如何留在今天的街道。",
     whyRecommended: ["保留傳統製麵手藝", "從老城日常延伸至跨區探索"],
     visitMinutes: 25,
     routeRank: 3,

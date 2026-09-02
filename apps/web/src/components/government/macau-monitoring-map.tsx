@@ -6,8 +6,6 @@ import { LocateFixed, Minus, Plus, Store } from "lucide-react";
 
 import type { AttentionPriority, DemoShopSeed, HeritageShop } from "@/lib/heritage/application-types";
 
-import { MACAU_MAP_GEOMETRY } from "./macau-map-geometry";
-
 const priorityLabels: Record<AttentionPriority, string> = { low: "狀態良好", medium: "需要審視", high: "高度關注" };
 const markerTone: Record<AttentionPriority, string> = {
   low: "text-attention-low",
@@ -22,6 +20,7 @@ const MIN_SCALE = 1;
 const MAX_SCALE = 3.5;
 const WORLD_SIZE = 1000;
 const FOCUS_SCALE = 1.6;
+type MacauMapGeometry = typeof import("./macau-map-geometry").MACAU_MAP_GEOMETRY;
 
 const Paths = memo(function Paths({ paths, className }: { paths: readonly string[]; className: string }) {
   const occurrences = new Map<string, number>();
@@ -36,8 +35,7 @@ const Paths = memo(function Paths({ paths, className }: { paths: readonly string
   );
 });
 
-const MapArtwork = memo(function MapArtwork() {
-  const geometry = MACAU_MAP_GEOMETRY;
+const MapArtwork = memo(function MapArtwork({ geometry }: { geometry: MacauMapGeometry }) {
   return (
     <>
       <rect className="fill-background" height={WORLD_SIZE} width={WORLD_SIZE} />
@@ -114,11 +112,21 @@ export const MacauMonitoringMap = memo(function MacauMonitoringMap({
   hoveredShopId: string | null;
   onHover: (id: string | null) => void;
 }) {
+  const [geometry, setGeometry] = useState<MacauMapGeometry | null>(null);
   const [view, setView] = useState(INITIAL);
   const [isDragging, setIsDragging] = useState(false);
   const drag = useRef<DragState | null>(null);
   const viewport = useRef<HTMLDivElement | null>(null);
   const previousSelection = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    let cancelled = false;
+    void import("./macau-map-geometry").then(({ MACAU_MAP_GEOMETRY }) => {
+      if (!cancelled) setGeometry(MACAU_MAP_GEOMETRY);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const constrain = useCallback((next: View): View => {
     const rect = viewport.current?.getBoundingClientRect();
     const scale = clamp(next.scale, MIN_SCALE, MAX_SCALE);
@@ -202,7 +210,7 @@ export const MacauMonitoringMap = memo(function MacauMonitoringMap({
         }}
         viewBox="0 0 1000 1000"
       >
-        <MapArtwork />
+        {geometry ? <MapArtwork geometry={geometry} /> : <rect className="fill-background" height={WORLD_SIZE} width={WORLD_SIZE} />}
         {markers.map(({ seed, shop, position }) => {
           const priority = shop.insight.attention_priority;
           const active = seed.shop_id === selectedShopId;

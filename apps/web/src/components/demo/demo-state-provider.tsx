@@ -305,7 +305,7 @@ export function DemoStateProvider({ children, initialShopId }: { children: React
           pipeline: {
             ...current.pipeline,
             workflowStatus: "abort",
-            workflowError: { code: "aborted", message: "Workflow中止請求失敗，請稍後刷新重試。" },
+            workflowError: { code: "aborted", message: "Workflow 中止請求失敗，請稍後重新整理再試。" },
             isRunning: false,
           },
         }));

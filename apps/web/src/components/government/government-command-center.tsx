@@ -130,7 +130,7 @@ function WorkflowResultDetails({ result }: { result: WorkflowResult }) {
   const publicIssues = getPublicWorkflowIssues(result.issues);
   const card = result.asset_card;
   const producedFields = [
-    ["店鋪名稱", card.shop_name.value],
+    ["店舖名稱", card.shop_name.value],
     ["創立年份", card.founding_year.value],
     ["地址", card.address.value],
     ["代表產品", card.products.map((item) => item.name).join("、") || "暫無"],
@@ -146,7 +146,7 @@ function WorkflowResultDetails({ result }: { result: WorkflowResult }) {
         <span>不支持</span><strong className="text-red-300">{counts.unsupported}</strong>
         <span>待處理事項</span><strong className="text-slate-100">{publicIssues.length}</strong>
       </div>
-      <p className="mt-2 text-slate-400">“證據支持”表示 Verifier 找到來源證據並通過一致性檢查，不代表社交平台曝光量。</p>
+      <p className="mt-2 text-slate-400">「證據支持」表示 Verifier 找到來源證據並通過一致性檢查，不代表社交平台曝光量。</p>
       <div className="mt-2 border-white/10 border-t pt-2">
         <p className="text-slate-300">已產出文化資產卡</p>
         <dl className="mt-1 grid grid-cols-[5rem_1fr] gap-x-2 gap-y-1 text-slate-400">
@@ -272,7 +272,7 @@ function CompletenessBreakdown({ analytics }: { analytics: GovernmentAnalytics }
     <section>
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-sm">文化資料完整度</h3>
-        <span className="text-slate-400 text-xs">缺口分布</span>
+        <span className="text-slate-400 text-xs">缺口分佈</span>
       </div>
       <div className="mt-4 space-y-3">
         {analytics.completeness.map((dimension) => (

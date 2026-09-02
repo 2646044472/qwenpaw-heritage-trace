@@ -1,11 +1,10 @@
 "use client";
 
 import type { PointerEvent } from "react";
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { LocateFixed, Minus, Plus } from "lucide-react";
 
-import { MACAU_MAP_GEOMETRY } from "@/components/government/macau-map-geometry";
 import { normalizeShopPosition } from "@/lib/heritage/government-data";
 import type { HunterRoutePlan, HunterShopProjection } from "@/lib/heritage/hunter-data";
 
@@ -17,6 +16,7 @@ const INITIAL_VIEW = { scale: 1.92, x: -210, y: -48 };
 const MIN_ZOOM = 0.65;
 const MAX_ZOOM = 2.6;
 type MapView = typeof INITIAL_VIEW;
+type MacauMapGeometry = typeof import("@/components/government/macau-map-geometry").MACAU_MAP_GEOMETRY;
 function Paths({ paths, className }: { paths: readonly string[]; className: string }) {
   const occurrences = new Map<string, number>();
   return (
@@ -76,11 +76,21 @@ export function HunterMap({
   routeJustAdded?: boolean;
   routePlanning?: boolean;
 }) {
+  const [geometry, setGeometry] = useState<MacauMapGeometry | null>(null);
   const [view, setView] = useState(INITIAL_VIEW);
   const dragRef = useRef<HunterMapDragState | null>(null);
   const viewRef = useRef<MapView>(INITIAL_VIEW);
   const routeAddedRef = useRef(false);
   const routeCameraKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void import("@/components/government/macau-map-geometry").then(({ MACAU_MAP_GEOMETRY }) => {
+      if (!cancelled) setGeometry(MACAU_MAP_GEOMETRY);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const markers = useMemo(
     () => shops.map((shop) => ({ shop, ...normalizeShopPosition({ location: shop.coordinates }) })),
     [shops],
@@ -192,20 +202,24 @@ export function HunterMap({
         <title>澳門文化探索地圖</title>
         <rect width="1000" height="1000" fill="#eaf1ef" />
         <g transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>
-          <Paths paths={MACAU_MAP_GEOMETRY.land} className="fill-[#f7f2e7] stroke-[#7d9c91] [stroke-width:1.25]" />
-          <Paths paths={MACAU_MAP_GEOMETRY.green} className="fill-[#dce7db] stroke-[#c8d5ca] [stroke-width:.4]" />
-          <Paths paths={MACAU_MAP_GEOMETRY.blocks} className="fill-[#f0eadd] stroke-[#d6cdbf] [stroke-width:.45]" />
-          <Paths paths={MACAU_MAP_GEOMETRY.buildings} className="fill-[#e4dccf] stroke-[#d0c6b7] [stroke-width:.4]" />
-          <Paths paths={MACAU_MAP_GEOMETRY.localRoads} className="fill-none stroke-[#d7d0c4] [stroke-width:.65]" />
-          <Paths paths={MACAU_MAP_GEOMETRY.secondaryRoads} className="fill-none stroke-[#c9c0b2] [stroke-width:.85]" />
-          <Paths
-            paths={MACAU_MAP_GEOMETRY.majorRoads}
-            className="fill-none stroke-[#aea18e] [stroke-linecap:round] [stroke-width:1.35]"
-          />
-          <Paths
-            paths={MACAU_MAP_GEOMETRY.bridges}
-            className="fill-none stroke-[#789c91] [stroke-linecap:round] [stroke-width:1.8]"
-          />
+          {geometry ? (
+            <>
+              <Paths paths={geometry.land} className="fill-[#f7f2e7] stroke-[#7d9c91] [stroke-width:1.25]" />
+              <Paths paths={geometry.green} className="fill-[#dce7db] stroke-[#c8d5ca] [stroke-width:.4]" />
+              <Paths paths={geometry.blocks} className="fill-[#f0eadd] stroke-[#d6cdbf] [stroke-width:.45]" />
+              <Paths paths={geometry.buildings} className="fill-[#e4dccf] stroke-[#d0c6b7] [stroke-width:.4]" />
+              <Paths paths={geometry.localRoads} className="fill-none stroke-[#d7d0c4] [stroke-width:.65]" />
+              <Paths paths={geometry.secondaryRoads} className="fill-none stroke-[#c9c0b2] [stroke-width:.85]" />
+              <Paths
+                paths={geometry.majorRoads}
+                className="fill-none stroke-[#aea18e] [stroke-linecap:round] [stroke-width:1.35]"
+              />
+              <Paths
+                paths={geometry.bridges}
+                className="fill-none stroke-[#789c91] [stroke-linecap:round] [stroke-width:1.8]"
+              />
+            </>
+          ) : null}
           {routePoints.length > 1 ? (
             <g className={routePlanning ? "opacity-55" : undefined}>
               <polyline
