@@ -48,6 +48,18 @@ Merchant, or Hunter surfaces. Run one Government workflow and refresh the
 page: the persisted run id must remain visible and the start button must not
 reappear.
 
+### HTTPS on an IP-only host
+
+The current host has no domain, so a publicly trusted certificate cannot be
+issued for it. For temporary encrypted testing, generate a self-signed
+certificate with a Subject Alternative Name for the server IP, add an nginx
+`listen 443 ssl` server, and allow TCP 443 in both UFW and the cloud provider's
+security group. Browsers will show a one-time trust warning for this
+certificate. For production, point a domain at the server and replace the
+self-signed files with a trusted CA certificate (for example, Certbot/Let's
+Encrypt), then redirect port 80 to HTTPS. Keep the API and QwenPaw ports bound
+to loopback.
+
 ## 4. Stop or update
 
 ```bash
