@@ -25,3 +25,13 @@ provider-variable name, set `QWENPAW_IMAGE` and the provider variables in the
 local `.env` after validating that release. The API expects the console's
 `GET /api/agents` and `POST /api/console/chat` interfaces and the four IDs in
 `working-template/config.json`.
+
+## Permission boundary
+
+The live template enables the tools needed by the project: agents may read,
+create, edit, append, search, and preview files in their own workspace, and
+may use `web_search`/`web_fetch` for public-source research. The API service
+retains write access to its SQLite workflow database. QwenPaw agents do not
+receive shell or Python execution, browser/desktop control, MCP, inter-agent
+management, or file-transfer tools. File Guard protects the secret volume and
+common credential paths, and previews outside the workspace are disabled.
