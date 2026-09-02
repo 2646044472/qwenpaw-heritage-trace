@@ -46,9 +46,7 @@ describe("MacauMonitoringMap", () => {
     const map = screen.getByRole("img", { name: "澳門地理底圖及文化商戶位置" });
     expect(map).toHaveStyle({ transform: "translate(0px,0px) scale(1.6)" });
     fireEvent.click(screen.getByRole("button", { name: "放大地圖" }));
-    expect(map).toHaveStyle({ transform: "translate(0px,0px) scale(1.8)" });
-    fireEvent.click(screen.getByRole("button", { name: "中等縮放" }));
-    expect(map).toHaveStyle({ transform: "translate(0px,0px) scale(1.34)" });
+    expect(map).toHaveStyle({ transform: "translate(0px,0px) scale(1.7000000000000002)" });
     fireEvent.click(screen.getByRole("button", { name: "顯示全澳" }));
     expect(map).toHaveStyle({ transform: "translate(0px,0px) scale(1.08)" });
   });
@@ -66,7 +64,7 @@ describe("MacauMonitoringMap", () => {
     expect(map).toHaveStyle({ transform: "translate(0px,0px) scale(1.6)" });
     act(() => frames[0](16));
     const scale = Number(map.style.transform.match(/scale\(([^)]+)\)/)?.[1]);
-    expect(scale).toBeCloseTo(2.14);
+    expect(scale).toBeCloseTo(2.05);
   });
 
   it("cancels a queued gesture when resetting or unmounting the map", () => {

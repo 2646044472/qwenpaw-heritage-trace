@@ -11,7 +11,7 @@ import {
   type WheelEvent,
 } from "react";
 
-import { LocateFixed, Minus, Plus, Scan, Store } from "lucide-react";
+import { LocateFixed, Minus, Plus, Store } from "lucide-react";
 
 import type { AttentionPriority, DemoShopSeed, HeritageShop } from "@/lib/heritage/application-types";
 
@@ -31,7 +31,6 @@ const MIN_SCALE = 1;
 const MAX_SCALE = 3.5;
 const WORLD_SIZE = 1000;
 const FOCUS_SCALE = 1.6;
-const MEDIUM_SCALE = 1.34;
 
 function Paths({ paths, className }: { paths: readonly string[]; className: string }) {
   const occurrences = new Map<string, number>();
@@ -184,12 +183,10 @@ export function MacauMonitoringMap({
     },
     [constrain, updateView],
   );
-  const setZoomScale = (scale: number) => {
-    updateView((current) => ({ ...current, scale: clamp(scale, MIN_SCALE, MAX_SCALE) }));
-  };
   const handleWheel = (event: WheelEvent<SVGSVGElement>) => {
     event.preventDefault();
-    zoomAt(event.deltaY < 0 ? 0.18 : -0.18, event.clientX, event.clientY, true);
+    const amount = clamp(Math.abs(event.deltaY) * 0.0015, 0.015, 0.18);
+    zoomAt(event.deltaY < 0 ? amount : -amount, event.clientX, event.clientY, true);
   };
   const handlePointerDown = (event: PointerEvent<SVGSVGElement>) => {
     if ((event.target as Element).closest("[data-map-marker]")) return;
@@ -307,7 +304,7 @@ export function MacauMonitoringMap({
         <button
           aria-label="放大地圖"
           className="flex size-10 items-center justify-center hover:bg-accent"
-          onClick={() => zoomAt(0.2)}
+          onClick={() => zoomAt(0.1)}
           type="button"
         >
           <Plus className="size-4" />
@@ -315,18 +312,10 @@ export function MacauMonitoringMap({
         <button
           aria-label="縮小地圖"
           className="flex size-10 items-center justify-center border-border border-t hover:bg-accent"
-          onClick={() => zoomAt(-0.2)}
+          onClick={() => zoomAt(-0.1)}
           type="button"
         >
           <Minus className="size-4" />
-        </button>
-        <button
-          aria-label="中等縮放"
-          className="flex size-10 items-center justify-center border-border border-t hover:bg-accent"
-          onClick={() => setZoomScale(MEDIUM_SCALE)}
-          type="button"
-        >
-          <Scan className="size-4" />
         </button>
         <button
           aria-label="顯示全澳"
