@@ -91,14 +91,11 @@ for (const [name, id] of Object.entries(layers)) {
 }
 
 const roads = data.streets.map((f) => ({ f, len: lineLength(f) })).sort((a, b) => b.len - a.len);
-// Layer 4 is the DSEC street-name reference layer, rather than a road hierarchy.
-// It contains a small set of named streets and beach boundaries, so treating its
-// longest features as major roads produces misleading gold lines across the map.
-// Keep the references as quiet local detail and reserve the highlighted network
-// for actual bridge geometry below.
-const majorRoads = [];
-const secondaryRoads = [];
-const localRoads = roads.map(({ f }) => geometryPath(f, 11)).filter(Boolean);
+const majorCut = Math.max(35, Math.round(roads.length * 0.12));
+const secondaryCut = Math.max(160, Math.round(roads.length * 0.55));
+const majorRoads = roads.slice(0, majorCut).map(({ f }) => geometryPath(f, 4)).filter(Boolean);
+const secondaryRoads = roads.slice(majorCut, secondaryCut).map(({ f }) => geometryPath(f, 7)).filter(Boolean);
+const localRoads = roads.slice(secondaryCut, Math.min(roads.length, 300)).map(({ f }) => geometryPath(f, 11)).filter(Boolean);
 const buildings = data.buildings.filter((f) => polygonArea(f) > 120).sort((a, b) => polygonArea(b) - polygonArea(a)).slice(0, 900);
 const blocks = data.blocks.filter((f) => polygonArea(f) > 500).slice(0, 700);
 

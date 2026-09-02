@@ -52,7 +52,7 @@ function MapArtwork() {
         paths={geometry.majorRoads}
       />
       <Paths
-        className="fill-heritage-gold/20 stroke-heritage-gold/55 [stroke-linecap:round] [stroke-linejoin:round] [stroke-width:1.2]"
+        className="fill-none stroke-heritage-gold/40 [stroke-linecap:round] [stroke-width:2.4]"
         paths={geometry.bridges}
       />
       <Paths
@@ -219,16 +219,12 @@ export function MacauMonitoringMap({
                 event.stopPropagation();
                 onSelect(seed.shop_id);
               }}
-              onPointerDown={(event) => event.stopPropagation()}
               onFocus={() => onHover(seed.shop_id)}
               onBlur={() => onHover(null)}
               onMouseEnter={() => onHover(seed.shop_id)}
               onMouseLeave={() => onHover(null)}
             >
-              <g
-                pointerEvents="all"
-                transform={`translate(${position.x} ${position.y})`}
-              >
+              <g transform={`translate(${position.x} ${position.y})`}>
                 {active ? <circle className="fill-current opacity-20" r="29" /> : null}
                 <circle
                   className="fill-background stroke-current transition-[r] duration-300"
