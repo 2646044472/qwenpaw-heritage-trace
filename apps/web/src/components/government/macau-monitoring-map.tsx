@@ -52,7 +52,7 @@ function MapArtwork() {
         paths={geometry.majorRoads}
       />
       <Paths
-        className="fill-none stroke-heritage-gold/40 [stroke-linecap:round] [stroke-width:2.4]"
+        className="fill-heritage-gold/20 stroke-heritage-gold/55 [stroke-linecap:round] [stroke-linejoin:round] [stroke-width:1.2]"
         paths={geometry.bridges}
       />
       <Paths

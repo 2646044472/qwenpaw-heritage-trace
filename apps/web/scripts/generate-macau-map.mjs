@@ -91,11 +91,12 @@ for (const [name, id] of Object.entries(layers)) {
 }
 
 const roads = data.streets.map((f) => ({ f, len: lineLength(f) })).sort((a, b) => b.len - a.len);
-const majorCut = Math.max(35, Math.round(roads.length * 0.12));
-const secondaryCut = Math.max(160, Math.round(roads.length * 0.55));
-const majorRoads = roads.slice(0, majorCut).map(({ f }) => geometryPath(f, 4)).filter(Boolean);
-const secondaryRoads = roads.slice(majorCut, secondaryCut).map(({ f }) => geometryPath(f, 7)).filter(Boolean);
-const localRoads = roads.slice(secondaryCut, Math.min(roads.length, 300)).map(({ f }) => geometryPath(f, 11)).filter(Boolean);
+// Layer 4 is a street-name reference layer, not a road hierarchy.  Its longest
+// features include beach boundaries, so highlighting them as major roads creates
+// misleading gold lines across the islands. Keep them as quiet local detail.
+const majorRoads = [];
+const secondaryRoads = [];
+const localRoads = roads.map(({ f }) => geometryPath(f, 11)).filter(Boolean);
 const buildings = data.buildings.filter((f) => polygonArea(f) > 120).sort((a, b) => polygonArea(b) - polygonArea(a)).slice(0, 900);
 const blocks = data.blocks.filter((f) => polygonArea(f) > 500).slice(0, 700);
 
