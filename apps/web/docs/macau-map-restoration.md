@@ -2,7 +2,9 @@
 
 The map artwork, generator and Government map component were restored from
 `stephlam-um/Htrace-Frontend` at `92ad0a0ed158ad3d9162aee1e7ded4329b457dc2`.
-The subsequent local road reclassification and bridge styling were removed.
+The accepted baseline is `46ef312`. It retains the original geometry source,
+classifies the 24 street-name reference features as local detail instead of
+major roads, and renders the bridge polygons with a fill and outline.
 
 The original repository introduced a guessed longitude/latitude bounding box in
 `7a1167a`, when replacing the schematic map with DSEC geometry. That is not a
