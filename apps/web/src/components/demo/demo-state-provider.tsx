@@ -230,6 +230,10 @@ export function DemoStateProvider({ children, initialShopId }: { children: React
         case_id: `CASE-LAIKEI-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
       };
       const response = await runHeritageWorkflowWithFallback(request, {
+        // Government runs must use the configured QwenPaw backend. Keep the
+        // demo fallback available in the adapter for tests and offline tools,
+        // but never present synthetic workflow data in the live console.
+        fallback: false,
         signal: controller.signal,
         onStatus: (status) => {
           persistActiveRun(status.run_id);
