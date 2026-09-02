@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, CheckCircle2, CircleAlert, FileCheck2, Sparkles } from "lucide-react";
 
 import type { AttentionPriority, HeritageShop, SuccessfulResult } from "@/lib/heritage/application-types";
+import { getPublicWorkflowIssues } from "@/lib/heritage/workflow-presentation";
 
 type AssetCard = SuccessfulResult["asset_card"];
 const labels: Record<keyof AssetCard, string> = {
@@ -75,6 +76,7 @@ function Field({ field, value }: { field: keyof AssetCard; value: AssetCard[keyo
 }
 export function GovernmentEvidenceDetail({ shop }: { shop: HeritageShop }) {
   const { workflow, insight } = shop;
+  const publicIssues = getPublicWorkflowIssues(workflow.issues);
   const verification = workflow.verification_summary;
   const issueOccurrences = new Map<string, number>();
   return (
@@ -137,9 +139,9 @@ export function GovernmentEvidenceDetail({ shop }: { shop: HeritageShop }) {
                 <CircleAlert className="size-5 text-attention-review" />
                 <h2 className="font-heritage-display font-semibold text-lg">審視事項</h2>
               </div>
-              {workflow.issues.length > 0 ? (
+              {publicIssues.length > 0 ? (
                 <ul className="mt-4 space-y-3">
-                  {workflow.issues.map((issue) => {
+                  {publicIssues.map((issue) => {
                     const base = `${issue.claim_id}-${issue.issue_type}-${issue.description}`;
                     const occurrence = issueOccurrences.get(base) ?? 0;
                     issueOccurrences.set(base, occurrence + 1);

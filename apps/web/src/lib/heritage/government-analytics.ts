@@ -1,4 +1,5 @@
 import type { HeritageShop } from "./application-types";
+import { getPublicWorkflowIssues } from "./workflow-presentation";
 
 export type ExposurePoint = { label: string; current: number; previous: number; event?: string };
 export type AttentionSignal = { label: string; change: number };
@@ -136,7 +137,7 @@ export function getGovernmentAnalytics(shop: HeritageShop): GovernmentAnalytics 
       { label: "旅客探索率", shop: isHero ? 42 : 64, peerMedian: 58, area: 61, suffix: "%" },
       { label: "證據覆蓋率", shop: isHero ? 45 : 72, peerMedian: 63, area: 66, suffix: "%" },
     ],
-    unresolved: shop.workflow.issues.length + (isHero ? 2 : 0),
+    unresolved: getPublicWorkflowIssues(shop.workflow.issues).length + (isHero ? 2 : 0),
     lastVerified: isHero ? "2026/06/06 14:20" : "2026/06/07 09:40",
   };
 }

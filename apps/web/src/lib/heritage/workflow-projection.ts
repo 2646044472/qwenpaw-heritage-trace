@@ -1,5 +1,6 @@
 import type { InsightInputs, ShopSignals } from "./application-types";
 import type { components } from "./generated/workflow-types";
+import { getPublicWorkflowIssues } from "./workflow-presentation";
 
 type SuccessfulResult = components["schemas"]["SuccessfulResult"];
 type RevisedAssetCard = components["schemas"]["RevisedAssetCard"];
@@ -42,7 +43,7 @@ export function projectInsightInputs(result: SuccessfulResult, signals: ShopSign
   return {
     completeness: projectCompleteness(result.asset_card),
     publication_readiness: publicationReadiness,
-    issues: result.issues.map((issue) => ({
+    issues: getPublicWorkflowIssues(result.issues).map((issue) => ({
       severity: projectIssueSeverity(issue),
       code: issue.issue_type,
       message: issue.description,

@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import type { HeritageShop } from "@/lib/heritage/application-types";
+import { getPublicWorkflowIssues } from "@/lib/heritage/workflow-presentation";
 
 const publicationLabels = { publishable: "可發佈", needs_review: "需要覆核", not_publishable: "暫不可發佈" } as const;
 
@@ -11,6 +12,7 @@ export function MerchantWorkflowDossier({ shop }: { shop: HeritageShop }) {
   const workflow = shop.workflow;
   const card = workflow.asset_card;
   const summary = workflow.verification_summary;
+  const publicIssues = getPublicWorkflowIssues(workflow.issues);
   const fields = [
     ["店舖名稱", displayFieldValue(card.shop_name)],
     ["創立年份", displayFieldValue(card.founding_year)],
@@ -67,11 +69,11 @@ export function MerchantWorkflowDossier({ shop }: { shop: HeritageShop }) {
       </div>
       <div className="mt-5">
         <h3 className="font-medium">覆核事項</h3>
-        {workflow.issues.length === 0 ? (
+        {publicIssues.length === 0 ? (
           <p className="mt-2 text-muted-foreground text-sm">暫無事項</p>
         ) : (
           <ul className="mt-2 space-y-2">
-            {workflow.issues.map((issue) => (
+            {publicIssues.map((issue) => (
               <li className="rounded-lg border border-heritage-border px-3 py-2 text-sm" key={issue.claim_id}>
                 <p className="font-medium">{issue.description}</p>
                 <p className="mt-1 text-muted-foreground">建議：{issue.recommended_action}</p>

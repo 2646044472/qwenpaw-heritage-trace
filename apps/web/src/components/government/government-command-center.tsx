@@ -17,6 +17,7 @@ import {
 } from "@/lib/heritage/demo-seeds";
 import { type GovernmentAnalytics, getGovernmentAnalytics } from "@/lib/heritage/government-analytics";
 import { getGovernmentActivity, normalizeShopPosition } from "@/lib/heritage/government-data";
+import { getPublicWorkflowIssues } from "@/lib/heritage/workflow-presentation";
 
 import { useDemoState } from "../demo/demo-state-provider";
 import { MacauMonitoringMap } from "./macau-monitoring-map";
@@ -126,6 +127,7 @@ function WorkflowResultDetails({ result }: { result: WorkflowResult }) {
     );
   }
   const counts = result.verification_summary.by_status;
+  const publicIssues = getPublicWorkflowIssues(result.issues);
   const card = result.asset_card;
   const producedFields = [
     ["店铺名称", card.shop_name.value],
@@ -142,7 +144,7 @@ function WorkflowResultDetails({ result }: { result: WorkflowResult }) {
         <span>部分支持</span><strong className="text-amber-300">{counts.partially_supported}</strong>
         <span>无法核实</span><strong className="text-slate-200">{counts.unverifiable}</strong>
         <span>不支持</span><strong className="text-red-300">{counts.unsupported}</strong>
-        <span>待处理问题</span><strong className="text-slate-100">{result.issues.length}</strong>
+        <span>待处理事项</span><strong className="text-slate-100">{publicIssues.length}</strong>
       </div>
       <p className="mt-2 text-slate-400">“证据支持”表示 Verifier 找到来源证据并通过一致性检查，不代表社交平台曝光量。</p>
       <div className="mt-2 border-white/10 border-t pt-2">
@@ -151,9 +153,9 @@ function WorkflowResultDetails({ result }: { result: WorkflowResult }) {
           {producedFields.map(([label, value]) => <Fragment key={label}><dt>{label}</dt><dd className="text-slate-200">{value ?? "待核实"}</dd></Fragment>)}
         </dl>
       </div>
-      {result.issues.length > 0 ? (
+      {publicIssues.length > 0 ? (
         <ul className="mt-2 space-y-1 text-amber-200">
-          {result.issues.slice(0, 4).map((issue) => <li key={issue.claim_id}><span className="text-amber-300">{issue.issue_type}</span>：{issue.description}（{issue.recommended_action}）</li>)}
+          {publicIssues.slice(0, 4).map((issue) => <li key={issue.claim_id}>{issue.description}（{issue.recommended_action}）</li>)}
         </ul>
       ) : null}
     </details>
