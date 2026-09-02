@@ -11,8 +11,9 @@ During dragging, a single HTML container transforms the entire SVG, including
 all shop markers. The browser can composite that container without repainting
 the map on each pointer move. At rest, the original SVG transform owns the camera
 again. Two animation frames with transitions disabled prevent a jump when
-handing the final transform back. Geometry, projection, colors, camera equations,
-marker positions and Hunter rendering are unchanged by the performance commit.
+handing the final transform back. Geometry, projection, colors, camera equations
+and marker positions are unchanged. Hunter uses the same frame-coalesced drag
+handling and composited drag layer; its artwork and route geometry are unchanged.
 
 Keeping the container transform at rest was investigated and rejected: it caused
 2,272 pixels with channel differences of at most 6 in the initial overview.

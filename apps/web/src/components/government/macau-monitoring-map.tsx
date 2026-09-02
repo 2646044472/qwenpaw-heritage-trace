@@ -11,7 +11,7 @@ import {
   type WheelEvent,
 } from "react";
 
-import { LocateFixed, Minus, Plus, Store } from "lucide-react";
+import { LocateFixed, Minus, Plus, Scan, Store } from "lucide-react";
 
 import type { AttentionPriority, DemoShopSeed, HeritageShop } from "@/lib/heritage/application-types";
 
@@ -31,6 +31,7 @@ const MIN_SCALE = 1;
 const MAX_SCALE = 3.5;
 const WORLD_SIZE = 1000;
 const FOCUS_SCALE = 1.6;
+const MEDIUM_SCALE = 1.34;
 
 function Paths({ paths, className }: { paths: readonly string[]; className: string }) {
   const occurrences = new Map<string, number>();
@@ -183,6 +184,9 @@ export function MacauMonitoringMap({
     },
     [constrain, updateView],
   );
+  const setZoomScale = (scale: number) => {
+    updateView((current) => ({ ...current, scale: clamp(scale, MIN_SCALE, MAX_SCALE) }));
+  };
   const handleWheel = (event: WheelEvent<SVGSVGElement>) => {
     event.preventDefault();
     zoomAt(event.deltaY < 0 ? 0.18 : -0.18, event.clientX, event.clientY, true);
@@ -252,7 +256,7 @@ export function MacauMonitoringMap({
           style={{
             transform: isDragging ? undefined : `translate(${view.x}px,${view.y}px) scale(${view.scale})`,
             transformOrigin: "center",
-            transition: motion === "idle" ? "transform 320ms cubic-bezier(.2,.8,.2,1)" : "none",
+            transition: motion === "idle" ? "transform 520ms cubic-bezier(.16,1,.3,1)" : "none",
           }}
           viewBox="0 0 1000 1000"
         >
@@ -279,11 +283,12 @@ export function MacauMonitoringMap({
                 onMouseLeave={() => onHover(null)}
               >
                 <g transform={`translate(${position.x} ${position.y})`}>
-                  {active ? <circle className="fill-current opacity-20" r="29" /> : null}
+                  <circle className="fill-transparent stroke-none" pointerEvents="all" r={active ? 29 : 15} />
+                  {active ? <circle className="fill-current opacity-20" r="23.2" /> : null}
                   <circle
                     className="fill-background stroke-current transition-[r] duration-300"
-                    r={highlighted ? 15 : 10}
-                    strokeWidth={active ? 4 : 2.5}
+                    r={highlighted ? 12 : 8}
+                    strokeWidth={active ? 3.2 : 2}
                   />
                   <foreignObject className="pointer-events-none overflow-visible" height="14" width="14" x="-7" y="-7">
                     {highlighted ? <Store className="size-3.5" /> : null}
@@ -314,6 +319,14 @@ export function MacauMonitoringMap({
           type="button"
         >
           <Minus className="size-4" />
+        </button>
+        <button
+          aria-label="中等縮放"
+          className="flex size-10 items-center justify-center border-border border-t hover:bg-accent"
+          onClick={() => setZoomScale(MEDIUM_SCALE)}
+          type="button"
+        >
+          <Scan className="size-4" />
         </button>
         <button
           aria-label="顯示全澳"

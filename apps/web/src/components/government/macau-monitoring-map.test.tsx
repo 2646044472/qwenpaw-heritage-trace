@@ -47,6 +47,8 @@ describe("MacauMonitoringMap", () => {
     expect(map).toHaveStyle({ transform: "translate(0px,0px) scale(1.6)" });
     fireEvent.click(screen.getByRole("button", { name: "放大地圖" }));
     expect(map).toHaveStyle({ transform: "translate(0px,0px) scale(1.8)" });
+    fireEvent.click(screen.getByRole("button", { name: "中等縮放" }));
+    expect(map).toHaveStyle({ transform: "translate(0px,0px) scale(1.34)" });
     fireEvent.click(screen.getByRole("button", { name: "顯示全澳" }));
     expect(map).toHaveStyle({ transform: "translate(0px,0px) scale(1.08)" });
   });
