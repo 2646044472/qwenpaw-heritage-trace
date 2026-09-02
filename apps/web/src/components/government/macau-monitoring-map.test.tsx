@@ -61,6 +61,7 @@ describe("MacauMonitoringMap", () => {
     const map = screen.getByRole("img", { name: "澳門地理底圖及文化商戶位置" });
     for (let i = 0; i < 3; i++) fireEvent.wheel(map, { deltaY: -100 });
     expect(request).toHaveBeenCalledTimes(1);
+    expect(map).toHaveStyle({ transition: "none" });
     expect(map).toHaveStyle({ transform: "translate(0px,0px) scale(1.6)" });
     act(() => frames[0](16));
     const scale = Number(map.style.transform.match(/scale\(([^)]+)\)/)?.[1]);

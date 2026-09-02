@@ -126,9 +126,10 @@ export function MacauMonitoringMap({
   const [view, setView] = useState(INITIAL);
   const viewRef = useRef(INITIAL);
   const pendingFrame = useRef<number | null>(null);
-  const [motion, setMotion] = useState<"idle" | "dragging" | "settling">("idle");
+  const [motion, setMotion] = useState<"idle" | "dragging" | "settling" | "zooming">("idle");
   const isDragging = motion === "dragging";
   const drag = useRef<DragState | null>(null);
+  const wheelIdleTimer = useRef<number | null>(null);
   const viewport = useRef<HTMLDivElement | null>(null);
   const previousSelection = useRef<string | null | undefined>(undefined);
   // Keep every input delta, but render at most once per animation frame.
@@ -150,6 +151,7 @@ export function MacauMonitoringMap({
   useEffect(
     () => () => {
       if (pendingFrame.current !== null) window.cancelAnimationFrame(pendingFrame.current);
+      if (wheelIdleTimer.current !== null) window.clearTimeout(wheelIdleTimer.current);
     },
     [],
   );
@@ -185,6 +187,12 @@ export function MacauMonitoringMap({
   );
   const handleWheel = (event: WheelEvent<SVGSVGElement>) => {
     event.preventDefault();
+    if (motion !== "dragging") setMotion("zooming");
+    if (wheelIdleTimer.current !== null) window.clearTimeout(wheelIdleTimer.current);
+    wheelIdleTimer.current = window.setTimeout(() => {
+      wheelIdleTimer.current = null;
+      setMotion((current) => (current === "zooming" ? "idle" : current));
+    }, 100);
     const amount = clamp(Math.abs(event.deltaY) * 0.0015, 0.015, 0.18);
     zoomAt(event.deltaY < 0 ? amount : -amount, event.clientX, event.clientY, true);
   };
