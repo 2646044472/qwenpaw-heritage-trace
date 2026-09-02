@@ -12,7 +12,20 @@
   },
   "channels": {},
   "mcp": {"clients": {}},
-  "tools": {},
+  "tools": {
+    "builtin_tools": {
+      "read_file": {"enabled": true},
+      "write_file": {"enabled": true},
+      "edit_file": {"enabled": true},
+      "append_file": {"enabled": true},
+      "grep_search": {"enabled": true},
+      "glob_search": {"enabled": true},
+      "web_search": {"enabled": true},
+      "web_fetch": {"enabled": true},
+      "view_image": {"enabled": true},
+      "view_video": {"enabled": true}
+    }
+  },
   "security": {
     "sandbox_enabled": true,
     "allow_no_auth_hosts": ["127.0.0.1", "::1"],
@@ -21,14 +34,21 @@
       "enabled": true,
       "denied_tools": [
         "execute_shell_command", "execute_python_code", "execute_query",
-        "read_file", "write_file", "edit_file", "append_file",
-        "grep_search", "glob_search", "web_search", "web_fetch",
-        "browser", "desktop_screenshot", "view_image", "view_video",
+        "browser", "desktop_screenshot",
         "send_file_to_user", "list_agents", "chat_with_agent", "submit_to_agent",
         "check_agent_task", "spawn_subagent", "delegate_external_agent",
         "materialize_skill", "ast_search", "run_tool_batch", "set_user_timezone"
       ]
-    }
+    },
+    "file_guard": {
+      "enabled": true,
+      "sensitive_files": [
+        "/app/working.secret/", "/root/.ssh/", "/root/.aws/", "/root/.gnupg/",
+        "/etc/passwd", "/etc/shadow", "/var/run/docker.sock"
+      ],
+      "allow_preview_outside_workspace": false
+    },
+    "skill_scanner": {"mode": "block"}
   },
   "user_timezone": "Asia/Shanghai",
   "skill_paths": []

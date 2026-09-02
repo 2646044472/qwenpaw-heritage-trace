@@ -8,7 +8,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, CheckCircle2, ChevronRight, CircleAlert, LoaderCircle, MapPin, Play, X } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { AttentionPriority, GovernmentActivity, HeritageShop } from "@/lib/heritage/application-types";
+import type { AttentionPriority, GovernmentActivity, HeritageShop, WorkflowResult } from "@/lib/heritage/application-types";
 import {
   createHeritageShopFromWorkflow,
   DEMO_SHOP_SEEDS,
@@ -113,6 +113,40 @@ function WorkflowProgress({ status }: { status: string }) {
     </section>
   );
 }
+
+function WorkflowResultDetails({ result }: { result: WorkflowResult }) {
+  if (result.workflow_status === "completed_with_errors") {
+    return (
+      <details className="mt-2 rounded bg-white/5 px-2 py-1 text-[11px] text-slate-300">
+        <summary className="cursor-pointer select-none">查看中止原因</summary>
+        <ul className="mt-1 space-y-1 text-red-200">
+          {result.errors.map((error) => <li key={`${error.code}-${error.path}`}>{error.message}</li>)}
+        </ul>
+      </details>
+    );
+  }
+  const counts = result.verification_summary.by_status;
+  return (
+    <details className="mt-2 rounded bg-white/5 px-2 py-1 text-[11px] text-slate-300">
+      <summary className="cursor-pointer select-none">查看本次流程详情</summary>
+      <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1">
+        <span>总资料项</span><strong className="text-slate-100">{result.verification_summary.total_claims}</strong>
+        <span>证据支持</span><strong className="text-emerald-300">{counts.supported}</strong>
+        <span>部分支持</span><strong className="text-amber-300">{counts.partially_supported}</strong>
+        <span>无法核实</span><strong className="text-slate-200">{counts.unverifiable}</strong>
+        <span>不支持</span><strong className="text-red-300">{counts.unsupported}</strong>
+        <span>待处理问题</span><strong className="text-slate-100">{result.issues.length}</strong>
+      </div>
+      <p className="mt-2 text-slate-400">“证据支持”表示 Verifier 找到来源证据并通过一致性检查，不代表社交平台曝光量。</p>
+      {result.issues.length > 0 ? (
+        <ul className="mt-2 space-y-1 text-amber-200">
+          {result.issues.slice(0, 4).map((issue) => <li key={issue.claim_id}>{issue.description}</li>)}
+        </ul>
+      ) : null}
+    </details>
+  );
+}
+
 
 function ExposureChart({ analytics }: { analytics: GovernmentAnalytics }) {
   const max = Math.max(...analytics.exposure.flatMap((point) => [point.current, point.previous]), 1);
@@ -486,10 +520,15 @@ export function GovernmentCommandCenter() {
               {workflow.isRunning ? (
                 <button className="rounded px-2 py-1 hover:bg-white/10" onClick={abortWorkflow} type="button">中止</button>
               ) : workflow.runId ? (
-                <span className="text-slate-400">
-                  {workflow.workflowStatus === "completed_with_errors" ? "本次流程已結束" : "本次流程已完成"} · {workflow.runId}
-                  {terminalSummary ? <span className="ml-2 text-slate-500">{terminalSummary}</span> : null}
-                </span>
+                <>
+                  <span className="text-slate-400">
+                    {workflow.workflowStatus === "completed_with_errors" ? "本次流程已結束" : "本次流程已完成"} · {workflow.runId}
+                    {terminalSummary ? <span className="ml-2 text-slate-500">{terminalSummary}</span> : null}
+                  </span>
+                  <button className="rounded px-2 py-1 hover:bg-white/10" onClick={() => void startWorkflow()} type="button">
+                    {workflow.workflowStatus === "completed_with_errors" ? "重新执行" : "再次执行"}
+                  </button>
+                </>
               ) : (
                 <button aria-label="Run live workflow" className="flex items-center gap-1 rounded px-2 py-1 hover:bg-white/10" onClick={() => void startWorkflow()} type="button">
                   <Play className="size-3" />
@@ -498,6 +537,7 @@ export function GovernmentCommandCenter() {
               )}
             </div>
             {workflow.isRunning ? <WorkflowProgress status={workflow.workflowStatus} /> : null}
+            {!workflow.isRunning && workflow.workflowResult ? <WorkflowResultDetails result={workflow.workflowResult} /> : null}
           </div>
           {workflow.workflowError ? (
             <div className="absolute top-20 right-5 flex max-w-sm gap-2 rounded-lg bg-red-950/90 p-3 text-red-100 text-xs">
