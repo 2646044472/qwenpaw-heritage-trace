@@ -14,7 +14,7 @@ const views = [
 export function DemoSwitcher({ shopId }: { shopId: string }) {
   const pathname = usePathname();
   return (
-    <nav aria-label="示範介面切換" className="grid shrink-0 grid-cols-3 items-stretch">
+    <nav aria-label="系統介面切換" className="grid shrink-0 grid-cols-3 items-stretch">
       {views.map((view, index) => (
         <Link
           aria-current={pathname === view.href ? "page" : undefined}

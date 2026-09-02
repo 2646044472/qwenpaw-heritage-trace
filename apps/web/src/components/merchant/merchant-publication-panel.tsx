@@ -35,7 +35,7 @@ export function MerchantPublicationPanel({ publication }: { publication: Publica
       </div>
       <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
         <div>
-          <dt className="text-muted-foreground">Demo 內容 ID</dt>
+          <dt className="text-muted-foreground">內容編號</dt>
           <dd className="mt-1 font-mono">{publication.post_id ?? "尚未建立"}</dd>
         </div>
         <div>

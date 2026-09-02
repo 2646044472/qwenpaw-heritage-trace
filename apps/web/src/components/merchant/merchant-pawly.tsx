@@ -30,7 +30,7 @@ const freeTextReply = "收到，我會以目前已核實文化資料和可追溯
 type PendingRequest = "overview" | MerchantTopic;
 
 function getThinkingLabel(request: PendingRequest | null) {
-  if (request === "sentiment") return "正在整理固定 Demo 評價訊號";
+  if (request === "sentiment") return "正在整理近期評價訊號";
   if (request === "overview") return "Pawly 正在整理最近訊號";
   return "Pawly 正在整理已核實資料";
 }

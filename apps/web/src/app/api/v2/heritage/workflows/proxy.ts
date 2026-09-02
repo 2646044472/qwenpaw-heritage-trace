@@ -5,6 +5,8 @@ export async function forwardWorkflowRequest(request: Request, suffix = ""): Pro
   const headers = new Headers();
   const contentType = request.headers.get("content-type");
   if (contentType) headers.set("content-type", contentType);
+  const apiBasicAuth = process.env.API_BASIC_AUTH?.trim();
+  if (apiBasicAuth) headers.set("authorization", `Basic ${apiBasicAuth}`);
 
   const init: RequestInit = {
     method: request.method,

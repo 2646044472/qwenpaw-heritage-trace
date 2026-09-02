@@ -43,9 +43,9 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
 export function FallbackState({ children }: { children?: ReactNode }) {
   return (
     <Alert>
-      <AlertTitle>Demo data active</AlertTitle>
+      <AlertTitle>目前使用已驗證資料</AlertTitle>
       <AlertDescription>
-        Live workflow data is unavailable. Heritage Trace is using the verified demo fallback.
+        即時分析服務暫時無法連線，目前顯示最近一次通過驗證的資料。
       </AlertDescription>
       {children}
     </Alert>

@@ -1,6 +1,15 @@
 "use client";
 
-import { type PointerEvent, useCallback, useEffect, useRef, useState, type WheelEvent } from "react";
+import {
+  memo,
+  type PointerEvent,
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type WheelEvent,
+} from "react";
 
 import { LocateFixed, Minus, Plus, Store } from "lucide-react";
 
@@ -36,7 +45,7 @@ function Paths({ paths, className }: { paths: readonly string[]; className: stri
   );
 }
 
-function MapArtwork() {
+const MapArtwork = memo(function MapArtwork() {
   const geometry = MACAU_MAP_GEOMETRY;
   return (
     <>
@@ -75,7 +84,7 @@ function MapArtwork() {
       </g>
     </>
   );
-}
+});
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -115,10 +124,46 @@ export function MacauMonitoringMap({
   onHover: (id: string | null) => void;
 }) {
   const [view, setView] = useState(INITIAL);
-  const [isDragging, setIsDragging] = useState(false);
+  const viewRef = useRef(INITIAL);
+  const pendingFrame = useRef<number | null>(null);
+  const [motion, setMotion] = useState<"idle" | "dragging" | "settling" | "zooming">("idle");
+  const isCompositing = motion === "dragging" || motion === "zooming";
   const drag = useRef<DragState | null>(null);
+  const wheelIdleTimer = useRef<number | null>(null);
   const viewport = useRef<HTMLDivElement | null>(null);
   const previousSelection = useRef<string | null | undefined>(undefined);
+  // Keep every input delta, but render at most once per animation frame.
+  const updateView = useCallback((next: SetStateAction<View>, deferred = false) => {
+    viewRef.current = typeof next === "function" ? next(viewRef.current) : next;
+    if (deferred) {
+      pendingFrame.current ??= window.requestAnimationFrame(() => {
+        pendingFrame.current = null;
+        setView(viewRef.current);
+      });
+      return;
+    }
+    if (pendingFrame.current !== null) {
+      window.cancelAnimationFrame(pendingFrame.current);
+      pendingFrame.current = null;
+    }
+    setView(viewRef.current);
+  }, []);
+  useEffect(
+    () => () => {
+      if (pendingFrame.current !== null) window.cancelAnimationFrame(pendingFrame.current);
+      if (wheelIdleTimer.current !== null) window.clearTimeout(wheelIdleTimer.current);
+    },
+    [],
+  );
+  useEffect(() => {
+    if (motion !== "settling") return;
+    // Paint the final SVG transform without a transition before enabling camera
+    // animations again. Otherwise handing back the transform animates from zero.
+    let frame = window.requestAnimationFrame(() => {
+      frame = window.requestAnimationFrame(() => setMotion("idle"));
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [motion]);
   const constrain = useCallback((next: View): View => {
     const rect = viewport.current?.getBoundingClientRect();
     const scale = clamp(next.scale, MIN_SCALE, MAX_SCALE);
@@ -127,8 +172,8 @@ export function MacauMonitoringMap({
     return { scale, x: clamp(next.x, -maxX, maxX), y: clamp(next.y, -maxY, maxY) };
   }, []);
   const zoomAt = useCallback(
-    (delta: number, clientX?: number, clientY?: number) => {
-      setView((current) => {
+    (delta: number, clientX?: number, clientY?: number, deferred = false) => {
+      updateView((current) => {
         const rect = viewport.current?.getBoundingClientRect();
         const scale = clamp(current.scale + delta, MIN_SCALE, MAX_SCALE);
         if (!rect || clientX === undefined || clientY === undefined) return constrain({ ...current, scale });
@@ -136,13 +181,20 @@ export function MacauMonitoringMap({
         const px = clientX - rect.left - rect.width / 2;
         const py = clientY - rect.top - rect.height / 2;
         return constrain({ scale, x: px - (px - current.x) * ratio, y: py - (py - current.y) * ratio });
-      });
+      }, deferred);
     },
-    [constrain],
+    [constrain, updateView],
   );
   const handleWheel = (event: WheelEvent<SVGSVGElement>) => {
     event.preventDefault();
-    zoomAt(event.deltaY < 0 ? 0.18 : -0.18, event.clientX, event.clientY);
+    if (motion !== "dragging") setMotion("zooming");
+    if (wheelIdleTimer.current !== null) window.clearTimeout(wheelIdleTimer.current);
+    wheelIdleTimer.current = window.setTimeout(() => {
+      wheelIdleTimer.current = null;
+      setMotion((current) => (current === "zooming" ? "idle" : current));
+    }, 100);
+    const amount = clamp(Math.abs(event.deltaY) * 0.0015, 0.015, 0.18);
+    zoomAt(event.deltaY < 0 ? amount : -amount, event.clientX, event.clientY, true);
   };
   const handlePointerDown = (event: PointerEvent<SVGSVGElement>) => {
     if ((event.target as Element).closest("[data-map-marker]")) return;
@@ -151,8 +203,8 @@ export function MacauMonitoringMap({
       id: event.pointerId,
       x: event.clientX,
       y: event.clientY,
-      viewX: view.x,
-      viewY: view.y,
+      viewX: viewRef.current.x,
+      viewY: viewRef.current.y,
       moved: false,
     };
   };
@@ -162,92 +214,105 @@ export function MacauMonitoringMap({
     const dx = event.clientX - start.x,
       dy = event.clientY - start.y;
     if (!start.moved && Math.hypot(dx, dy) < 4) return;
+    if (!start.moved) setMotion("dragging");
     start.moved = true;
-    setIsDragging(true);
-    setView((current) => constrain({ ...current, x: start.viewX + dx, y: start.viewY + dy }));
+    updateView((current) => constrain({ ...current, x: start.viewX + dx, y: start.viewY + dy }), true);
   };
   const handlePointerUp = (event: PointerEvent<SVGSVGElement>) => {
     if (drag.current?.id !== event.pointerId) return;
+    const moved = drag.current.moved;
     drag.current = null;
-    setIsDragging(false);
+    updateView(viewRef.current);
+    if (moved) setMotion("settling");
   };
   const selected = markers.find((marker) => marker.seed.shop_id === selectedShopId);
   useEffect(() => {
     if (previousSelection.current === selectedShopId) return;
     previousSelection.current = selectedShopId;
     if (!selected) {
-      setView(INITIAL);
+      updateView(INITIAL);
       return;
     }
     const rect = viewport.current?.getBoundingClientRect();
     if (!rect) return;
-    setView(constrain(calculateMapFocus(selected.position, rect.width, rect.height, true)));
-  }, [constrain, selected, selectedShopId]);
+    updateView(constrain(calculateMapFocus(selected.position, rect.width, rect.height, true)));
+  }, [constrain, selected, selectedShopId, updateView]);
   return (
     <div className="relative h-full min-h-[560px] touch-none select-none overflow-hidden bg-background" ref={viewport}>
-      <svg
-        aria-label="澳門地理底圖及文化商戶位置"
-        className="absolute inset-0 size-full cursor-grab active:cursor-grabbing"
-        onPointerCancel={handlePointerUp}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onWheel={handleWheel}
-        preserveAspectRatio="xMidYMid meet"
-        role="img"
+      <div
+        className="absolute inset-0"
         style={{
-          transform: `translate(${view.x}px,${view.y}px) scale(${view.scale})`,
-          transformOrigin: "center",
-          transition: isDragging ? "none" : "transform 320ms cubic-bezier(.2,.8,.2,1)",
+          // Composite the whole map together during a drag. At rest the SVG
+          // owns the transform again, preserving its original rasterization.
+          transform: isCompositing ? `translate(${view.x}px,${view.y}px) scale(${view.scale})` : undefined,
+          willChange: isCompositing ? "transform" : undefined,
         }}
-        viewBox="0 0 1000 1000"
       >
-        <MapArtwork />
-        {markers.map(({ seed, shop, position }) => {
-          const priority = shop.insight.attention_priority;
-          const active = seed.shop_id === selectedShopId;
-          const highlighted = active || seed.shop_id === hoveredShopId;
-          return (
-            <a
-              aria-label={`${seed.name}，${priorityLabels[priority]}`}
-              className={`cursor-pointer outline-none ${markerTone[priority]}`}
-              data-map-marker=""
-              href={`?shop=${encodeURIComponent(seed.shop_id)}`}
-              key={seed.shop_id}
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onSelect(seed.shop_id);
-              }}
-              onFocus={() => onHover(seed.shop_id)}
-              onBlur={() => onHover(null)}
-              onMouseEnter={() => onHover(seed.shop_id)}
-              onMouseLeave={() => onHover(null)}
-            >
-              <g transform={`translate(${position.x} ${position.y})`}>
-                {active ? <circle className="fill-current opacity-20" r="29" /> : null}
-                <circle
-                  className="fill-background stroke-current transition-[r] duration-300"
-                  r={highlighted ? 15 : 10}
-                  strokeWidth={active ? 4 : 2.5}
-                />
-                <foreignObject className="pointer-events-none overflow-visible" height="14" width="14" x="-7" y="-7">
-                  {highlighted ? <Store className="size-3.5" /> : null}
-                </foreignObject>
-              </g>
-            </a>
-          );
-        })}
-      </svg>
+        <svg
+          aria-label="澳門地理底圖及文化商戶位置"
+          className="absolute inset-0 size-full cursor-grab active:cursor-grabbing"
+          onPointerCancel={handlePointerUp}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onWheel={handleWheel}
+          preserveAspectRatio="xMidYMid meet"
+          role="img"
+          style={{
+            transform: isCompositing ? undefined : `translate(${view.x}px,${view.y}px) scale(${view.scale})`,
+            transformOrigin: "center",
+            transition: motion === "idle" ? "transform 520ms cubic-bezier(.16,1,.3,1)" : "none",
+          }}
+          viewBox="0 0 1000 1000"
+        >
+          <MapArtwork />
+          {markers.map(({ seed, shop, position }) => {
+            const priority = shop.insight.attention_priority;
+            const active = seed.shop_id === selectedShopId;
+            const highlighted = active || seed.shop_id === hoveredShopId;
+            return (
+              <a
+                aria-label={`${seed.name}，${priorityLabels[priority]}`}
+                className={`cursor-pointer outline-none ${markerTone[priority]}`}
+                data-map-marker=""
+                href={`?shop=${encodeURIComponent(seed.shop_id)}`}
+                key={seed.shop_id}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onSelect(seed.shop_id);
+                }}
+                onFocus={() => onHover(seed.shop_id)}
+                onBlur={() => onHover(null)}
+                onMouseEnter={() => onHover(seed.shop_id)}
+                onMouseLeave={() => onHover(null)}
+              >
+                <g transform={`translate(${position.x} ${position.y})`}>
+                  <circle className="fill-transparent stroke-none" pointerEvents="all" r={active ? 29 : 15} />
+                  {active ? <circle className="fill-current opacity-20" r="23.2" /> : null}
+                  <circle
+                    className="fill-background stroke-current transition-[r] duration-300"
+                    r={highlighted ? 12 : 8}
+                    strokeWidth={active ? 3.2 : 2}
+                  />
+                  <foreignObject className="pointer-events-none overflow-visible" height="14" width="14" x="-7" y="-7">
+                    {highlighted ? <Store className="size-3.5" /> : null}
+                  </foreignObject>
+                </g>
+              </a>
+            );
+          })}
+        </svg>
+      </div>
       <div className="pointer-events-none absolute top-5 left-5 rounded-lg border border-border/70 bg-card/95 px-4 py-3 text-foreground shadow-xl backdrop-blur-sm">
         <p className="font-heritage-display font-semibold">澳門文化商戶監察</p>
         <p className="mt-1 text-muted-foreground text-xs">拖動地圖探索 · 滾輪縮放</p>
       </div>
-      <div className="absolute top-5 right-5 flex flex-col overflow-hidden rounded-lg border border-border/70 bg-card/95 text-foreground shadow-xl">
+      <div className="absolute right-5 bottom-5 z-20 flex flex-col overflow-hidden rounded-lg border border-border/70 bg-card/95 text-foreground shadow-xl">
         <button
           aria-label="放大地圖"
           className="flex size-10 items-center justify-center hover:bg-accent"
-          onClick={() => zoomAt(0.2)}
+          onClick={() => zoomAt(0.1)}
           type="button"
         >
           <Plus className="size-4" />
@@ -255,7 +320,7 @@ export function MacauMonitoringMap({
         <button
           aria-label="縮小地圖"
           className="flex size-10 items-center justify-center border-border border-t hover:bg-accent"
-          onClick={() => zoomAt(-0.2)}
+          onClick={() => zoomAt(-0.1)}
           type="button"
         >
           <Minus className="size-4" />
@@ -263,7 +328,7 @@ export function MacauMonitoringMap({
         <button
           aria-label="顯示全澳"
           className="flex size-10 items-center justify-center border-border border-t hover:bg-accent"
-          onClick={() => setView(INITIAL)}
+          onClick={() => updateView(INITIAL)}
           type="button"
         >
           <LocateFixed className="size-4" />

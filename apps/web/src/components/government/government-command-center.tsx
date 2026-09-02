@@ -50,7 +50,7 @@ function workflowErrorLabel(code: string) {
 const workflowSteps = [
   { label: "提交 Workflow", hint: "建立個案與 run ID" },
   { label: "檢查 Agent", hint: "確認四個 QwenPaw Agent" },
-  { label: "Miner 整理來源", hint: "收集固定 Demo 材料" },
+  { label: "Miner 整理來源", hint: "收集已接入的來源資料" },
   { label: "規範化來源", hint: "建立可追溯 source bundle" },
   { label: "Archivist 編錄", hint: "建立文化資產卡與 claims" },
   { label: "契約校驗", hint: "確認 Workflow v2 欄位" },
@@ -146,7 +146,6 @@ function WorkflowResultDetails({ result }: { result: WorkflowResult }) {
         <span>不支持</span><strong className="text-red-300">{counts.unsupported}</strong>
         <span>待處理事項</span><strong className="text-slate-100">{publicIssues.length}</strong>
       </div>
-      <p className="mt-2 text-slate-400">“證據支持”表示 Verifier 找到來源證據並通過一致性檢查，不代表社交平台曝光量。</p>
       <div className="mt-2 border-white/10 border-t pt-2">
         <p className="text-slate-300">已產出文化資產卡</p>
         <dl className="mt-1 grid grid-cols-[5rem_1fr] gap-x-2 gap-y-1 text-slate-400">

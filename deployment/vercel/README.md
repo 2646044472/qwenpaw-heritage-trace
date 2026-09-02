@@ -3,6 +3,12 @@
 The Vercel project root is `apps/web`. Vercel detects Next.js from the included
 `vercel.json`, so the default build command (`npm run build`) is sufficient.
 
+## Canonical production URL
+
+Use [https://heritage-trace.vercel.app/](https://heritage-trace.vercel.app/) as
+the public website address. The generated `*.vercel.app` deployment URLs are
+for deployment inspection only.
+
 ## Deploy from the CLI
 
 From `apps/web`:
@@ -29,4 +35,4 @@ separate origin.
 
 When importing the GitHub repository, select `apps/web` as **Root Directory**.
 Every push to the selected production branch will then create a new Vercel
-deployment and update the `*.vercel.app` alias.
+deployment and update the canonical alias above.
