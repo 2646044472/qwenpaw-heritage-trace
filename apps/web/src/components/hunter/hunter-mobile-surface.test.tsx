@@ -43,4 +43,22 @@ describe("HunterMobileSurface discovery notification", () => {
       expect(screen.getByRole("region", { name: `發現附近文化店舖：${nextShop.name}` })).toBeVisible();
     });
   });
+
+  it("allows the selected shop to be removed after adding it to the route", async () => {
+    const selected = shops.find((shop) => shop.shopId === "lei-kei-001");
+    if (!selected) throw new Error("Expected the hero shop fixture");
+
+    render(<HunterMobileSurface initialShopId={selected.shopId} shops={shops} />);
+    fireEvent.click(screen.getByRole("button", { name: "加入行程" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("已加進今天的行程")).toBeVisible();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /查看行程/ }));
+    fireEvent.click(screen.getByRole("button", { name: "移除目前地點" }));
+
+    expect(screen.getByRole("button", { name: "加入行程" })).toBeVisible();
+    expect(screen.queryByText("已加進今天的行程")).not.toBeInTheDocument();
+  });
 });

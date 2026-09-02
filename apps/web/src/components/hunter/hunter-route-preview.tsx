@@ -10,7 +10,17 @@ function formatDuration(minutes: number) {
   return remainder ? `約 ${hours} 小時 ${remainder} 分鐘` : `約 ${hours} 小時`;
 }
 
-export function HunterRoutePreview({ route, onClose }: { route: HunterRoutePlan; onClose: () => void }) {
+export function HunterRoutePreview({
+  route,
+  onClose,
+  selectedShopId,
+  onRemoveSelected,
+}: {
+  route: HunterRoutePlan;
+  onClose: () => void;
+  selectedShopId?: string;
+  onRemoveSelected?: () => void;
+}) {
   return (
     <section
       aria-label="今日行程"
@@ -69,6 +79,15 @@ export function HunterRoutePreview({ route, onClose }: { route: HunterRoutePlan;
           <MapIcon className="size-4" />
           交通時間只供參考
         </div>
+        {selectedShopId && onRemoveSelected && route.stops.some((shop) => shop.shopId === selectedShopId) ? (
+          <button
+            className="mt-3 min-h-10 w-full rounded-xl border border-[#b97965]/30 bg-[#fff8f3] px-3 py-2.5 font-semibold text-[#9a5947] text-xs transition-colors hover:bg-[#fff0e8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b97965]"
+            onClick={onRemoveSelected}
+            type="button"
+          >
+            移除目前地點
+          </button>
+        ) : null}
       </div>
     </section>
   );

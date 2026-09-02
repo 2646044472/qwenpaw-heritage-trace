@@ -47,19 +47,25 @@ function workflowErrorLabel(code: string) {
 }
 
 const workflowSteps = [
-  { label: "建立 Workflow", hint: "提交商戶個案" },
+  { label: "提交 Workflow", hint: "建立個案與 run ID" },
+  { label: "檢查 Agent", hint: "確認四個 QwenPaw Agent" },
   { label: "Miner 整理來源", hint: "收集固定 Demo 材料" },
-  { label: "Archivist 建立資料卡", hint: "結構化文化欄位" },
-  { label: "Verifier 核實風險", hint: "檢查來源與發布限制" },
-  { label: "同步共享結果", hint: "Government / Merchant / Hunter" },
+  { label: "規範化來源", hint: "建立可追溯 source bundle" },
+  { label: "Archivist 編錄", hint: "建立文化資產卡與 claims" },
+  { label: "契約校驗", hint: "確認 Workflow v2 欄位" },
+  { label: "Verifier 核實", hint: "檢查證據、風險與發布限制" },
+  { label: "打包共享結果", hint: "同步 Government / Merchant / Hunter" },
 ] as const;
 
 function workflowProgress(status: string) {
   if (status === "submitting" || status === "input_received") return 0;
-  if (status === "miner_running") return 1;
-  if (status === "sources_normalized" || status === "archivist_running") return 2;
-  if (status === "archivist_validated" || status === "verifier_running") return 3;
-  return 4;
+  if (status === "agent_resolution") return 1;
+  if (status === "miner_running") return 2;
+  if (status === "sources_normalized") return 3;
+  if (status === "archivist_running") return 4;
+  if (status === "archivist_validated") return 5;
+  if (status === "verifier_running") return 6;
+  return 7;
 }
 
 function WorkflowProgress({ status }: { status: string }) {
@@ -74,7 +80,7 @@ function WorkflowProgress({ status }: { status: string }) {
       <div className="relative">
         <div className="absolute top-2.5 right-2.5 left-2.5 h-px bg-white/15" />
         <div className="absolute top-2.5 left-2.5 h-px bg-heritage-gold transition-all" style={{ width: `calc(${percentage}% - ${percentage === 0 ? 0 : 10}px)` }} />
-        <ol className="relative grid grid-cols-5 gap-1">
+        <ol className="relative grid grid-cols-8 gap-1">
           {workflowSteps.map((step, index) => {
             const active = index === current;
             const complete = index < current;

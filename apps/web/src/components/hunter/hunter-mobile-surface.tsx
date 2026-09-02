@@ -142,7 +142,19 @@ export function HunterMobileSurface({
         </button>
       </div>
 
-      {routeDetailsOpen ? <HunterRoutePreview onClose={() => setRouteDetailsOpen(false)} route={route} /> : null}
+      {routeDetailsOpen ? (
+        <HunterRoutePreview
+          onClose={() => setRouteDetailsOpen(false)}
+          onRemoveSelected={() => {
+            setRouteAdded(false);
+            setRouteDetailsOpen(false);
+            setConfirmationVisible(false);
+            setInvitationVisible(true);
+          }}
+          route={route}
+          selectedShopId={selected.shopId}
+        />
+      ) : null}
       {invitationVisible && !routeAdded ? (
         <HunterRouteInvitation
           isPlanning={routePlanning}
