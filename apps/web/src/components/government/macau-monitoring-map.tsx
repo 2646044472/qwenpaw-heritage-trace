@@ -300,7 +300,7 @@ export function MacauMonitoringMap({
         <p className="font-heritage-display font-semibold">澳門文化商戶監察</p>
         <p className="mt-1 text-muted-foreground text-xs">拖動地圖探索 · 滾輪縮放</p>
       </div>
-      <div className="absolute top-5 right-5 flex flex-col overflow-hidden rounded-lg border border-border/70 bg-card/95 text-foreground shadow-xl">
+      <div className="absolute top-5 right-5 z-20 flex flex-col overflow-hidden rounded-lg border border-border/70 bg-card/95 text-foreground shadow-xl">
         <button
           aria-label="放大地圖"
           className="flex size-10 items-center justify-center hover:bg-accent"
