@@ -22,6 +22,9 @@ class WorkflowConfig:
     reconnect_attempts: int
     executor_mode: str
     demo_source_path: Path | None = None
+    crawl_urls: tuple[str, ...] = ()
+    crawl_timeout: float = 15
+    crawl_max_bytes: int = 300_000
 
     @classmethod
     def from_env(cls, env=None) -> "WorkflowConfig":
@@ -50,4 +53,7 @@ class WorkflowConfig:
                 if source.get("QWENPAW_DEMO_SOURCE_PATH")
                 else None
             ),
+            crawl_urls=tuple(item.strip() for item in (source.get("QWENPAW_CRAWL_URLS") or "").split(",") if item.strip()),
+            crawl_timeout=float(source.get("QWENPAW_CRAWL_TIMEOUT_SECONDS") or "15"),
+            crawl_max_bytes=int(source.get("QWENPAW_CRAWL_MAX_BYTES") or "300000"),
         )

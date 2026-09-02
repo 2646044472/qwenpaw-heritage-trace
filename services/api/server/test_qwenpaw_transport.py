@@ -13,7 +13,7 @@ if str(SERVER_ROOT) not in sys.path:
     sys.path.insert(0, str(SERVER_ROOT))
 
 from workflows.config import WorkflowConfig
-from workflows.qwenpaw import QwenPawClient, QwenPawError
+from workflows.qwenpaw import QwenPawClient, QwenPawError, _extract_first_json_object
 
 
 class Response(io.BytesIO):
@@ -105,6 +105,9 @@ class QwenPawTransportTests(unittest.TestCase):
         stream = "".join("data: " + json.dumps(event) + "\n\n" for event in events).encode()
         client = QwenPawClient(self.config(), opener=lambda *_args, **_kwargs: Response(stream))
         self.assertEqual(client.chat_with_agent("Paw-Miner", "message", "session").text, '{"done":true}')
+
+    def test_repeated_json_objects_are_trimmed_to_first_object(self):
+        self.assertEqual(_extract_first_json_object('prefix {"done":true}{"done":false} suffix'), '{"done":true}')
 
     def test_failed_sse_event_raises_transport_error(self):
         stream = b'data: {"sequence_number":1,"status":"failed","error":{"message":"boom"}}\n\n'

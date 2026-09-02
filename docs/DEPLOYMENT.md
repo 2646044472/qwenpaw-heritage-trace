@@ -123,6 +123,18 @@ Demo-data boundary. Replace `QWENPAW_DEMO_SOURCE_PATH` in local `.env` when
 testing an operator-supplied source pack; never present the bundled fixture as
 independently verified history.
 
+### Optional: collect one or two public pages
+
+For a small live-data experiment, put `QWENPAW_CRAWL_URLS` in the ignored root
+`.env` as a comma-separated list of public `http://` or `https://` URLs. The API
+downloads each page once (bounded to `QWENPAW_CRAWL_MAX_BYTES`), extracts visible
+HTML text, records the URL as evidence, and sends that source bundle to
+Paw-Miner. Set `QWENPAW_DEMO_SOURCE_PATH=` so the crawl is used instead of the
+fictional source. This is deliberately a bounded collector: it does not log in,
+follow links, bypass robots/rate limits, call social-platform APIs, or publish
+anything. Empty or failed crawls produce a visible Workflow error rather than
+silently reverting to fictional facts.
+
 ## 5. Manually inspect a real Agent response
 
 The QwenPaw console returns `text/event-stream`, not one final JSON document.

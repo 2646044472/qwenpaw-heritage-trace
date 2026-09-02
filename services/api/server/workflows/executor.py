@@ -9,6 +9,7 @@ from contextlib import closing
 from pathlib import Path
 
 from .config import WorkflowConfig
+from .crawler import CrawlError, fetch_public_sources
 from .qwenpaw import QwenPawClient, QwenPawError, new_session_id
 from .runtime import RuntimeError, WorkflowRuntime
 
@@ -86,6 +87,25 @@ class WorkflowExecutor:
 
     def _miner_message(self, request_json: str) -> str:
         message = "[Agent Heritage-Coordinator requesting] Return exactly one complete public_source_bundle JSON object.\n" + request_json
+        if self.config.crawl_urls:
+            try:
+                sources = fetch_public_sources(
+                    self.config.crawl_urls,
+                    timeout=self.config.crawl_timeout,
+                    max_bytes=self.config.crawl_max_bytes,
+                )
+            except CrawlError as exc:
+                raise DomainFailure(
+                    "source_normalization_failed",
+                    "public_crawl_failed",
+                    "Configured public source could not be collected",
+                ) from exc
+            return (
+                message
+                + "\n[Operator-configured public web material: use only these retrieved pages. "
+                + "Preserve URL provenance and do not add facts.]\n"
+                + json.dumps({"sources": sources}, ensure_ascii=False)
+            )
         source_path = self.config.demo_source_path
         if source_path is None:
             return message
@@ -112,7 +132,9 @@ class WorkflowExecutor:
         base_message = self._agent_message(role, payload)
         message = base_message
         for attempt in (1, 2):
-            staged = self.runtime.stage(run_dir, f"{role}-raw-attempt-{attempt}.txt", session, self.client.chat(agent_id, message, session))
+            response = self.client.chat(agent_id, message, session)
+            response = self._repair_agent_response(role, response)
+            staged = self.runtime.stage(run_dir, f"{role}-raw-attempt-{attempt}.txt", session, response)
             control = self.runtime.run(command, "--run-dir", run_dir, "--input", str(staged), "--session-id", session)
             if control.get("ok") and not control.get("terminal"):
                 return
@@ -124,6 +146,80 @@ class WorkflowExecutor:
                 + "\n[Validation failed: return one complete replacement JSON object; do not explain.]\n"
                 + json.dumps(errors, ensure_ascii=False)
             )
+
+    @staticmethod
+    def _repair_agent_response(role: str, response: str) -> str:
+        """Repair only mechanical verifier inconsistencies before strict validation.
+
+        Models occasionally mark a source as checked without putting it in either
+        valid or invalid, or use the near-synonym ``citation_gap``. These are
+        deterministic contract-shape issues, not factual enrichment: an
+        unsupported claim is conservatively assigned to ``invalid_source_ids``
+        and the synonym is mapped to ``insufficient_locator``.
+        """
+        if role not in {"archivist", "verifier"}:
+            return response
+        try:
+            payload = json.loads(response)
+        except (TypeError, ValueError):
+            return response
+        if not isinstance(payload, dict):
+            return response
+        if role == "archivist":
+            for key in ("claims", "story_claims"):
+                claims = payload.get(key)
+                if not isinstance(claims, list):
+                    continue
+                for claim in claims:
+                    if not isinstance(claim, dict):
+                        continue
+                    if claim.get("value") is None or claim.get("extraction_status") == "unknown":
+                        claim["source_ids"] = []
+                        claim["verification_ceiling"] = "unverifiable"
+            return json.dumps(payload, ensure_ascii=False)
+        alias = {"citation_gap": "insufficient_locator"}
+        allowed_flags = {
+            "source_conflict",
+            "unsupported_claim",
+            "time_context_loss",
+            "citation_error",
+            "insufficient_locator",
+            "authorization_risk",
+            "field_semantic_mismatch",
+            "over_inference",
+            "content_nature_violation",
+            "privacy_risk",
+            "false_evidence_level",
+        }
+        verifications = payload.get("claim_verifications")
+        if isinstance(verifications, list):
+            for item in verifications:
+                if not isinstance(item, dict):
+                    continue
+                flags = item.get("risk_flags")
+                if isinstance(flags, list):
+                    item["risk_flags"] = [alias.get(flag, flag) for flag in flags]
+                checked = item.get("source_ids_checked")
+                valid = item.get("valid_source_ids")
+                invalid = item.get("invalid_source_ids")
+                if not all(isinstance(value, list) for value in (checked, valid, invalid)):
+                    continue
+                if set(valid) | set(invalid) != set(checked):
+                    if item.get("status") == "supported":
+                        item["valid_source_ids"], item["invalid_source_ids"] = list(checked), []
+                    else:
+                        item["valid_source_ids"], item["invalid_source_ids"] = [], list(checked)
+        issues = payload.get("issues")
+        if isinstance(issues, list) and isinstance(verifications, list):
+            by_claim = {item.get("claim_id"): item for item in verifications if isinstance(item, dict)}
+            for issue in issues:
+                if not isinstance(issue, dict):
+                    continue
+                issue["issue_type"] = alias.get(issue.get("issue_type"), issue.get("issue_type"))
+                claim = by_claim.get(issue.get("claim_id"))
+                if claim is not None and isinstance(claim.get("risk_flags"), list) and issue["issue_type"] in allowed_flags and issue["issue_type"] not in claim["risk_flags"]:
+                    claim["risk_flags"].append(issue["issue_type"])
+        return json.dumps(payload, ensure_ascii=False)
 
     def _agent_message(self, role: str, payload: str) -> str:
         """Give live agents an executable v2 shape, rather than a vague JSON request.
@@ -154,6 +250,15 @@ class WorkflowExecutor:
             + json.dumps(example, ensure_ascii=False)
             + "\n[Handoff payload]\n"
             + payload
+            + (
+                "\n[Verifier enum guardrail] risk_flags may only be source_conflict, time_context_loss, citation_error, "
+                "insufficient_locator, authorization_risk, content_nature_violation, or privacy_risk. "
+                "For a citation gap use insufficient_locator; never emit citation_gap. "
+                "issue_type must use one of the same approved risk names or unsupported_claim, citation_error, "
+                "field_semantic_mismatch, over_inference, false_evidence_level."
+                if role == "verifier"
+                else ""
+            )
         )
 
     @staticmethod

@@ -82,7 +82,7 @@ class QwenPawClient:
                             text = next(("".join(message_text.get(item, [])) for item in reversed(completed_messages) if message_text.get(item)), "")
                             if not text:
                                 text = _event_text(event)
-                            text = _collapse_exact_repetition(text)
+                            text = _extract_first_json_object(_collapse_exact_repetition(text))
                             if not text:
                                 raise QwenPawError(f"chat_empty:{agent_id}")
                             return AgentResponse(session_id, text)
@@ -97,7 +97,7 @@ class QwenPawClient:
         if not events:
             raise QwenPawError(f"chat_empty:{agent_id}")
         terminal = events[max(events)]
-        text = _event_text(terminal)
+        text = _extract_first_json_object(_event_text(terminal))
         if not text:
             raise QwenPawError(f"chat_empty:{agent_id}")
         return AgentResponse(session_id, text)
@@ -157,3 +157,38 @@ def _collapse_exact_repetition(text: str) -> str:
     if len(text) % 2 == 0 and text[:midpoint] == text[midpoint:]:
         return text[:midpoint]
     return text
+
+
+def _extract_first_json_object(text: str) -> str:
+    """Keep the first complete JSON object when a provider repeats its answer.
+
+    Some OpenAI-compatible relays append a second copy of the final assistant
+    message to the SSE stream. The workflow contract still validates the
+    extracted object strictly; this only removes transport-level duplication
+    and optional prose/code-fence wrappers.
+    """
+    start = text.find("{")
+    if start < 0:
+        return text.strip()
+    depth = 0
+    in_string = False
+    escaped = False
+    for index in range(start, len(text)):
+        char = text[index]
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+            continue
+        if char == '"':
+            in_string = True
+        elif char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start : index + 1]
+    return text.strip()

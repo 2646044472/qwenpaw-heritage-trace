@@ -34,7 +34,9 @@ export function HunterMobileSurface({
   onRouteOverviewChange?: (overview: HunterRouteOverview) => void;
 }) {
   const [selectedShopId, setSelectedShopId] = useState(initialShopId);
-  const [routeAdded, setRouteAdded] = useState(false);
+  const [includedShopIds, setIncludedShopIds] = useState(() =>
+    shops.map((shop) => shop.shopId).filter((shopId) => shopId !== initialShopId),
+  );
   const [routePlanning, setRoutePlanning] = useState(false);
   const [routeDetailsOpen, setRouteDetailsOpen] = useState(false);
   const [invitationVisible, setInvitationVisible] = useState(true);
@@ -42,9 +44,10 @@ export function HunterMobileSurface({
   const [routeAnimationActive, setRouteAnimationActive] = useState(false);
   const planningTimerRef = useRef<number | null>(null);
   const selected = shops.find((shop) => shop.shopId === selectedShopId) ?? shops[0];
+  const routeAdded = includedShopIds.includes(selected.shopId);
   const route = useMemo(
-    () => composeHunterRoute(selected.shopId, { includeSelected: routeAdded }),
-    [routeAdded, selected.shopId],
+    () => composeHunterRoute(selected.shopId, { includedShopIds }),
+    [includedShopIds, selected.shopId],
   );
 
   useEffect(() => {
@@ -75,10 +78,25 @@ export function HunterMobileSurface({
     setInvitationVisible(true);
     planningTimerRef.current = window.setTimeout(() => {
       setRoutePlanning(false);
-      setRouteAdded(true);
+      setIncludedShopIds((current) => (current.includes(selected.shopId) ? current : [...current, selected.shopId]));
       setInvitationVisible(false);
       setRouteDetailsOpen(false);
       setConfirmationVisible(true);
+      setRouteAnimationActive(true);
+      planningTimerRef.current = null;
+    }, 900);
+  };
+
+  const removeSelectedShop = () => {
+    if (routePlanning || !routeAdded) return;
+    setRoutePlanning(true);
+    setInvitationVisible(true);
+    if (planningTimerRef.current !== null) window.clearTimeout(planningTimerRef.current);
+    planningTimerRef.current = window.setTimeout(() => {
+      setIncludedShopIds((current) => current.filter((shopId) => shopId !== selected.shopId));
+      setRoutePlanning(false);
+      setRouteDetailsOpen(false);
+      setConfirmationVisible(false);
       setRouteAnimationActive(true);
       planningTimerRef.current = null;
     }, 900);
@@ -89,7 +107,6 @@ export function HunterMobileSurface({
     if (planningTimerRef.current !== null) window.clearTimeout(planningTimerRef.current);
     setSelectedShopId(shopId);
     setInvitationVisible(true);
-    setRouteAdded(false);
     setRoutePlanning(false);
     setRouteDetailsOpen(false);
     setConfirmationVisible(false);
@@ -146,19 +163,18 @@ export function HunterMobileSurface({
         <HunterRoutePreview
           onClose={() => setRouteDetailsOpen(false)}
           onRemoveSelected={() => {
-            setRouteAdded(false);
-            setRouteDetailsOpen(false);
-            setConfirmationVisible(false);
-            setInvitationVisible(true);
+            removeSelectedShop();
           }}
           route={route}
           selectedShopId={selected.shopId}
         />
       ) : null}
-      {invitationVisible && !routeAdded ? (
+      {invitationVisible ? (
         <HunterRouteInvitation
+          isAdded={routeAdded}
           isPlanning={routePlanning}
           onAdd={addSelectedShop}
+          onRemove={removeSelectedShop}
           onDismiss={() => setInvitationVisible(false)}
           shop={selected}
         />

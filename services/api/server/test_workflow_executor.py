@@ -34,6 +34,34 @@ class FakeClient:
         return '{"fake":"agent-output"}'
 
 
+class VerifierRepairTests(unittest.TestCase):
+    def test_archivist_unknown_claim_cannot_claim_source_support(self):
+        payload = {"claims": [{"claim_id": "C001", "value": None, "extraction_status": "unknown", "source_ids": ["WEB-001"], "verification_ceiling": "source_evidence"}]}
+        repaired = json.loads(WorkflowExecutor._repair_agent_response("archivist", json.dumps(payload)))
+        self.assertEqual(repaired["claims"][0]["source_ids"], [])
+        self.assertEqual(repaired["claims"][0]["verification_ceiling"], "unverifiable")
+
+    def test_repairs_source_partition_and_citation_gap_without_adding_facts(self):
+        payload = {
+            "claim_verifications": [
+                {
+                    "claim_id": "C001",
+                    "status": "unsupported",
+                    "risk_flags": ["citation_gap"],
+                    "source_ids_checked": ["WEB-001"],
+                    "valid_source_ids": [],
+                    "invalid_source_ids": [],
+                }
+            ],
+            "issues": [{"claim_id": "C001", "issue_type": "citation_gap"}],
+        }
+        repaired = json.loads(WorkflowExecutor._repair_agent_response("verifier", json.dumps(payload)))
+        verification = repaired["claim_verifications"][0]
+        self.assertEqual(verification["risk_flags"], ["insufficient_locator"])
+        self.assertEqual(verification["invalid_source_ids"], ["WEB-001"])
+        self.assertEqual(repaired["issues"][0]["issue_type"], "insufficient_locator")
+
+
 class ScriptedClient(FakeClient):
     def __init__(self, responses):
         super().__init__({"Heritage-Coordinator", "Paw-Miner", "Paw-Archivist", "Paw-Verifier"})

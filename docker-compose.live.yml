@@ -11,7 +11,12 @@ services:
       # The live competition demo gives Miner a fixed, explicitly labelled
       # fictional source. Operators can override this in ignored .env for a
       # separate source pack.
-      QWENPAW_DEMO_SOURCE_PATH: /workspace/fixtures/lei-kei-001.live-demo-source.json
+      # Use `-` (not `:-`) so an explicit blank value disables the fixture when
+      # QWENPAW_CRAWL_URLS is configured in the operator's local .env.
+      QWENPAW_DEMO_SOURCE_PATH: ${QWENPAW_DEMO_SOURCE_PATH-/workspace/fixtures/lei-kei-001.live-demo-source.json}
+      QWENPAW_CRAWL_URLS: ${QWENPAW_CRAWL_URLS:-}
+      QWENPAW_CRAWL_TIMEOUT_SECONDS: ${QWENPAW_CRAWL_TIMEOUT_SECONDS:-15}
+      QWENPAW_CRAWL_MAX_BYTES: ${QWENPAW_CRAWL_MAX_BYTES:-300000}
     depends_on:
       qwenpaw:
         condition: service_healthy

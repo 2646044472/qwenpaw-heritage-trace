@@ -88,7 +88,13 @@ The default Compose values are sufficient for fixture mode.
 | --- | --- | --- |
 | `QWENPAW_WORKFLOW_EXECUTOR` | API | `fixture` by default; live overlay sets `real` |
 | `QWENPAW_BASE_URL` | API | QwenPaw service URL, normally `http://qwenpaw:8088` |
+| `QWENPAW_CRAWL_URLS` | API | Optional comma-separated public HTTP(S) pages for live source collection |
 | provider variables in local `.env` | QwenPaw | Local model endpoint, model identifier, and provider key |
+
+真实网页采集是 live mode 的可选功能，不是默认行为。设置
+`QWENPAW_CRAWL_URLS` 后，API 会限制大小地下载这些公开 HTML 页面，提取可见文字和
+URL provenance，再交给 Paw-Miner；不会登录社交平台、发帖或抓取无限页面。留空时
+仍使用固定的 competition source，开发模式也始终不需要模型 Key。
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for mode boundaries and
 [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) for the presentation flow.

@@ -40,7 +40,8 @@ describe("HunterMobileSurface discovery notification", () => {
     fireEvent.click(screen.getByRole("button", { name: `選擇 ${nextShop.shopId}` }));
 
     await waitFor(() => {
-      expect(screen.getByRole("region", { name: `發現附近文化店舖：${nextShop.name}` })).toBeVisible();
+      expect(screen.getByRole("region", { name: `已加入行程：${nextShop.name}` })).toBeVisible();
+      expect(screen.getByRole("button", { name: "移除並重新規劃路線" })).toBeVisible();
     });
   });
 
@@ -58,7 +59,9 @@ describe("HunterMobileSurface discovery notification", () => {
     fireEvent.click(screen.getByRole("button", { name: /查看行程/ }));
     fireEvent.click(screen.getByRole("button", { name: "移除目前地點" }));
 
-    expect(screen.getByRole("button", { name: "加入行程" })).toBeVisible();
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "加入行程" })).toBeVisible();
+    });
     expect(screen.queryByText("已加進今天的行程")).not.toBeInTheDocument();
   });
 });

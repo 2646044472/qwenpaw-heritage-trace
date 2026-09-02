@@ -38,6 +38,7 @@ export type HunterRoutePlan = {
 
 export type HunterRouteOptions = {
   includeSelected?: boolean;
+  includedShopIds?: string[];
 };
 
 export type HunterShopResolution = {
@@ -128,10 +129,13 @@ export function resolveHunterShop(shopId?: string | null): HunterShopResolution 
 export function composeHunterRoute(selectedShopId?: string | null, options: HunterRouteOptions = {}): HunterRoutePlan {
   const { shop: selected } = resolveHunterShop(selectedShopId);
   const shops = getHunterShops();
+  const includedShopIds = options.includedShopIds ? new Set(options.includedShopIds) : null;
   const includeSelected = options.includeSelected ?? true;
   const ordered = [
-    ...(includeSelected ? [selected] : []),
-    ...shops.filter((shop) => shop.shopId !== selected.shopId).sort((a, b) => a.routeRank - b.routeRank),
+    ...(includeSelected && (!includedShopIds || includedShopIds.has(selected.shopId)) ? [selected] : []),
+    ...shops
+      .filter((shop) => shop.shopId !== selected.shopId && (!includedShopIds || includedShopIds.has(shop.shopId)))
+      .sort((a, b) => a.routeRank - b.routeRank),
   ];
   const stops = ordered.map((shop, index) => ({ ...shop, routePosition: index + 1 }));
 
