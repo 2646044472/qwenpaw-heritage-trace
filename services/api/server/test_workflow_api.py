@@ -167,6 +167,40 @@ class WorkflowApiTests(unittest.TestCase):
         self.assertEqual(self.request("GET", PREFIX + "/run-pending/result"), (409, {"error": "run_not_finished"}))
         self.assertEqual(self.request("GET", PREFIX + "/missing")[0], 404)
 
+    def test_resume_pending_runs_reconnects_after_process_restart(self) -> None:
+        with closing(app.connect()) as db, db:
+            timestamp = app.now_iso()
+            db.execute(
+                "INSERT INTO heritage_workflow_runs (run_id, case_id, route, state, request_json, created_at, updated_at) "
+                "VALUES ('run-restart', 'CASE-RESTART', 'mine', 'miner_running', '{}', ?, ?)",
+                (timestamp, timestamp),
+            )
+        completed = threading.Event()
+        seen: list[str] = []
+
+        def resumed(service, run_id):
+            seen.append(run_id)
+            service.finish(run_id, {"schema_version": "2.0"})
+            completed.set()
+
+        service = WorkflowApiService(app.connect, app.now_iso, executor=resumed)
+        self.assertEqual(service.resume_pending_runs(), 1)
+        self.assertTrue(completed.wait(1))
+        self.assertEqual(seen, ["run-restart"])
+        with closing(app.connect()) as db:
+            self.assertEqual(db.execute("SELECT state FROM heritage_workflow_runs WHERE run_id = 'run-restart'").fetchone()[0], "finished")
+
+    def test_resume_pending_runs_ignores_terminal_runs(self) -> None:
+        with closing(app.connect()) as db, db:
+            timestamp = app.now_iso()
+            db.execute(
+                "INSERT INTO heritage_workflow_runs (run_id, case_id, route, state, request_json, created_at, updated_at) "
+                "VALUES ('run-finished', 'CASE-FINISHED', 'mine', 'finished', '{}', ?, ?)",
+                (timestamp, timestamp),
+            )
+        service = WorkflowApiService(app.connect, app.now_iso, executor=lambda *_: self.fail("terminal run was resumed"))
+        self.assertEqual(service.resume_pending_runs(), 0)
+
     def test_every_lifecycle_state_is_contract_valid(self) -> None:
         for stage in ("input_received", "agent_resolution", "miner_running", "sources_normalized", "archivist_running", "archivist_validated", "verifier_running", "finalizing", "finished"):
             row = {"run_id": "run-stage", "case_id": "CASE-1", "route": "mine", "state": stage, "failed_stage": None, "error_json": "{}"}

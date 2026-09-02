@@ -56,6 +56,25 @@ class WorkflowApiService:
             self.executor = self._fixture_executor if config.executor_mode == "fixture" else WorkflowExecutor(config)
         self.threads: list[threading.Thread] = []
 
+    def resume_pending_runs(self) -> int:
+        """Resume non-terminal runs after an API process restart.
+
+        Run state is durable in SQLite, while execution threads are process-local.
+        A restart must therefore re-attach a worker to every accepted run that has
+        not reached a terminal state. The executor replays the persisted request
+        and writes transitions/result to the same run instead of creating a second
+        run.
+        """
+        with closing(self.connect()) as db:
+            rows = db.execute(
+                "SELECT run_id FROM heritage_workflow_runs "
+                "WHERE state NOT IN ('finished', 'completed_with_errors') "
+                "ORDER BY created_at"
+            ).fetchall()
+        for row in rows:
+            self._spawn(row["run_id"])
+        return len(rows)
+
     def handle_get(self, handler, path: str) -> bool:
         result_suffix = "/result"
         if path.startswith(PREFIX + "/") and path.endswith(result_suffix):

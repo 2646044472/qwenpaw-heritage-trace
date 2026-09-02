@@ -1417,8 +1417,9 @@ class ApiHandler(BaseHTTPRequestHandler):
 
 def main() -> None:
     initialize_database()
+    resumed = WORKFLOW_API.resume_pending_runs()
     server = ThreadingHTTPServer((HOST, PORT), ApiHandler)
-    print(f"QwenPaw API listening on {HOST}:{PORT}")
+    print(f"QwenPaw API listening on {HOST}:{PORT}; resumed {resumed} pending workflow(s)")
     server.serve_forever()
 
 
