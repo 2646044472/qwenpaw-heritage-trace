@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -126,6 +126,13 @@ function WorkflowResultDetails({ result }: { result: WorkflowResult }) {
     );
   }
   const counts = result.verification_summary.by_status;
+  const card = result.asset_card;
+  const producedFields = [
+    ["店铺名称", card.shop_name.value],
+    ["创立年份", card.founding_year.value],
+    ["地址", card.address.value],
+    ["代表产品", card.products.map((item) => item.name).join("、") || "暂无"],
+  ] as const;
   return (
     <details className="mt-2 rounded bg-white/5 px-2 py-1 text-[11px] text-slate-300">
       <summary className="cursor-pointer select-none">查看本次流程详情</summary>
@@ -138,9 +145,15 @@ function WorkflowResultDetails({ result }: { result: WorkflowResult }) {
         <span>待处理问题</span><strong className="text-slate-100">{result.issues.length}</strong>
       </div>
       <p className="mt-2 text-slate-400">“证据支持”表示 Verifier 找到来源证据并通过一致性检查，不代表社交平台曝光量。</p>
+      <div className="mt-2 border-white/10 border-t pt-2">
+        <p className="text-slate-300">已产出文化资产卡</p>
+        <dl className="mt-1 grid grid-cols-[5rem_1fr] gap-x-2 gap-y-1 text-slate-400">
+          {producedFields.map(([label, value]) => <Fragment key={label}><dt>{label}</dt><dd className="text-slate-200">{value ?? "待核实"}</dd></Fragment>)}
+        </dl>
+      </div>
       {result.issues.length > 0 ? (
         <ul className="mt-2 space-y-1 text-amber-200">
-          {result.issues.slice(0, 4).map((issue) => <li key={issue.claim_id}>{issue.description}</li>)}
+          {result.issues.slice(0, 4).map((issue) => <li key={issue.claim_id}><span className="text-amber-300">{issue.issue_type}</span>：{issue.description}（{issue.recommended_action}）</li>)}
         </ul>
       ) : null}
     </details>
