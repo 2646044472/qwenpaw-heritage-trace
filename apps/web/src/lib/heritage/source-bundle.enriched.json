@@ -13,7 +13,7 @@
                                              "lng":  113.5475
                                          },
                          "established_year":  1933,
-                         "description_zh":  "1933年創辦的澳門老字號冰室，早期以手推車沿街售賣雪糕，1960年代遷至荷蘭園現址，店內保留傳統冰室格局。",
+                         "description_zh":  "1933年創辦的澳門老字號冰室，早期以手推車沿街售賣雪糕，1960年代遷至荷蘭園現址，是澳門碩果僅存的冰室之一。",
                          "image":  null
                      },
         "heritage":  {
@@ -30,7 +30,9 @@
                          "products":  [
                                           "紅豆雪條",
                                           "雪糕磚",
-                                          "雪糕三文治"
+                                          "雪糕三文治",
+                                          "紅豆冰",
+                                          "椰子雪糕"
                                       ],
                          "persons":  [
                                          {
@@ -54,7 +56,8 @@
                                         ],
                          "operations":  [
                                             "自家製雪糕類產品",
-                                            "保留傳統冰室空間與歷史陳設"
+                                            "保留傳統冰室空間與歷史陳設",
+                                            "沿用「孖辮妹」品牌商標"
                                         ]
                      },
         "evidence":  [
@@ -94,6 +97,22 @@
                                               "heritage.products",
                                               "heritage.persons",
                                               "heritage.operations"
+                                          ],
+                             "status":  "verified"
+                         },
+                         {
+                             "id":  "lei-kei-memory-03",
+                             "type":  "archive",
+                             "title":  "禮記雪糕現址昔日外觀",
+                             "publisher":  "澳門基金會「澳門記憶」文史網",
+                             "url":  "https://www.macaumemory.mo/entries_e38d9de741de42bcb0dd956096ebfe8f?lgType=zh-mo",
+                             "published_at":  "2025-05-28",
+                             "excerpt":  "澳門記憶收錄禮記雪糕現址於1960年代遷址後的歷史照片，確認荷蘭園大馬路12號、第三代經營及1933年相關年代脈絡。",
+                             "supports":  [
+                                              "identity.address",
+                                              "heritage.founding_year",
+                                              "heritage.key_events",
+                                              "heritage.persons"
                                           ],
                              "status":  "verified"
                          }

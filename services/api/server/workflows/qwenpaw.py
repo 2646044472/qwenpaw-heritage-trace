@@ -160,35 +160,42 @@ def _collapse_exact_repetition(text: str) -> str:
 
 
 def _extract_first_json_object(text: str) -> str:
-    """Keep the first complete JSON object when a provider repeats its answer.
-
-    Some OpenAI-compatible relays append a second copy of the final assistant
-    message to the SSE stream. The workflow contract still validates the
-    extracted object strictly; this only removes transport-level duplication
-    and optional prose/code-fence wrappers.
-    """
-    start = text.find("{")
-    if start < 0:
-        return text.strip()
-    depth = 0
-    in_string = False
-    escaped = False
-    for index in range(start, len(text)):
-        char = text[index]
-        if in_string:
-            if escaped:
-                escaped = False
-            elif char == "\\":
-                escaped = True
-            elif char == '"':
-                in_string = False
+    """Extract the first valid object, recovering from malformed prefixes."""
+    candidates: list[tuple[int, int, str]] = []
+    for start, char in enumerate(text):
+        if char != "{":
             continue
-        if char == '"':
-            in_string = True
-        elif char == "{":
-            depth += 1
-        elif char == "}":
-            depth -= 1
-            if depth == 0:
-                return text[start : index + 1]
-    return text.strip()
+        depth = 0
+        in_string = False
+        escaped = False
+        for index in range(start, len(text)):
+            current = text[index]
+            if in_string:
+                if escaped:
+                    escaped = False
+                elif current == "\\":
+                    escaped = True
+                elif current == '"':
+                    in_string = False
+                continue
+            if current == '"':
+                in_string = True
+            elif current == "{":
+                depth += 1
+            elif current == "}":
+                depth -= 1
+                if depth == 0:
+                    candidate = text[start : index + 1]
+                    try:
+                        parsed = json.loads(candidate)
+                    except json.JSONDecodeError:
+                        break
+                    if isinstance(parsed, dict):
+                        if start == text.find("{"):
+                            return candidate
+                        candidates.append((len(candidate), start, candidate))
+                    break
+    if candidates:
+        return max(candidates, key=lambda item: (item[0], -item[1]))[2]
+    start = text.find("{")
+    return text[start:].strip() if start >= 0 else text.strip()

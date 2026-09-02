@@ -55,7 +55,7 @@ export function MerchantWorkflowDossier({ shop }: { shop: HeritageShop }) {
         </div>
       </dl>
       <div className="mt-5">
-        <h3 className="font-medium">RevisedAssetCard</h3>
+        <h3 className="font-medium">已核實資料明細</h3>
         <dl className="mt-3 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
           {fields.map(([label, value]) => (
             <div className="border-heritage-border border-b pb-3" key={label}>

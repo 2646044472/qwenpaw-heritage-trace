@@ -22,6 +22,34 @@ function scoreClass(score: number) {
   return "text-heritage-gold-foreground";
 }
 
+function buildSentimentAnalysis(records: SentimentSignalRecord[]) {
+  if (records.length === 0) return null;
+
+  const counts = records.reduce(
+    (result, record) => {
+      result[record.label] += 1;
+      return result;
+    },
+    { positive: 0, mixed: 0, negative: 0 },
+  );
+  const channelCounts = records.reduce<Record<string, number>>((result, record) => {
+    result[record.channel] = (result[record.channel] ?? 0) + 1;
+    return result;
+  }, {});
+  const primaryChannel = Object.entries(channelCounts).sort(([, left], [, right]) => right - left)[0]?.[0] ?? "公開渠道";
+  let channelObservation = "旅遊平台上的回應顯示，這間店已被納入旅客的行程考量。";
+  if (primaryChannel === "小紅書") channelObservation = "小紅書上的分享帶來最多討論。";
+  if (primaryChannel === "Google 評論") channelObservation = "Google 評論反映出訪客對實際到訪體驗的感受。";
+
+  if (counts.positive >= counts.mixed + counts.negative) {
+    return `訪客整體反應正面，最欣賞店舖故事與招牌產品。${channelObservation}目前最值得改善的是營業時間和位置資訊，寫得更清楚會更方便旅客到訪。`;
+  }
+  if (counts.negative > counts.positive) {
+    return `訪客對店舖的印象較為保留，主要疑問落在營業資訊和到訪體驗。${channelObservation}建議先把基礎資訊補齊，再推出新的宣傳內容。`;
+  }
+  return `訪客反應不一，大家認同店舖的特色，但到訪前仍需要更多清晰資訊。${channelObservation}補充營業時間、地圖位置和產品介紹，有助於把興趣變成實際到訪。`;
+}
+
 export function MerchantSentimentTable({
   signals,
   records,
@@ -29,6 +57,8 @@ export function MerchantSentimentTable({
   signals: ShopSignals;
   records: SentimentSignalRecord[];
 }) {
+  const analysis = buildSentimentAnalysis(records);
+
   return (
     <section
       aria-labelledby="sentiment-signals-heading"
@@ -46,7 +76,7 @@ export function MerchantSentimentTable({
         </Badge>
       </div>
       <p className="mt-3 rounded-lg bg-heritage-soft px-3 py-2 text-heritage-gold-foreground text-sm">
-        整體訊號：{signals.sentiment.summary}
+        {analysis ?? signals.sentiment.summary}
       </p>
       {records.length === 0 ? (
         <p className="py-10 text-center text-muted-foreground">暫無事件</p>

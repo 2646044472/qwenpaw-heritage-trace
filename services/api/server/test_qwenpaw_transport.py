@@ -109,6 +109,10 @@ class QwenPawTransportTests(unittest.TestCase):
     def test_repeated_json_objects_are_trimmed_to_first_object(self):
         self.assertEqual(_extract_first_json_object('prefix {"done":true}{"done":false} suffix'), '{"done":true}')
 
+    def test_malformed_prefix_is_skipped_when_provider_appends_valid_retry(self):
+        text = '{"done":{"nested":true},"truncated": {"done":true} ' + '{"done":true,"stage":"retry"}'
+        self.assertEqual(_extract_first_json_object(text), '{"done":true,"stage":"retry"}')
+
     def test_failed_sse_event_raises_transport_error(self):
         stream = b'data: {"sequence_number":1,"status":"failed","error":{"message":"boom"}}\n\n'
         client = QwenPawClient(self.config(), opener=lambda *_args, **_kwargs: Response(stream))

@@ -22,6 +22,7 @@ describe("getMerchantTelemetry", () => {
 
     expect(telemetry.map((item) => item.shop_id)).toEqual(DEMO_SHOP_SEEDS.map((shop) => shop.shop_id));
     expect(new Set(telemetry.map((item) => JSON.stringify(item))).size).toBe(DEMO_SHOP_SEEDS.length);
+    expect(telemetry.every((item) => item.exposure_events.length > 0 && item.sentiment_signals.length > 0)).toBe(true);
   });
 
   it("falls back to the first demo shop for an unknown shop", () => {

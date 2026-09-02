@@ -120,7 +120,7 @@ class WorkflowApiService:
     def _fixture_executor(self, service, run_id: str) -> None:
         with closing(self.connect()) as db:
             row = self._row(db, run_id)
-        stages = (["miner_running"] if row["route"] == "mine" else []) + ["sources_normalized", "archivist_running", "archivist_validated", "verifier_running", "finalizing"]
+        stages = ["agent_resolution"] + (["miner_running"] if row["route"] == "mine" else []) + ["sources_normalized", "archivist_running", "archivist_validated", "verifier_running", "finalizing"]
         for stage in stages:
             self.transition(run_id, stage)
             time.sleep(0.002)

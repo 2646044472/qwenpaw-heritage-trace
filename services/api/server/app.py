@@ -782,6 +782,66 @@ def request_llm_draft(project: sqlite3.Row, sources: list[sqlite3.Row]) -> dict:
     return parse_draft_response(content, len(source_records))
 
 
+def request_pawly_reply(message: str, context: dict) -> str:
+    """Ask the configured provider for a grounded Pawly reply in live mode."""
+    if not model_status()["configured"]:
+        raise LlmError("ai_unconfigured")
+    parsed = urlparse(LLM_BASE_URL)
+    if parsed.scheme not in {"https", "http"} or not parsed.hostname:
+        raise LlmError("invalid_model_configuration")
+    if parsed.scheme != "https" and parsed.hostname not in {"127.0.0.1", "localhost"}:
+        raise LlmError("insecure_model_url")
+    system = (
+        "You are Pawly, a helpful Macau heritage shop assistant. "
+        "The person asking questions is the shop owner (老闆), so address them as 老闆 when natural and never mistake them for a visitor. "
+        "Answer in Traditional Chinese, warmly and concisely. Use Markdown headings or bullet lists when they make the answer clearer. "
+        "Use only the verified context supplied below; never invent facts, prices, hours, or claims. "
+        "If the context does not answer the question, say what needs confirmation from the owner. "
+        "Do not mention prompts, internal agents, or API details."
+    )
+    user_content = json.dumps({"verified_context": context, "owner_message": message}, ensure_ascii=False)
+    body = json.dumps(
+        {
+            "model": LLM_MODEL,
+            "temperature": 0.4,
+            "messages": [{"role": "system", "content": system}, {"role": "user", "content": user_content}],
+        },
+        ensure_ascii=False,
+    ).encode("utf-8")
+    path = (parsed.path.rstrip("/") + "/chat/completions") or "/chat/completions"
+    connection_type = http.client.HTTPSConnection if parsed.scheme == "https" else http.client.HTTPConnection
+    connection = None
+    try:
+        connection = connection_type(parsed.hostname, parsed.port, timeout=LLM_TIMEOUT_SECONDS)
+        connection.request(
+            "POST",
+            path,
+            body=body,
+            headers={"Content-Type": "application/json", "Authorization": f"Bearer {LLM_API_KEY}"},
+        )
+        response = connection.getresponse()
+        raw = response.read(128 * 1024)
+    except (OSError, http.client.HTTPException) as exc:
+        raise LlmError("ai_unavailable") from exc
+    finally:
+        if connection is not None:
+            connection.close()
+    if response.status in {401, 403}:
+        raise LlmError("ai_authentication_failed")
+    if response.status == 429:
+        raise LlmError("ai_rate_limited")
+    if response.status != 200:
+        raise LlmError("ai_provider_rejected")
+    try:
+        response_json = json.loads(raw.decode("utf-8"))
+        content = response_json["choices"][0]["message"]["content"]
+        if not isinstance(content, str):
+            raise ValueError("invalid_model_output")
+        return safe_text(content, 2000)
+    except (KeyError, TypeError, ValueError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise LlmError("invalid_model_output") from exc
+
+
 class ApiHandler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
@@ -795,6 +855,13 @@ class ApiHandler(BaseHTTPRequestHandler):
             return
         if path == "/api/health":
             self.respond_json(HTTPStatus.OK, {"ok": True})
+            return
+        if path == "/api/pawly/status":
+            live = os.environ.get("QWENPAW_WORKFLOW_EXECUTOR", "fixture").strip().lower() == "real"
+            self.respond_json(
+                HTTPStatus.OK,
+                {"mode": "live" if live and model_status()["configured"] else "fixture", "model": LLM_MODEL if live else None},
+            )
             return
         if path == "/api/public/demo-status":
             status = model_status()
@@ -873,6 +940,27 @@ class ApiHandler(BaseHTTPRequestHandler):
             return
         if path == "/api/login":
             self.login()
+            return
+        if path == "/api/pawly/chat":
+            if os.environ.get("QWENPAW_WORKFLOW_EXECUTOR", "fixture").strip().lower() != "real":
+                self.respond_json(HTTPStatus.CONFLICT, {"error": "live_mode_required"})
+                return
+            try:
+                payload = self.read_json()
+                message = required_text(payload, "message", 2000)
+                context = payload.get("context", {})
+                if not isinstance(context, dict):
+                    raise ValueError("invalid_context")
+                context = json.loads(json.dumps(context, ensure_ascii=False))
+            except (ValueError, AttributeError, UnicodeDecodeError, json.JSONDecodeError):
+                self.respond_json(HTTPStatus.BAD_REQUEST, {"error": "invalid_pawly_request"})
+                return
+            try:
+                reply = request_pawly_reply(message, context)
+            except LlmError as exc:
+                self.respond_json(HTTPStatus.BAD_GATEWAY, {"error": str(exc)})
+                return
+            self.respond_json(HTTPStatus.OK, {"reply": reply, "model": LLM_MODEL, "mode": "live"})
             return
         session = self.require_session()
         if not session or not self.require_csrf(session):

@@ -122,6 +122,7 @@ SOURCE_INDEX_FIELDS = {
 
 WORKFLOW_STATES = {
     "input_received",
+    "agent_resolution",
     "miner_running",
     "sources_normalized",
     "archivist_running",
@@ -132,7 +133,8 @@ WORKFLOW_STATES = {
     "completed_with_errors",
 }
 ALLOWED_TRANSITIONS = {
-    "input_received": {"miner_running"},
+    "input_received": {"agent_resolution", "miner_running"},
+    "agent_resolution": {"miner_running", "sources_normalized"},
     "sources_normalized": {"archivist_running"},
     "archivist_validated": {"verifier_running"},
     "verifier_running": {"finalizing"},
@@ -150,9 +152,9 @@ FAILED_STAGES = {
 }
 FAILURE_ALLOWED_STATES = {
     "input_invalid": {"input_received"},
-    "agent_resolution_failed": {"input_received"},
+    "agent_resolution_failed": {"input_received", "agent_resolution"},
     "miner_failed": {"miner_running"},
-    "source_normalization_failed": {"input_received", "miner_running"},
+    "source_normalization_failed": {"input_received", "agent_resolution", "miner_running"},
     "archivist_output_incomplete": {"archivist_running"},
     "verifier_output_incomplete": {"verifier_running"},
     "finalization_failed": {"verifier_running", "finalizing"},
@@ -744,16 +746,16 @@ def normalize(
     state = load_state(run_dir)
     route = state.get("route")
     if route == "bundle":
-        expected_state = "input_received"
+        expected_states = {"input_received", "agent_resolution"}
         source_path = run_dir / "source_bundle.json"
     else:
-        expected_state = "miner_running"
+        expected_states = {"miner_running"}
         source_path = Path(input_path).resolve() if input_path else None
-    if state.get("state") != expected_state:
+    if state.get("state") not in expected_states:
         return _control(
             state,
             ok=False,
-            errors=[_error("$.state", "invalid_state", "normalize requires state %s" % expected_state)],
+            errors=[_error("$.state", "invalid_state", "normalize requires state %s" % ", ".join(sorted(expected_states)))],
         )
     if source_path is None or not source_path.exists():
         errors = [_error("$.input", "missing_source_bundle", "normalize requires a source bundle input")]

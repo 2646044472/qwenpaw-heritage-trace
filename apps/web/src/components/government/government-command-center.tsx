@@ -479,6 +479,8 @@ export function GovernmentCommandCenter() {
               <span>{workflow.isRunning ? "工作流程執行中" : "系統運作正常"}</span>
               {workflow.isRunning ? (
                 <button className="rounded px-2 py-1 hover:bg-white/10" onClick={abortWorkflow} type="button">中止</button>
+              ) : workflow.runId ? (
+                <span className="text-slate-400">本次流程已完成 · {workflow.runId}</span>
               ) : (
                 <button aria-label="Run live workflow" className="flex items-center gap-1 rounded px-2 py-1 hover:bg-white/10" onClick={() => void startWorkflow()} type="button">
                   <Play className="size-3" />

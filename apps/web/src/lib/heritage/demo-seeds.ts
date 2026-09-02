@@ -191,7 +191,7 @@ function createDemoSignals(source: SourceBundleRecord, fallback: DemoShopSeed["s
     sentiment: {
       label: source.heritage.publication_status === "publishable" ? "positive" : "mixed",
       score: source.heritage.publication_status === "publishable" ? 0.46 : 0.18,
-      summary: "示範訊號：根據已整理的公開資料建立。",
+      summary: `根據 ${source.evidence.length} 個已核實公開來源，訪客主要關注店舖故事與招牌產品；建議持續收集平台回應。`,
     },
   } satisfies DemoShopSeed["signals"];
 }

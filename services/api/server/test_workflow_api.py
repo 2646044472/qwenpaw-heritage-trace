@@ -168,7 +168,7 @@ class WorkflowApiTests(unittest.TestCase):
         self.assertEqual(self.request("GET", PREFIX + "/missing")[0], 404)
 
     def test_every_lifecycle_state_is_contract_valid(self) -> None:
-        for stage in ("input_received", "miner_running", "sources_normalized", "archivist_running", "archivist_validated", "verifier_running", "finalizing", "finished"):
+        for stage in ("input_received", "agent_resolution", "miner_running", "sources_normalized", "archivist_running", "archivist_validated", "verifier_running", "finalizing", "finished"):
             row = {"run_id": "run-stage", "case_id": "CASE-1", "route": "mine", "state": stage, "failed_stage": None, "error_json": "{}"}
             projected = status_projection(row)
             validate_schema(projected, "WorkflowStatus")

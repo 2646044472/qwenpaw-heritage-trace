@@ -67,6 +67,7 @@ function isWorkflowStatus(value: unknown): value is WorkflowStatus {
     (record.route === "mine" || record.route === "bundle") &&
     [
       "input_received",
+      "agent_resolution",
       "miner_running",
       "sources_normalized",
       "archivist_running",
@@ -268,6 +269,61 @@ export async function runHeritageWorkflow(
       await requestJson(
         fetchImpl,
         `${baseUrl}${WORKFLOW_PATH}/${encodeURIComponent(status.run_id)}/result`,
+        { method: "GET" },
+        200,
+        requestContext.signal,
+        "Workflow result",
+      ),
+    );
+  } catch (error) {
+    throw mapTransportError(error);
+  } finally {
+    requestContext.dispose();
+  }
+}
+
+/** Resume an already accepted run without submitting a second workflow. */
+export async function resumeHeritageWorkflow(
+  runId: string,
+  options: WorkflowAdapterOptions = {},
+): Promise<WorkflowResult> {
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const baseUrl = normalizeBaseUrl(options.baseUrl ?? HERITAGE_API_BASE_URL);
+  const timeoutMs = options.timeoutMs ?? DEFAULT_WORKFLOW_TIMEOUT_MS;
+  const pollIntervalMs = options.pollIntervalMs ?? 1_000;
+  const requestContext = createRequestContext(timeoutMs, options.signal);
+
+  try {
+    if (requestContext.signal.aborted) throw mapTransportError(requestContext.signal.reason);
+    let status = parseWorkflowStatus(
+      await requestJson(
+        fetchImpl,
+        `${baseUrl}${WORKFLOW_PATH}/${encodeURIComponent(runId)}`,
+        { method: "GET" },
+        200,
+        requestContext.signal,
+        "Workflow status",
+      ),
+    );
+    options.onStatus?.(status);
+    while (status.workflow_status === "running") {
+      await waitFor(pollIntervalMs, requestContext.signal);
+      status = parseWorkflowStatus(
+        await requestJson(
+          fetchImpl,
+          `${baseUrl}${WORKFLOW_PATH}/${encodeURIComponent(runId)}`,
+          { method: "GET" },
+          200,
+          requestContext.signal,
+          "Workflow status",
+        ),
+      );
+      options.onStatus?.(status);
+    }
+    return parseWorkflowResult(
+      await requestJson(
+        fetchImpl,
+        `${baseUrl}${WORKFLOW_PATH}/${encodeURIComponent(runId)}/result`,
         { method: "GET" },
         200,
         requestContext.signal,

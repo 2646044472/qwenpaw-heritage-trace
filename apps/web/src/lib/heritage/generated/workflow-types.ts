@@ -179,7 +179,7 @@ export interface components {
             /** @enum {unknown} */
             route: "mine" | "bundle";
             /** @enum {unknown} */
-            state: "input_received" | "miner_running" | "sources_normalized" | "archivist_running" | "archivist_validated" | "verifier_running" | "finalizing" | "finished" | "completed_with_errors";
+            state: "input_received" | "agent_resolution" | "miner_running" | "sources_normalized" | "archivist_running" | "archivist_validated" | "verifier_running" | "finalizing" | "finished" | "completed_with_errors";
             /** @enum {unknown} */
             workflow_status: "running" | "finished" | "completed_with_errors";
             agents: components["schemas"]["Agents"];

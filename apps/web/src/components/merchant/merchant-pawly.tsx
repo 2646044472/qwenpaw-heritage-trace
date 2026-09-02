@@ -12,6 +12,7 @@ import { useDemoState } from "../demo/demo-state-provider";
 
 import { MerchantChatComposer } from "./merchant-chat-composer";
 import { MerchantChatMessage } from "./merchant-chat-message";
+import { PawlyMarkdown } from "./pawly-markdown";
 import { type MerchantTopic, merchantOpeningPrompt, merchantTopics } from "./merchant-demo-copy";
 import { MerchantDraftPreview } from "./merchant-draft-preview";
 import { merchantHeroCopy } from "./merchant-hero-copy";
@@ -34,6 +35,44 @@ function getThinkingLabel(request: PendingRequest | null) {
   return "Pawly 正在整理已核實資料";
 }
 
+function getLiveFollowUps(message: string, reply: string): string[] {
+  const conversation = `${message} ${reply}`;
+  if (/產品|雪糕|紅豆|椰子/.test(conversation)) {
+    return ["想整理一段招牌產品介紹", "哪些產品資料仍要向店主確認？", "點樣講好傳統雪糕故事？"];
+  }
+  if (/歷史|創立|1933|傳承|故事|地址/.test(conversation)) {
+    return ["幫我整理一條店舖歷史時間線", "想補充第三代傳承故事", "哪些歷史資料仍要確認？"];
+  }
+  if (/曝光|網上|瀏覽|流量|宣傳/.test(conversation)) {
+    return ["曝光下降可以先做哪三件事？", "幫我設計一個老店故事貼文", "想比較不同宣傳渠道"];
+  }
+  if (/評價|市民|客人|遊客|口碑/.test(conversation)) {
+    return ["怎樣回應客人的正面評價？", "幫我整理客人最重視的特色", "如何把評價變成宣傳內容？"];
+  }
+  return ["可以再講具體一點嗎？", "哪些資料仍需要我確認？", "幫我整理下一步行動"];
+}
+
+async function requestLivePawlyReply(message: string, shop: HeritageShop): Promise<string> {
+  const response = await fetch("/api/pawly/chat", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      message,
+      context: {
+        shop_name: shop.name,
+        verified_asset: shop.workflow.asset_card,
+        verification_summary: shop.workflow.verification_summary,
+        signals: shop.signals,
+      },
+    }),
+  });
+  const payload = (await response.json()) as { reply?: unknown; error?: unknown };
+  if (!response.ok || typeof payload.reply !== "string") {
+    throw new Error(typeof payload.error === "string" ? payload.error : "pawly_request_failed");
+  }
+  return payload.reply;
+}
+
 export function MerchantPawly({ shop }: { shop: HeritageShop }) {
   const { state } = useDemoState();
   const [composerValue, setComposerValue] = useState("");
@@ -42,12 +81,32 @@ export function MerchantPawly({ shop }: { shop: HeritageShop }) {
   const [showDetailChoices, setShowDetailChoices] = useState(false);
   const [publicationState, setPublicationState] = useState<PublicationFlowState>("idle");
   const [turns, setTurns] = useState<ConversationTurn[]>([]);
+  const [liveMode, setLiveMode] = useState(false);
+  const [liveFollowUps, setLiveFollowUps] = useState<string[]>([]);
   const sharedShop =
     state.selectedShopId === HERO_SHOP_ID && state.pipeline.workflowResult?.workflow_status === "finished"
       ? createHeritageShopFromWorkflow(HERO_SHOP_ID, state.pipeline.workflowResult)
       : shop;
+  const isLiveMode = liveMode;
   const telemetry = getMerchantTelemetry(sharedShop.shop_id);
   const heroCopy = merchantHeroCopy[sharedShop.shop_id];
+
+  useEffect(() => {
+    let active = true;
+    void fetch("/api/pawly/chat", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload: unknown) => {
+        if (active && payload && typeof payload === "object" && "mode" in payload) {
+          setLiveMode(payload.mode === "live");
+        }
+      })
+      .catch(() => {
+        if (active) setLiveMode(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!pendingRequest) return;
@@ -95,7 +154,7 @@ export function MerchantPawly({ shop }: { shop: HeritageShop }) {
   }, [publicationState, telemetry.publication.post_id, telemetry.publication.published_at]);
 
   useEffect(() => {
-    if (!isResponding) return;
+    if (!isResponding || isLiveMode) return;
     const timer = window.setTimeout(() => {
       setTurns((current) => [
         ...current,
@@ -104,11 +163,41 @@ export function MerchantPawly({ shop }: { shop: HeritageShop }) {
       setIsResponding(false);
     }, 500);
     return () => window.clearTimeout(timer);
-  }, [isResponding]);
+  }, [isLiveMode, isResponding]);
+
+  function askLive(message: string) {
+    setShowDetailChoices(false);
+    setLiveFollowUps([]);
+    setTurns((current) => [...current, { id: `owner-live-${Date.now()}`, kind: "text", speaker: "owner", text: message }]);
+    setIsResponding(true);
+    void requestLivePawlyReply(message, sharedShop)
+      .then((reply) => {
+        setTurns((current) => [...current, { id: `reply-live-${Date.now()}`, kind: "reply", speaker: "pawly", text: reply }]);
+        setLiveFollowUps(getLiveFollowUps(message, reply));
+      })
+      .catch(() => {
+        setTurns((current) => [
+          ...current,
+          {
+            id: `reply-live-error-${Date.now()}`,
+            kind: "reply",
+            speaker: "pawly",
+            text: "Pawly 暫時未能連線到模型，請稍後再試。",
+          },
+        ]);
+        setLiveFollowUps(["可以再試一次嗎？", "哪些資料仍需要我確認？", "先幫我整理目前重點"]);
+      })
+      .finally(() => setIsResponding(false));
+  }
 
   function askTopic(topic: MerchantTopic) {
     const label = merchantTopics.find((item) => item.id === topic)?.label;
     if (!label) return;
+
+    if (isLiveMode) {
+      askLive(label);
+      return;
+    }
 
     setTurns((current) => [
       ...current,
@@ -119,6 +208,11 @@ export function MerchantPawly({ shop }: { shop: HeritageShop }) {
   }
 
   function askOpeningPrompt() {
+    if (isLiveMode) {
+      askLive(merchantOpeningPrompt);
+      return;
+    }
+
     setTurns((current) => [
       ...current,
       { id: `owner-overview-${Date.now()}`, kind: "text", speaker: "owner", text: merchantOpeningPrompt },
@@ -129,6 +223,12 @@ export function MerchantPawly({ shop }: { shop: HeritageShop }) {
   function sendMessage() {
     const text = composerValue.trim();
     if (!text || isResponding) return;
+
+    if (isLiveMode) {
+      askLive(text);
+      setComposerValue("");
+      return;
+    }
 
     setTurns((current) => [...current, { id: `owner-free-${Date.now()}`, kind: "text", speaker: "owner", text }]);
     setComposerValue("");
@@ -148,7 +248,10 @@ export function MerchantPawly({ shop }: { shop: HeritageShop }) {
               <p className="mt-0.5 text-muted-foreground text-sm">{heroCopy?.displayName ?? shop.name}</p>
             </div>
           </div>
-          <span className="text-muted-foreground text-sm">商戶對話</span>
+          <div className="flex items-center gap-3">
+            {liveMode ? <span className="rounded-full bg-heritage-success/15 px-2.5 py-1 text-heritage-success text-xs">Live LLM</span> : null}
+            <span className="text-muted-foreground text-sm">商戶對話</span>
+          </div>
         </div>
       </header>
 
@@ -174,7 +277,7 @@ export function MerchantPawly({ shop }: { shop: HeritageShop }) {
                   topic={turn.topic}
                 />
               ) : (
-                <p>{turn.text}</p>
+                turn.speaker === "pawly" ? <PawlyMarkdown>{turn.text}</PawlyMarkdown> : <p>{turn.text}</p>
               )}
             </MerchantChatMessage>
           ))}
@@ -231,20 +334,34 @@ export function MerchantPawly({ shop }: { shop: HeritageShop }) {
         <section aria-label="Pawly 建議問題" className="mt-9 border-heritage-border border-t pt-5">
           <p className="text-muted-foreground text-sm">{turns.length === 0 ? "你可以問 Pawly：" : "繼續問 Pawly："}</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            {(turns.length > 0 && !showDetailChoices && !pendingRequest ? merchantTopics : []).map((topic) => {
-              const Icon = icons[topic.id];
-              return (
-                <button
-                  className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-heritage-border bg-heritage-surface px-4 font-medium text-sm transition-colors hover:border-heritage/60 hover:bg-heritage-success-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
-                  key={topic.id}
-                  onClick={() => askTopic(topic.id)}
-                  type="button"
-                >
-                  <Icon aria-hidden="true" className="size-4 text-heritage-gold-foreground" />
-                  {topic.label}
-                </button>
-              );
-            })}
+            {turns.length > 0 && !showDetailChoices && !pendingRequest && !isResponding
+              ? isLiveMode
+                ? liveFollowUps.map((prompt) => (
+                    <button
+                      className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-heritage-border bg-heritage-surface px-4 font-medium text-sm transition-colors hover:border-heritage/60 hover:bg-heritage-success-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
+                      key={prompt}
+                      onClick={() => askLive(prompt)}
+                      type="button"
+                    >
+                      <MessageCircle aria-hidden="true" className="size-4 text-heritage-gold-foreground" />
+                      {prompt}
+                    </button>
+                  ))
+                : merchantTopics.map((topic) => {
+                    const Icon = icons[topic.id];
+                    return (
+                      <button
+                        className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-heritage-border bg-heritage-surface px-4 font-medium text-sm transition-colors hover:border-heritage/60 hover:bg-heritage-success-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-heritage"
+                        key={topic.id}
+                        onClick={() => askTopic(topic.id)}
+                        type="button"
+                      >
+                        <Icon aria-hidden="true" className="size-4 text-heritage-gold-foreground" />
+                        {topic.label}
+                      </button>
+                    );
+                  })
+              : null}
             {turns.length === 0 ? (
               <button
                 className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-heritage-border bg-heritage-surface px-4 font-medium text-sm transition-colors hover:border-heritage/60 hover:bg-heritage-success-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-heritage"

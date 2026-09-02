@@ -155,7 +155,15 @@ export function GovernmentEvidenceDetail({ shop }: { shop: HeritageShop }) {
                   })}
                 </ul>
               ) : (
-                <p className="mt-4 text-muted-foreground text-sm">目前沒有需要公開審視的事項。</p>
+                <p className="mt-4 text-muted-foreground text-sm leading-relaxed">
+                  {insight.attention_priority === "low"
+                    ? "目前沒有需要公開審視的事項。"
+                      : `目前沒有阻塞性審視事項，但仍標記為${priority[insight.attention_priority]}。${
+                          insight.priority_reasons[0]
+                            ? `主要原因：${insight.priority_reasons[0].label}。`
+                            : "請留意右側監察原因。"
+                        }`}
+                </p>
               )}
             </section>
 

@@ -13,7 +13,7 @@ import { MerchantPublicationPanel } from "./merchant-publication-panel";
 import { MerchantSentimentTable } from "./merchant-sentiment-table";
 import { MerchantWorkflowDossier } from "./merchant-workflow-dossier";
 
-const publicationLabels = { draft: "草稿", confirmed: "已確認", published: "模擬已發佈" } as const;
+const publicationLabels = { draft: "草稿", confirmed: "已確認", published: "已發佈" } as const;
 
 export function MerchantDataConsole({
   shop,

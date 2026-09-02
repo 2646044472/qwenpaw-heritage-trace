@@ -276,6 +276,19 @@ class WorkflowExecutorTests(unittest.TestCase):
         self.assertIn("return the supplied example object exactly as-is", message)
         self.assertIn("Do not infer, add, remove", message)
 
+    def test_fixed_demo_archivist_example_preserves_supported_product(self):
+        payload = json.dumps(
+            {
+                "case_id": "CASE-1",
+                "shop_name": "禮記雪糕",
+                "sources": [{"source_id": "S1", "content": "示範產品為椰子雪糕", "content_type": "original_text"}],
+            },
+            ensure_ascii=False,
+        )
+        example = WorkflowExecutor._archivist_example(payload, fixed_demo=True)
+        self.assertEqual(example["asset_card"]["products"], [{"name": "椰子雪糕", "claim_id": "C006"}])
+        self.assertEqual(example["claims"][-1]["field"], "product")
+
 
 if __name__ == "__main__":
     unittest.main()

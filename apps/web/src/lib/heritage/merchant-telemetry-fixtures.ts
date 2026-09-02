@@ -1,5 +1,5 @@
 import { DEMO_SHOP_SEEDS } from "./demo-seeds";
-import type { MerchantTelemetry } from "./merchant-telemetry-types";
+import type { MerchantTelemetry, SentimentSignalRecord } from "./merchant-telemetry-types";
 import { getSourceBundleRecord } from "./source-bundle";
 
 const MERCHANT_TELEMETRY_FIXTURES: MerchantTelemetry[] = [
@@ -118,11 +118,11 @@ const MERCHANT_TELEMETRY_FIXTURES: MerchantTelemetry[] = [
     ],
     publication: {
       platform: "xiaohongshu",
-      status: "draft",
-      post_id: null,
+      status: "published",
+      post_id: "demo-lei-kei-20260808",
       created_at: "2026-08-08T08:00:00.000Z",
-      published_at: null,
-      metrics: { impressions: 0, saves: 0, comments: 0 },
+      published_at: "2026-08-08T09:30:00.000Z",
+      metrics: { impressions: 248, saves: 34, comments: 12 },
     },
   },
   {
@@ -371,30 +371,103 @@ const MERCHANT_TELEMETRY_FIXTURES: MerchantTelemetry[] = [
   },
 ];
 
+const DEMO_DATE = "2026-08";
+const REFERRERS = ["小紅書", "澳門旅遊指南", "Google 搜尋", "直接進入"] as const;
+const DEVICES = ["mobile", "desktop", "tablet"] as const;
+const ROUTES = ["/merchant", "/hunter", "/government"] as const;
+const EVENT_TYPES = ["impression", "detail_view", "save", "route_add"] as const;
+const CHANNELS = ["小紅書", "Google 評論", "旅遊平台"] as const;
+const EXCERPT_SETS = [
+  [
+    "The family story behind this shop is the reason visitors remember the stop.",
+    "招牌產品味道穩定，訪客建議安排在歷史街區路線內。",
+    "Several visitors asked for clearer opening hours before making a detour.",
+    "Local craft and the long-running recipe are the strongest reasons to visit.",
+  ],
+  [
+    "An easy cultural stop for a short Macau itinerary.",
+    "Visitors describe this as a warm local experience rather than a tourist-only stop.",
+    "Photos are shared often, but the shop story is still under-explained online.",
+    "Good value and generous portions keep the recommendation positive.",
+  ],
+  [
+    "A quiet corner with a flavour that feels specific to old Macau.",
+    "老街氣氛和店內手藝同樣吸引，適合加入半日散步路線。",
+    "The location is easy to miss; visitors want a clearer map pin and directions.",
+    "Returning customers mention the familiar taste and friendly welcome.",
+  ],
+  [
+    "Worth a second visit when you want to explore beyond the landmark streets.",
+    "旅客最常提到傳統做法，也期待看到更多製作故事。",
+    "Reviews are positive overall, with a small concern about peak-hour waiting.",
+    "A distinctive local product with strong potential for heritage storytelling.",
+  ],
+] as const;
+
+function createGeneratedTelemetry(source: NonNullable<ReturnType<typeof getSourceBundleRecord>>, index: number): MerchantTelemetry {
+  const rank = source.hunter.route_rank ?? index + 1;
+  const current = Math.max(42, 228 - rank * 13);
+  const baseImpressions = current * 2 + 72;
+  const status: MerchantTelemetry["publication"]["status"] =
+    source.heritage.publication_status === "needs_review" ? "confirmed" : "published";
+  const day = (index % 6) + 3;
+
+  const exposure_events: MerchantTelemetry["exposure_events"] = Array.from({ length: 6 }, (_, eventIndex) => ({
+    id: `${source.shop_id}-exposure-${String(eventIndex + 1).padStart(2, "0")}`,
+    shop_id: source.shop_id,
+    occurred_at: `${DEMO_DATE}-${String(Math.min(9, day + eventIndex)).padStart(2, "0")}T${String(2 + eventIndex).padStart(2, "0")}:${String((index * 7 + eventIndex * 11) % 60).padStart(2, "0")}:00.000Z`,
+    ip_address: eventIndex % 2 === 0 ? `203.0.113.${20 + index * 5 + eventIndex}` : `198.51.100.${30 + index * 5 + eventIndex}`,
+    ip_visibility: "anonymized",
+    referrer: REFERRERS[(index + eventIndex) % REFERRERS.length],
+    device: DEVICES[(index + eventIndex) % DEVICES.length],
+    route: ROUTES[(index + eventIndex) % ROUTES.length],
+    event_type: EVENT_TYPES[eventIndex % EVENT_TYPES.length],
+  }));
+
+  let sentimentLabel: SentimentSignalRecord["label"] = "positive";
+  if (source.heritage.publication_status === "needs_review" || rank % 4 === 0) sentimentLabel = "mixed";
+  let sentimentScore = -0.08;
+  if (sentimentLabel === "positive") sentimentScore = 0.52 + (index % 4) * 0.08;
+  if (sentimentLabel === "mixed") sentimentScore = 0.12 + (index % 3) * 0.05;
+  const sentiment_signals: MerchantTelemetry["sentiment_signals"] = Array.from({ length: 4 }, (_, signalIndex) => ({
+    id: `${source.shop_id}-sentiment-${String(signalIndex + 1).padStart(2, "0")}`,
+    shop_id: source.shop_id,
+    occurred_at: `${DEMO_DATE}-${String(Math.min(9, day + signalIndex)).padStart(2, "0")}T05:00:00.000Z`,
+    channel: CHANNELS[(index + signalIndex) % CHANNELS.length],
+    label: signalIndex === 2 && sentimentLabel === "positive" ? "mixed" : sentimentLabel,
+    score: Number((sentimentScore - signalIndex * 0.04).toFixed(2)),
+    excerpt: EXCERPT_SETS[index % EXCERPT_SETS.length][signalIndex],
+    source_count: Math.max(7, 18 - index + signalIndex * 2),
+  }));
+
+  return {
+    shop_id: source.shop_id,
+    generated_at: "2026-08-09T08:00:00.000Z",
+    exposure_events,
+    sentiment_signals,
+    publication: {
+      platform: source.merchant.publication.platform,
+      status,
+      post_id: `demo-${source.shop_id}-2026080${Math.min(9, day + 2)}`,
+      created_at: `${DEMO_DATE}-${String(Math.min(9, day + 1)).padStart(2, "0")}T08:00:00.000Z`,
+      published_at: status === "published" ? `${DEMO_DATE}-${String(Math.min(9, day + 2)).padStart(2, "0")}T09:30:00.000Z` : null,
+      metrics: {
+        impressions: baseImpressions,
+        saves: Math.round(baseImpressions * 0.14),
+        comments: Math.round(baseImpressions * 0.045),
+      },
+    },
+  };
+}
+
 export function getMerchantTelemetry(shopId?: string): MerchantTelemetry {
   const fixture = MERCHANT_TELEMETRY_FIXTURES.find((telemetry) => telemetry.shop_id === shopId);
   if (fixture) return fixture;
 
   const source = getSourceBundleRecord(shopId);
   if (source) {
-    return {
-      shop_id: source.shop_id,
-      generated_at: "2026-08-09T08:00:00.000Z",
-      exposure_events: [],
-      sentiment_signals: [],
-      publication: {
-        platform: source.merchant.publication.platform,
-        status: source.merchant.publication.status,
-        post_id: null,
-        created_at: "2026-08-09T08:00:00.000Z",
-        published_at: null,
-        metrics: {
-          impressions: source.merchant.publication.metrics.impressions ?? 0,
-          saves: source.merchant.publication.metrics.saves ?? 0,
-          comments: source.merchant.publication.metrics.comments ?? 0,
-        },
-      },
-    };
+    const sourceIndex = DEMO_SHOP_SEEDS.findIndex((shop) => shop.shop_id === source.shop_id);
+    return createGeneratedTelemetry(source, Math.max(0, sourceIndex));
   }
 
   const fallbackShopId = DEMO_SHOP_SEEDS[0]?.shop_id;

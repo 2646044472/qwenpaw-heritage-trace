@@ -7,10 +7,11 @@ import json
 from workflow_contract import validate_schema
 
 AGENT_NAMES = ("miner", "archivist", "verifier")
-STAGES = {"input_received", "miner_running", "sources_normalized", "archivist_running", "archivist_validated", "verifier_running", "finalizing", "finished", "completed_with_errors"}
+STAGES = {"input_received", "agent_resolution", "miner_running", "sources_normalized", "archivist_running", "archivist_validated", "verifier_running", "finalizing", "finished", "completed_with_errors"}
 FAILED_STAGES = {"input_invalid", "agent_resolution_failed", "miner_failed", "source_normalization_failed", "archivist_output_incomplete", "verifier_output_incomplete", "finalization_failed"}
 STAGE_AGENTS = {
     "input_received": ("not_started", "not_started", "not_started"),
+    "agent_resolution": ("not_started", "not_started", "not_started"),
     "miner_running": ("running", "not_started", "not_started"),
     "sources_normalized": ("completed", "not_started", "not_started"),
     "archivist_running": ("completed", "running", "not_started"),

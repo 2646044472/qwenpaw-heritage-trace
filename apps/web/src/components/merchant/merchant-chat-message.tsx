@@ -1,11 +1,13 @@
 import type { ReactNode } from "react";
 
-import { LoaderCircle, PawPrint } from "lucide-react";
+import { Check, LoaderCircle, PawPrint } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
 export type MerchantChatRole = "pawly" | "owner";
+const thinkingSteps = ["讀取已核實資料", "整理店舖背景與近期訊號", "組織回答內容"];
 
 export function MerchantChatMessage({
   children,
@@ -20,6 +22,14 @@ export function MerchantChatMessage({
 }) {
   const owner = speaker === "owner";
   const roleLabel = owner ? "老闆" : "Pawly";
+  const [thinkingStep, setThinkingStep] = useState(0);
+
+  useEffect(() => {
+    if (!isThinking) return;
+    setThinkingStep(0);
+    const timer = window.setInterval(() => setThinkingStep((step) => Math.min(step + 1, thinkingSteps.length - 1)), 900);
+    return () => window.clearInterval(timer);
+  }, [isThinking]);
 
   return (
     <section
@@ -53,10 +63,25 @@ export function MerchantChatMessage({
             )}
           >
             {isThinking ? (
-              <span className="flex items-center gap-2 text-foreground/75">
-                <LoaderCircle aria-hidden="true" className="size-4 animate-spin text-heritage" />
-                {thinkingLabel}
-              </span>
+              <div aria-label="Pawly 處理進度" className="min-w-64 space-y-3 text-foreground/75">
+                <div className="flex items-center gap-2">
+                  <LoaderCircle aria-hidden="true" className="size-4 animate-spin text-heritage" />
+                  <span>{thinkingLabel}</span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-heritage-border/60" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(((thinkingStep + 1) / thinkingSteps.length) * 100)}>
+                  <div className="h-full rounded-full bg-heritage transition-[width] duration-500" style={{ width: `${((thinkingStep + 1) / thinkingSteps.length) * 100}%` }} />
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-[11px] leading-4">
+                  {thinkingSteps.map((step, index) => (
+                    <span className={index <= thinkingStep ? "text-heritage" : "text-muted-foreground"} key={step}>
+                      <span className="mr-1 inline-flex align-middle">
+                        {index < thinkingStep ? <Check aria-hidden="true" className="size-3" /> : <span className="size-1.5 rounded-full bg-current" />}
+                      </span>
+                      {step}
+                    </span>
+                  ))}
+                </div>
+              </div>
             ) : (
               children
             )}

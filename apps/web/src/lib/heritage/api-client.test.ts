@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { runHeritageWorkflow, runHeritageWorkflowWithFallback } from "./api-client";
+import { resumeHeritageWorkflow, runHeritageWorkflow, runHeritageWorkflowWithFallback } from "./api-client";
 import type { FailedResult, WorkflowStatus } from "./application-types";
 import { getDemoWorkflowResult } from "./demo-workflow-fixtures";
 
@@ -77,6 +77,43 @@ describe("Heritage Workflow API adapter", () => {
 
     expect(observed.map((value) => value.state)).toEqual(["miner_running", "archivist_running", "finished"]);
     expect(observed.every((value) => value.run_id === "run-demo-001")).toBe(true);
+  });
+
+  it("accepts the live agent-resolution status emitted before Miner", async () => {
+    const result = getDemoWorkflowResult("lei-kei-001", "Test shop");
+    const fetchImpl = vi.fn<typeof fetch>();
+    const observed: WorkflowStatus[] = [];
+    fetchImpl
+      .mockResolvedValueOnce(jsonResponse(status("running"), 202))
+      .mockResolvedValueOnce(jsonResponse({ ...status("running"), state: "agent_resolution" }, 200))
+      .mockResolvedValueOnce(jsonResponse({ ...status("finished"), state: "finished" }, 200))
+      .mockResolvedValueOnce(jsonResponse(result, 200));
+
+    await runHeritageWorkflow(
+      { shop_id: "lei-kei-001", shop_name: "Test shop", case_id: "demo-lei-kei-001" },
+      { baseUrl: "https://heritage.test", fetchImpl, pollIntervalMs: 0, onStatus: (value) => observed.push(value) },
+    );
+
+    expect(observed.map((value) => value.state)).toEqual(["miner_running", "agent_resolution", "finished"]);
+  });
+
+  it("resumes an accepted run without issuing a second POST", async () => {
+    const result = getDemoWorkflowResult("lei-kei-001", "Test shop");
+    const fetchImpl = vi.fn<typeof fetch>();
+    fetchImpl
+      .mockResolvedValueOnce(jsonResponse({ ...status("running"), run_id: "run-resume-001", state: "archivist_running" }, 200))
+      .mockResolvedValueOnce(jsonResponse({ ...status("finished"), run_id: "run-resume-001", state: "finished" }, 200))
+      .mockResolvedValueOnce(jsonResponse(result, 200));
+
+    await expect(
+      resumeHeritageWorkflow("run-resume-001", { baseUrl: "https://heritage.test", fetchImpl, pollIntervalMs: 0 }),
+    ).resolves.toEqual(result);
+    expect(fetchImpl.mock.calls.map(([input]) => String(input))).toEqual([
+      "https://heritage.test/api/v2/heritage/workflows/run-resume-001",
+      "https://heritage.test/api/v2/heritage/workflows/run-resume-001",
+      "https://heritage.test/api/v2/heritage/workflows/run-resume-001/result",
+    ]);
+    expect(fetchImpl.mock.calls.every(([, init]) => init?.method !== "POST")).toBe(true);
   });
 
   it("returns a failed terminal result without treating it as a transport error", async () => {
