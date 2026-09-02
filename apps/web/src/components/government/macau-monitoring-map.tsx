@@ -127,7 +127,7 @@ export function MacauMonitoringMap({
   const viewRef = useRef(INITIAL);
   const pendingFrame = useRef<number | null>(null);
   const [motion, setMotion] = useState<"idle" | "dragging" | "settling" | "zooming">("idle");
-  const isDragging = motion === "dragging";
+  const isCompositing = motion === "dragging" || motion === "zooming";
   const drag = useRef<DragState | null>(null);
   const wheelIdleTimer = useRef<number | null>(null);
   const viewport = useRef<HTMLDivElement | null>(null);
@@ -244,8 +244,8 @@ export function MacauMonitoringMap({
         style={{
           // Composite the whole map together during a drag. At rest the SVG
           // owns the transform again, preserving its original rasterization.
-          transform: isDragging ? `translate(${view.x}px,${view.y}px) scale(${view.scale})` : undefined,
-          willChange: isDragging ? "transform" : undefined,
+          transform: isCompositing ? `translate(${view.x}px,${view.y}px) scale(${view.scale})` : undefined,
+          willChange: isCompositing ? "transform" : undefined,
         }}
       >
         <svg
@@ -259,7 +259,7 @@ export function MacauMonitoringMap({
           preserveAspectRatio="xMidYMid meet"
           role="img"
           style={{
-            transform: isDragging ? undefined : `translate(${view.x}px,${view.y}px) scale(${view.scale})`,
+            transform: isCompositing ? undefined : `translate(${view.x}px,${view.y}px) scale(${view.scale})`,
             transformOrigin: "center",
             transition: motion === "idle" ? "transform 520ms cubic-bezier(.16,1,.3,1)" : "none",
           }}

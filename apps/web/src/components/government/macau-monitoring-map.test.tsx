@@ -62,9 +62,9 @@ describe("MacauMonitoringMap", () => {
     for (let i = 0; i < 3; i++) fireEvent.wheel(map, { deltaY: -100 });
     expect(request).toHaveBeenCalledTimes(1);
     expect(map).toHaveStyle({ transition: "none" });
-    expect(map).toHaveStyle({ transform: "translate(0px,0px) scale(1.6)" });
+    expect(map.parentElement).toHaveStyle({ transform: "translate(0px,0px) scale(1.6)" });
     act(() => frames[0](16));
-    const scale = Number(map.style.transform.match(/scale\(([^)]+)\)/)?.[1]);
+    const scale = Number(map.parentElement?.style.transform.match(/scale\(([^)]+)\)/)?.[1]);
     expect(scale).toBeCloseTo(2.05);
   });
 
@@ -91,7 +91,7 @@ describe("MacauMonitoringMap", () => {
     fireEvent.wheel(map, { deltaY: -100 });
     fireEvent.click(screen.getByRole("button", { name: "顯示全澳" }));
     expect(frames.size).toBe(0);
-    expect(map).toHaveStyle({ transform: "translate(0px,0px) scale(1.08)" });
+    expect(map.parentElement).toHaveStyle({ transform: "translate(0px,0px) scale(1.08)" });
     fireEvent.wheel(map, { deltaY: -100 });
     expect(frames.size).toBe(1);
     rendered.unmount();
