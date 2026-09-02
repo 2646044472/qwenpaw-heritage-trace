@@ -123,6 +123,37 @@ Demo-data boundary. Replace `QWENPAW_DEMO_SOURCE_PATH` in local `.env` when
 testing an operator-supplied source pack; never present the bundled fixture as
 independently verified history.
 
+## 5. Manually inspect a real Agent response
+
+The QwenPaw console returns `text/event-stream`, not one final JSON document.
+The API client joins the `object: content` text chunks, extracts the Agent's
+JSON, and then validates it against the Workflow v2 contract. A simple local
+smoke test (after configuring a provider in the Console) is:
+
+```powershell
+$chatBody = @{
+  session_id = "manual-check-$(Get-Date -Format yyyyMMddHHmmss)"
+  user_id = "manual-check"
+  channel = "console"
+  input = @(@{
+    role = "user"
+    content = @(@{ type = "text"; text = '只回复一个 JSON：{"ok":true,"message":"模型已连接"}' })
+  })
+} | ConvertTo-Json -Depth 8
+
+$reply = Invoke-WebRequest -Method Post `
+  -Uri http://127.0.0.1:8088/api/console/chat `
+  -Headers @{ Accept = "text/event-stream"; "X-Agent-Id" = "Heritage-Coordinator" } `
+  -ContentType "application/json" -Body $chatBody
+$reply.Content
+```
+
+The output contains `data: {...}` SSE events. Look for a completed response and
+the assistant text. To test the complete application path, use the Government
+button; it performs `POST` create → repeated `GET` status → `GET` result. In
+live mode the API calls Miner, Archivist, and Verifier in sequence. In fixture
+mode no model provider is called.
+
 ## Troubleshooting
 
 | Symptom | Check / action |

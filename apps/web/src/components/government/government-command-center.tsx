@@ -46,6 +46,68 @@ function workflowErrorLabel(code: string) {
   return "分析流程暫時無法啟動，請稍後重試。";
 }
 
+const workflowSteps = [
+  { label: "建立 Workflow", hint: "提交商戶個案" },
+  { label: "Miner 整理來源", hint: "收集固定 Demo 材料" },
+  { label: "Archivist 建立資料卡", hint: "結構化文化欄位" },
+  { label: "Verifier 核實風險", hint: "檢查來源與發布限制" },
+  { label: "同步共享結果", hint: "Government / Merchant / Hunter" },
+] as const;
+
+function workflowProgress(status: string) {
+  if (status === "submitting" || status === "input_received") return 0;
+  if (status === "miner_running") return 1;
+  if (status === "sources_normalized" || status === "archivist_running") return 2;
+  if (status === "archivist_validated" || status === "verifier_running") return 3;
+  return 4;
+}
+
+function WorkflowProgress({ status }: { status: string }) {
+  const current = workflowProgress(status);
+  const percentage = (current / (workflowSteps.length - 1)) * 100;
+  return (
+    <section aria-label="Workflow 執行進度" className="mt-3 w-[min(25rem,calc(100vw-3rem))] rounded-lg border border-white/10 bg-slate-900/95 p-3 shadow-xl">
+      <div className="mb-3 flex items-center justify-between text-[11px] text-slate-300">
+        <span>即時 Agent 工作進度</span>
+        <span>階段 {current + 1} / {workflowSteps.length}</span>
+      </div>
+      <div className="relative">
+        <div className="absolute top-2.5 right-2.5 left-2.5 h-px bg-white/15" />
+        <div className="absolute top-2.5 left-2.5 h-px bg-heritage-gold transition-all" style={{ width: `calc(${percentage}% - ${percentage === 0 ? 0 : 10}px)` }} />
+        <ol className="relative grid grid-cols-5 gap-1">
+          {workflowSteps.map((step, index) => {
+            const active = index === current;
+            const complete = index < current;
+            let circleClass = "border-white/25 bg-slate-800 text-slate-500";
+            let labelClass = "text-slate-500";
+            if (active) {
+              circleClass = "border-heritage-gold bg-heritage-gold text-slate-950";
+              labelClass = "text-heritage-gold";
+            } else if (complete) {
+              circleClass = "border-heritage-gold/80 bg-heritage-gold/30 text-heritage-gold";
+              labelClass = "text-slate-200";
+            }
+            return (
+              <li className="min-w-0 text-center" key={step.label}>
+                <span
+                  aria-current={active ? "step" : undefined}
+                  className={`mx-auto flex size-5 items-center justify-center rounded-full border text-[10px] ${circleClass}`}
+                >
+                  {complete ? "✓" : index + 1}
+                </span>
+                <span className={`mt-2 block text-[10px] leading-tight ${labelClass}`}>
+                  {step.label}
+                </span>
+                {active ? <span className="mt-1 block text-[9px] text-slate-400">{step.hint}</span> : null}
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
 function ExposureChart({ analytics }: { analytics: GovernmentAnalytics }) {
   const max = Math.max(...analytics.exposure.flatMap((point) => [point.current, point.previous]), 1);
   const chartWidth = 640;
@@ -405,28 +467,20 @@ export function GovernmentCommandCenter() {
             onSelect={chooseShop}
             selectedShopId={selectedShopId}
           />
-          <div className="absolute top-5 right-5 hidden items-center gap-3 rounded-lg bg-slate-950/85 px-3 py-2 text-slate-200 text-xs shadow-xl lg:flex">
-            {workflow.isRunning ? (
-              <LoaderCircle className="size-4 animate-spin" />
-            ) : (
-              <CheckCircle2 className="size-4 text-heritage-success" />
-            )}
-            <span>{workflow.isRunning ? "工作流程執行中" : "系統運作正常"}</span>
-            {workflow.isRunning ? (
-              <button className="rounded px-2 py-1 hover:bg-white/10" onClick={abortWorkflow} type="button">
-                中止
-              </button>
-            ) : (
-              <button
-                aria-label="Run live workflow"
-                className="flex items-center gap-1 rounded px-2 py-1 hover:bg-white/10"
-                onClick={() => void startWorkflow()}
-                type="button"
-              >
-                <Play className="size-3" />
-                執行即時流程
-              </button>
-            )}
+          <div className="absolute top-5 right-5 hidden rounded-lg bg-slate-950/85 text-slate-200 text-xs shadow-xl lg:block">
+            <div className="flex items-center gap-3 px-3 py-2">
+              {workflow.isRunning ? <LoaderCircle className="size-4 animate-spin" /> : <CheckCircle2 className="size-4 text-heritage-success" />}
+              <span>{workflow.isRunning ? "工作流程執行中" : "系統運作正常"}</span>
+              {workflow.isRunning ? (
+                <button className="rounded px-2 py-1 hover:bg-white/10" onClick={abortWorkflow} type="button">中止</button>
+              ) : (
+                <button aria-label="Run live workflow" className="flex items-center gap-1 rounded px-2 py-1 hover:bg-white/10" onClick={() => void startWorkflow()} type="button">
+                  <Play className="size-3" />
+                  執行即時流程
+                </button>
+              )}
+            </div>
+            {workflow.isRunning ? <WorkflowProgress status={workflow.workflowStatus} /> : null}
           </div>
           {workflow.workflowError ? (
             <div className="absolute top-20 right-5 flex max-w-sm gap-2 rounded-lg bg-red-950/90 p-3 text-red-100 text-xs">
