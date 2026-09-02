@@ -1,6 +1,6 @@
 "use client";
 
-import { type PointerEvent, useCallback, useEffect, useRef, useState, type WheelEvent } from "react";
+import { memo, type PointerEvent, useCallback, useEffect, useRef, useState, type WheelEvent } from "react";
 
 import { LocateFixed, Minus, Plus, Store } from "lucide-react";
 
@@ -23,7 +23,7 @@ const MAX_SCALE = 3.5;
 const WORLD_SIZE = 1000;
 const FOCUS_SCALE = 1.6;
 
-function Paths({ paths, className }: { paths: readonly string[]; className: string }) {
+const Paths = memo(function Paths({ paths, className }: { paths: readonly string[]; className: string }) {
   const occurrences = new Map<string, number>();
   return (
     <g className={className}>
@@ -34,9 +34,9 @@ function Paths({ paths, className }: { paths: readonly string[]; className: stri
       })}
     </g>
   );
-}
+});
 
-function MapArtwork() {
+const MapArtwork = memo(function MapArtwork() {
   const geometry = MACAU_MAP_GEOMETRY;
   return (
     <>
@@ -75,7 +75,7 @@ function MapArtwork() {
       </g>
     </>
   );
-}
+});
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -101,7 +101,7 @@ export function calculateMapFocus(
   };
 }
 
-export function MacauMonitoringMap({
+export const MacauMonitoringMap = memo(function MacauMonitoringMap({
   markers,
   selectedShopId,
   onSelect,
@@ -271,4 +271,4 @@ export function MacauMonitoringMap({
       </div>
     </div>
   );
-}
+});
