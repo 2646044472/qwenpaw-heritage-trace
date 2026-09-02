@@ -9,7 +9,7 @@ export const HERITAGE_API_BASE_URL =
 // Archivist, and Verifier each complete their external work. Keep polling
 // long enough to receive the terminal result instead of reporting a timeout
 // after the backend has already accepted and is still processing the run.
-export const DEFAULT_WORKFLOW_TIMEOUT_MS = 600_000;
+export const DEFAULT_WORKFLOW_TIMEOUT_MS = 900_000;
 
 export type WorkflowRequest = MiningRequest | BundleRequest;
 
