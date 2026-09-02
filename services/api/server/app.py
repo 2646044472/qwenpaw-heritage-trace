@@ -71,9 +71,14 @@ def now_iso() -> str:
 
 
 def connect() -> sqlite3.Connection:
-    db = sqlite3.connect(DB_PATH)
+    # Workflow workers and HTTP handlers use separate connections. WAL lets
+    # readers continue while a worker commits a stage, and busy_timeout avoids
+    # transient "database is locked" failures when two stage updates overlap.
+    db = sqlite3.connect(DB_PATH, timeout=10)
     db.row_factory = sqlite3.Row
     db.execute("PRAGMA foreign_keys = ON")
+    db.execute("PRAGMA busy_timeout = 10000")
+    db.execute("PRAGMA journal_mode = WAL")
     return db
 
 

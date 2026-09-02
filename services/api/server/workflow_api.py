@@ -99,6 +99,23 @@ class WorkflowApiService:
         run_id = f"run-{secrets.token_hex(8)}"
         timestamp = self.now_iso()
         with closing(self.connect()) as db, db:
+            # Serialize the check-and-insert so simultaneous retries cannot both
+            # pass the idempotency lookup before either one commits.
+            db.execute("BEGIN IMMEDIATE")
+            # The browser uses a stable case_id for the Government command
+            # center. Re-submitting that case (double-click, network retry, or
+            # a second tab) must attach to the existing run rather than launch a
+            # second three-agent workflow.
+            existing = db.execute(
+                "SELECT * FROM heritage_workflow_runs "
+                "WHERE case_id = ? AND state <> 'completed_with_errors' "
+                "ORDER BY created_at DESC LIMIT 1",
+                (case_id,),
+            ).fetchone()
+            if existing is not None:
+                accepted = status_projection(dict(existing))
+                handler.respond_json(HTTPStatus.ACCEPTED, accepted)
+                return True
             db.execute("INSERT INTO heritage_workflow_runs (run_id, shop_id, case_id, route, state, request_json, created_at, updated_at) VALUES (?, ?, ?, ?, 'input_received', ?, ?, ?)", (run_id, shop_id, case_id, route, json.dumps(request, ensure_ascii=False), timestamp, timestamp))
             row = self._row(db, run_id)
         accepted = status_projection(row)

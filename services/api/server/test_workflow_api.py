@@ -137,6 +137,14 @@ class WorkflowApiTests(unittest.TestCase):
         self.assertEqual(result["asset_card"]["shop_name"]["value"], "禮記雪糕")
         self.assertEqual(result["agents"]["miner"], {"status": "completed", "session_id": None})
 
+    def test_repeated_case_submission_reuses_existing_run(self) -> None:
+        request = {"shop_name": "Lei Kei", "case_id": "CASE-IDEMPOTENT", "aliases": ["Lei Kei"], "location_hint": "Macau"}
+        first_status, first = self.request("POST", PREFIX, request)
+        second_status, second = self.request("POST", PREFIX, request)
+        self.assertEqual((first_status, second_status), (202, 202))
+        self.assertEqual(second["run_id"], first["run_id"])
+        self.wait_terminal(first["run_id"])
+
     def test_only_the_shared_demo_shop_is_accepted(self) -> None:
         status, payload = self.request("POST", PREFIX, {"shop_id": "other-shop", "shop_name": "Other"})
         self.assertEqual(status, 400)

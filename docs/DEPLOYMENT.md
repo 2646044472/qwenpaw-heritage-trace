@@ -173,6 +173,14 @@ mode no model provider is called.
 
 ## Troubleshooting
 
+Workflow runs are persisted in the SQLite database mounted at
+`/var/lib/heritage-trace`. When the API starts, it reconnects workers to any
+non-terminal run so a container restart does not leave a run stuck forever.
+The Government client stores the accepted `run_id` and polls that same run
+after a page refresh. Re-submitting the same `case_id` while its run is active
+or finished returns the existing run instead of starting a second three-agent
+execution.
+
 | Symptom | Check / action |
 | --- | --- |
 | `docker` is not recognized | Restart PowerShell after installation; confirm Docker Desktop is installed and running. |
