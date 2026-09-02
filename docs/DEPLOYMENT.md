@@ -72,6 +72,11 @@ The initial build downloads the Python and Node images and can take several
 minutes.  Keep this terminal open.  When it is ready, open
 `http://localhost:3000` and select **Government** → 禮記雪糕 → **Run workflow**.
 
+The default website credentials are `OCTRA` / `OCTRAum`. For a public or
+long-running deployment, copy `.env.example` to the ignored `.env` and replace
+both `WEB_AUTH_USER` and `WEB_AUTH_PASSWORD` before starting Compose. Keep the
+credentials in that local file, not in a command history or a Git commit.
+
 In another PowerShell window, these checks are useful:
 
 ```powershell

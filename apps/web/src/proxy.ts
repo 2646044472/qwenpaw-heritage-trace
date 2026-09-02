@@ -13,7 +13,7 @@ function constantTimeEqual(left: string, right: string) {
   return difference === 0;
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const expectedUser = process.env.WEB_AUTH_USER;
   const expectedPassword = process.env.WEB_AUTH_PASSWORD;
 
