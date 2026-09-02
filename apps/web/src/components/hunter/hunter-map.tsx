@@ -241,7 +241,7 @@ export function HunterMap({
         >
           <title>澳門文化探索地圖</title>
           <rect width="1000" height="1000" fill="#eaf1ef" />
-          <g transform={motion === "dragging" ? undefined : `translate(${view.x} ${view.y}) scale(${view.scale})`}>
+          <g>
             <Paths paths={MACAU_MAP_GEOMETRY.land} className="fill-[#f7f2e7] stroke-[#7d9c91] [stroke-width:1.25]" />
             <Paths paths={MACAU_MAP_GEOMETRY.green} className="fill-[#dce7db] stroke-[#c8d5ca] [stroke-width:.4]" />
             <Paths paths={MACAU_MAP_GEOMETRY.blocks} className="fill-[#f0eadd] stroke-[#d6cdbf] [stroke-width:.45]" />
