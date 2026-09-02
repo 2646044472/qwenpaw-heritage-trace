@@ -48,6 +48,10 @@ Merchant, or Hunter surfaces. Run one Government workflow and refresh the
 page: the persisted run id must remain visible and the start button must not
 reappear.
 
+The API, Web, and QwenPaw services use `restart: unless-stopped`; after a host
+reboot Docker brings them back automatically, and the API reconnects any
+non-terminal workflow runs from the database.
+
 ### HTTPS on an IP-only host
 
 The current host has no domain, so a publicly trusted certificate cannot be

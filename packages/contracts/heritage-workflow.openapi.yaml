@@ -3,7 +3,7 @@
   "info": {"title": "Heritage Workflow API", "version": "2.0.0"},
   "paths": {
     "/api/v2/heritage/workflows": {"post": {"requestBody": {"required": true, "content": {"application/json": {"schema": {"oneOf": [{"$ref": "#/components/schemas/MiningRequest"}, {"$ref": "#/components/schemas/BundleRequest"}]}}}}, "responses": {"202": {"description": "Accepted", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/WorkflowStatus"}}}}}}},
-    "/api/v2/heritage/workflows/{run_id}": {"get": {"parameters": [{"name": "run_id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "Status", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/WorkflowStatus"}}}}}}},
+    "/api/v2/heritage/workflows/{run_id}": {"get": {"parameters": [{"name": "run_id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "Status", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/WorkflowStatus"}}}}}}, "delete": {"parameters": [{"name": "run_id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "Cancelled status", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/WorkflowStatus"}}}}, "404": {"description": "Run not found"}}}},
     "/api/v2/heritage/workflows/{run_id}/result": {"get": {"parameters": [{"name": "run_id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "Terminal result", "content": {"application/json": {"schema": {"oneOf": [{"$ref": "#/components/schemas/SuccessfulResult"}, {"$ref": "#/components/schemas/FailedResult"}]}}}}}}}
   },
   "components": {"schemas": {

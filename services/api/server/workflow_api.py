@@ -123,6 +123,25 @@ class WorkflowApiService:
         handler.respond_json(HTTPStatus.ACCEPTED, accepted)
         return True
 
+    def handle_delete(self, handler, path: str) -> bool:
+        if not path.startswith(PREFIX + "/") or path.endswith("/result"):
+            return False
+        run_id = path[len(PREFIX) + 1 :]
+        with closing(self.connect()) as db, db:
+            row = self._row(db, run_id)
+            if row is None:
+                handler.respond_json(HTTPStatus.NOT_FOUND, {"error": "run_not_found"})
+                return True
+            if row["state"] not in {"finished", "completed_with_errors"}:
+                error = {"errors": [{"path": "$", "code": "aborted", "message": "Workflow was cancelled by the operator"}]}
+                db.execute(
+                    "UPDATE heritage_workflow_runs SET state = 'completed_with_errors', failed_stage = 'finalization_failed', error_json = ?, updated_at = ? WHERE run_id = ? AND state NOT IN ('finished', 'completed_with_errors')",
+                    (json.dumps(error), self.now_iso(), run_id),
+                )
+            row = self._row(db, run_id)
+        handler.respond_json(HTTPStatus.OK, status_projection(row))
+        return True
+
     def _validate_request(self, payload: object) -> tuple[dict, str, str, str]:
         if not isinstance(payload, dict):
             raise ValueError("invalid_request")
@@ -158,8 +177,12 @@ class WorkflowApiService:
             row = self._row(db, run_id)
         stages = ["agent_resolution"] + (["miner_running"] if row["route"] == "mine" else []) + ["sources_normalized", "archivist_running", "archivist_validated", "verifier_running", "finalizing"]
         for stage in stages:
+            if self.is_cancelled(run_id):
+                return
             self.transition(run_id, stage)
             time.sleep(0.002)
+        if self.is_cancelled(run_id):
+            return
         result = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
         result["case_id"] = row["case_id"]
         result["shop_id"] = row["shop_id"]
@@ -168,11 +191,16 @@ class WorkflowApiService:
 
     def transition(self, run_id: str, state: str) -> None:
         with closing(self.connect()) as db, db:
-            db.execute("UPDATE heritage_workflow_runs SET state = ?, updated_at = ? WHERE run_id = ?", (state, self.now_iso(), run_id))
+            db.execute("UPDATE heritage_workflow_runs SET state = ?, updated_at = ? WHERE run_id = ? AND state NOT IN ('finished', 'completed_with_errors')", (state, self.now_iso(), run_id))
 
     def finish(self, run_id: str, result: dict) -> None:
         with closing(self.connect()) as db, db:
-            db.execute("UPDATE heritage_workflow_runs SET state = 'finished', result_json = ?, updated_at = ? WHERE run_id = ?", (json.dumps(result, ensure_ascii=False), self.now_iso(), run_id))
+            db.execute("UPDATE heritage_workflow_runs SET state = 'finished', result_json = ?, updated_at = ? WHERE run_id = ? AND state NOT IN ('finished', 'completed_with_errors')", (json.dumps(result, ensure_ascii=False), self.now_iso(), run_id))
+
+    def is_cancelled(self, run_id: str) -> bool:
+        with closing(self.connect()) as db:
+            row = self._row(db, run_id)
+        return bool(row and row["state"] == "completed_with_errors" and row.get("failed_stage") == "finalization_failed" and "aborted" in (row.get("error_json") or ""))
 
     def fail(self, run_id: str, failed_stage: str, code: str, message: str) -> None:
         error = {"errors": [{"path": "$", "code": code, "message": message}]}

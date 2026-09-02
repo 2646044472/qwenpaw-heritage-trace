@@ -337,6 +337,30 @@ export async function resumeHeritageWorkflow(
   }
 }
 
+/** Persistently cancel an accepted run on the server. */
+export async function cancelHeritageWorkflow(
+  runId: string,
+  options: Pick<WorkflowAdapterOptions, "baseUrl" | "fetchImpl"> = {},
+): Promise<WorkflowStatus> {
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const baseUrl = normalizeBaseUrl(options.baseUrl ?? HERITAGE_API_BASE_URL);
+  const controller = new AbortController();
+  try {
+    return parseWorkflowStatus(
+      await requestJson(
+        fetchImpl,
+        `${baseUrl}${WORKFLOW_PATH}/${encodeURIComponent(runId)}`,
+        { method: "DELETE" },
+        200,
+        controller.signal,
+        "Workflow cancellation",
+      ),
+    );
+  } catch (error) {
+    throw mapTransportError(error);
+  }
+}
+
 export async function runHeritageWorkflowWithFallback(
   request: WorkflowRequest,
   options: WorkflowAdapterOptions & { fallback?: boolean } = {},

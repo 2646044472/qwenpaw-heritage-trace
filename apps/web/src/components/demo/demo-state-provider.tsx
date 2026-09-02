@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import {
+  cancelHeritageWorkflow,
   resumeHeritageWorkflow,
   runHeritageWorkflowWithFallback,
   type WorkflowAdapterErrorCode,
@@ -87,8 +88,9 @@ function mergeWorkflowResponse(current: DemoState, response: WorkflowClientResul
       message: response.fallback_reason ?? "Live workflow unavailable.",
     };
   } else if (response.result.workflow_status === "completed_with_errors") {
+    const aborted = response.result.errors[0]?.code === "aborted";
     workflowError = {
-      code: "workflow_failed",
+      code: aborted ? "aborted" : "workflow_failed",
       message: response.result.errors[0]?.message ?? "Workflow failed.",
     };
   }
@@ -268,8 +270,41 @@ export function DemoStateProvider({ children, initialShopId }: { children: React
   }, []);
 
   const abortWorkflow = useCallback(() => {
-    workflowController.current?.abort(new DOMException("Workflow request aborted.", "AbortError"));
-  }, []);
+    const runId = state.pipeline.runId;
+    const controller = workflowController.current;
+    controller?.abort(new DOMException("Workflow request aborted.", "AbortError"));
+    workflowController.current = null;
+    if (!runId) return;
+    void cancelHeritageWorkflow(runId)
+      .then((status) => {
+        persistActiveRun(status.run_id);
+        setState((current) => ({
+          ...current,
+          pipeline: {
+            ...current.pipeline,
+            runId: status.run_id,
+            workflowStatus: status.state,
+            workflowSource: "api",
+            workflowError:
+              status.workflow_status === "completed_with_errors"
+                ? { code: "aborted", message: status.errors[0]?.message ?? "Workflow已中止。" }
+                : null,
+            isRunning: false,
+          },
+        }));
+      })
+      .catch(() => {
+        setState((current) => ({
+          ...current,
+          pipeline: {
+            ...current.pipeline,
+            workflowStatus: "abort",
+            workflowError: { code: "aborted", message: "Workflow中止请求失败，请稍后刷新重试。" },
+            isRunning: false,
+          },
+        }));
+      });
+  }, [state.pipeline.runId]);
 
   const resetDemo = useCallback(() => {
     workflowController.current?.abort(new DOMException("Workflow reset.", "AbortError"));

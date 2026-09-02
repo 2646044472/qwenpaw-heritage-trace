@@ -1174,6 +1174,12 @@ class ApiHandler(BaseHTTPRequestHandler):
             updated = db.execute("SELECT * FROM claims WHERE id = ?", (claim_id,)).fetchone()
         self.respond_json(HTTPStatus.OK, {"claim": row_dict(updated)})
 
+    def do_DELETE(self) -> None:
+        path = urlparse(self.path).path
+        if WORKFLOW_API.handle_delete(self, path):
+            return
+        self.respond_json(HTTPStatus.NOT_FOUND, {"error": "not_found"})
+
     def create_ai_draft(self, session: sqlite3.Row, project_id: str) -> None:
         with closing(connect()) as db, db:
             project = db.execute("SELECT * FROM projects WHERE id = ?", (project_id,)).fetchone()

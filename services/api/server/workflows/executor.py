@@ -33,6 +33,8 @@ class WorkflowExecutor:
         run_dir = None
         try:
             with tempfile.TemporaryDirectory(prefix="workflow-request-", dir=self._runtime_root()) as request_dir:
+                if service.is_cancelled(run_id):
+                    return
                 request_path = Path(request_dir) / "request.json"
                 request_path.write_text(row["request_json"], encoding="utf-8")
                 control = self._ok(self.runtime.run("prepare", "--input", str(request_path), "--runtime-root", str(self.config.runtime_root)), "input_invalid")
@@ -45,6 +47,8 @@ class WorkflowExecutor:
                 required = [self.config.coordinator_id, *workflow_agents]
                 self._transition(run_dir, "agent_resolution")
                 service.transition(run_id, "agent_resolution")
+                if service.is_cancelled(run_id):
+                    return
                 listed = [item.get("id") for item in self.client.list_agents() if isinstance(item, dict)]
                 unresolved = [agent for agent in required if listed.count(agent) != 1]
                 if unresolved:
@@ -54,23 +58,33 @@ class WorkflowExecutor:
                     service.transition(run_id, "miner_running")
                     session = new_session_id(self.config.coordinator_id, self.config.miner_id)
                     message = self._miner_message(row["request_json"])
+                    if service.is_cancelled(run_id):
+                        return
                     miner_response = self.client.chat(self.config.miner_id, message, session)
+                    if service.is_cancelled(run_id):
+                        return
                     miner_response = self._repair_agent_response("miner", miner_response)
                     staged = self.runtime.stage(run_dir, "miner-raw-attempt-1.txt", session, miner_response)
                     self._ok(self.runtime.run("normalize", "--run-dir", run_dir, "--input", str(staged), "--session-id", session), "source_normalization_failed")
                 else:
                     self._ok(self.runtime.run("normalize", "--run-dir", run_dir), "source_normalization_failed")
                 service.transition(run_id, "sources_normalized")
+                if service.is_cancelled(run_id):
+                    return
                 bundle = (Path(run_dir) / "normalized_bundle.json").read_text(encoding="utf-8")
                 self._transition(run_dir, "archivist_running")
                 service.transition(run_id, "archivist_running")
-                self._agent_stage(run_dir, "archivist", self.config.archivist_id, bundle, "validate-archivist", "archivist_output_incomplete")
+                self._agent_stage(run_dir, "archivist", self.config.archivist_id, bundle, "validate-archivist", "archivist_output_incomplete", service, run_id)
                 service.transition(run_id, "archivist_validated")
+                if service.is_cancelled(run_id):
+                    return
                 archivist = (Path(run_dir) / "archivist_output.json").read_text(encoding="utf-8")
                 handoff = json.dumps({"source_bundle": json.loads(bundle), "archivist_output": json.loads(archivist)}, ensure_ascii=False)
                 self._transition(run_dir, "verifier_running")
                 service.transition(run_id, "verifier_running")
-                self._agent_stage(run_dir, "verifier", self.config.verifier_id, handoff, "finalize", "verifier_output_incomplete")
+                self._agent_stage(run_dir, "verifier", self.config.verifier_id, handoff, "finalize", "verifier_output_incomplete", service, run_id)
+                if service.is_cancelled(run_id):
+                    return
                 service.transition(run_id, "finalizing")
                 result = json.loads((Path(run_dir) / "result.json").read_text(encoding="utf-8"))
                 service.finish(run_id, result)
@@ -137,12 +151,16 @@ class WorkflowExecutor:
     def _transition(self, run_dir: str, state: str) -> None:
         self._ok(self.runtime.run("transition", "--run-dir", run_dir, "--to", state), "finalization_failed")
 
-    def _agent_stage(self, run_dir: str, role: str, agent_id: str, payload: str, command: str, failed_stage: str) -> None:
+    def _agent_stage(self, run_dir: str, role: str, agent_id: str, payload: str, command: str, failed_stage: str, service=None, run_id: str | None = None) -> None:
         session = new_session_id(self.config.coordinator_id, agent_id)
         base_message = self._agent_message(role, payload)
         message = base_message
         for attempt in (1, 2):
+            if service is not None and run_id is not None and service.is_cancelled(run_id):
+                return
             response = self.client.chat(agent_id, message, session)
+            if service is not None and run_id is not None and service.is_cancelled(run_id):
+                return
             response = self._repair_agent_response(role, response)
             staged = self.runtime.stage(run_dir, f"{role}-raw-attempt-{attempt}.txt", session, response)
             control = self.runtime.run(command, "--run-dir", run_dir, "--input", str(staged), "--session-id", session)

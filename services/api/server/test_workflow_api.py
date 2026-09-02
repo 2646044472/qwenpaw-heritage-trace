@@ -145,6 +145,19 @@ class WorkflowApiTests(unittest.TestCase):
         self.assertEqual(second["run_id"], first["run_id"])
         self.wait_terminal(first["run_id"])
 
+    def test_delete_cancels_run_and_is_idempotent(self) -> None:
+        status, accepted = self.request("POST", PREFIX, {"shop_name": "Lei Kei", "case_id": "CASE-CANCEL"})
+        self.assertEqual(status, 202)
+        run_id = accepted["run_id"]
+        status, cancelled = self.request("DELETE", f"{PREFIX}/{run_id}")
+        self.assertEqual(status, 200)
+        self.assertEqual(cancelled["state"], "completed_with_errors")
+        self.assertEqual(cancelled["errors"][0]["code"], "aborted")
+        status, repeated = self.request("DELETE", f"{PREFIX}/{run_id}")
+        self.assertEqual(status, 200)
+        self.assertEqual(repeated["state"], "completed_with_errors")
+        self.assertEqual(self.request("DELETE", f"{PREFIX}/missing")[0], 404)
+
     def test_only_the_shared_demo_shop_is_accepted(self) -> None:
         status, payload = self.request("POST", PREFIX, {"shop_id": "other-shop", "shop_name": "Other"})
         self.assertEqual(status, 400)

@@ -5,6 +5,7 @@ name: heritage-trace
 # through the Next.js server-side proxy.
 services:
   api:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: services/api/Dockerfile
@@ -28,6 +29,7 @@ services:
       start_period: 5s
 
   web:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: apps/web/Dockerfile

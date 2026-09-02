@@ -13,7 +13,23 @@
   "channels": {},
   "mcp": {"clients": {}},
   "tools": {},
-  "security": {},
+  "security": {
+    "sandbox_enabled": true,
+    "allow_no_auth_hosts": ["127.0.0.1", "::1"],
+    "trusted_proxies": [],
+    "tool_guard": {
+      "enabled": true,
+      "denied_tools": [
+        "execute_shell_command", "execute_python_code", "execute_query",
+        "read_file", "write_file", "edit_file", "append_file",
+        "grep_search", "glob_search", "web_search", "web_fetch",
+        "browser", "desktop_screenshot", "view_image", "view_video",
+        "send_file_to_user", "list_agents", "chat_with_agent", "submit_to_agent",
+        "check_agent_task", "spawn_subagent", "delegate_external_agent",
+        "materialize_skill", "ast_search", "run_tool_batch", "set_user_timezone"
+      ]
+    }
+  },
   "user_timezone": "Asia/Shanghai",
   "skill_paths": []
 }
