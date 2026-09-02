@@ -5,10 +5,11 @@ export const WORKFLOW_PATH = "/api/v2/heritage/workflows";
 export const HERITAGE_API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? process.env.API_BASE_URL ?? "";
 
-// Fixture workflows return almost immediately; a real three-agent QwenPaw run
-// normally takes longer. Keep the browser attached long enough for a live
-// competition demonstration to receive its terminal result.
-export const DEFAULT_WORKFLOW_TIMEOUT_MS = 120_000;
+// A real three-agent QwenPaw run can take several minutes while Miner,
+// Archivist, and Verifier each complete their external work. Keep polling
+// long enough to receive the terminal result instead of reporting a timeout
+// after the backend has already accepted and is still processing the run.
+export const DEFAULT_WORKFLOW_TIMEOUT_MS = 600_000;
 
 export type WorkflowRequest = MiningRequest | BundleRequest;
 
