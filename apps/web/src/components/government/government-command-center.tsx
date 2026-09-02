@@ -392,6 +392,12 @@ export function GovernmentCommandCenter() {
   const selectedSeed = DEMO_SHOP_SEEDS.find((seed) => seed.shop_id === requestedId) ?? null;
   const selectedShopId = selectedSeed?.shop_id ?? null;
   const workflow = state.pipeline;
+  const terminalSummary =
+    workflow.workflowResult?.workflow_status === "finished"
+      ? `已整理 ${workflow.workflowResult.verification_summary.total_claims} 項資料，支持 ${workflow.workflowResult.verification_summary.by_status.supported ?? 0} 項`
+      : workflow.workflowResult?.workflow_status === "completed_with_errors"
+        ? "流程已中止，未發布結果"
+        : null;
   const fixtureShop = selectedShopId ? getDemoHeritageShop(selectedShopId) : null;
   const liveShop =
     selectedShopId === HERO_SHOP_ID &&
@@ -480,7 +486,10 @@ export function GovernmentCommandCenter() {
               {workflow.isRunning ? (
                 <button className="rounded px-2 py-1 hover:bg-white/10" onClick={abortWorkflow} type="button">中止</button>
               ) : workflow.runId ? (
-                <span className="text-slate-400">本次流程已完成 · {workflow.runId}</span>
+                <span className="text-slate-400">
+                  {workflow.workflowStatus === "completed_with_errors" ? "本次流程已結束" : "本次流程已完成"} · {workflow.runId}
+                  {terminalSummary ? <span className="ml-2 text-slate-500">{terminalSummary}</span> : null}
+                </span>
               ) : (
                 <button aria-label="Run live workflow" className="flex items-center gap-1 rounded px-2 py-1 hover:bg-white/10" onClick={() => void startWorkflow()} type="button">
                   <Play className="size-3" />
