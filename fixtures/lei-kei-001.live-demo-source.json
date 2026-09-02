@@ -6,7 +6,7 @@
       "source_id": "demo-lei-kei-001-source-01",
       "content_type": "original_text",
       "publisher": "Heritage Trace Demo Dataset · 商戶資料卡",
-      "source_family": "heritage-trace-competition-demo",
+      "source_family": "heritage-trace-competition-demo-merchant",
       "source_type": "fixed_demo_material",
       "content": "[Competition demo fixture — fictional] 禮記雪糕（Lei Kei Ice Cream）是 Heritage Trace 的固定示範商戶，演示資料設定建立年份為 1933。",
       "evidence": [
@@ -21,7 +21,7 @@
       "source_id": "demo-lei-kei-001-source-02",
       "content_type": "original_text",
       "publisher": "Heritage Trace Demo Dataset · 地點記錄",
-      "source_family": "heritage-trace-competition-demo",
+      "source_family": "heritage-trace-competition-demo-location",
       "source_type": "fixed_demo_material",
       "content": "[Competition demo fixture — fictional] 固定地點記錄將禮記雪糕標示為位於澳門荷蘭園。",
       "evidence": [
@@ -35,7 +35,7 @@
       "source_id": "demo-lei-kei-001-source-03",
       "content_type": "original_text",
       "publisher": "Heritage Trace Demo Dataset · 產品記錄",
-      "source_family": "heritage-trace-competition-demo",
+      "source_family": "heritage-trace-competition-demo-product",
       "source_type": "fixed_demo_material",
       "content": "[Competition demo fixture — fictional] 固定產品記錄以椰子雪糕作為本輪示範產品。",
       "evidence": [
