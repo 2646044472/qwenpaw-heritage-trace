@@ -23,8 +23,6 @@ QWENPAW_LLM_API_KEY=operator-issued-key
 QWENPAW_LLM_MODEL=your-model-id
 QWENPAW_LLM_TIMEOUT_SECONDS=30
 QWENPAW_WORKFLOW_EXECUTOR=real
-WEB_AUTH_USER=OCTRA
-WEB_AUTH_PASSWORD=OCTRAum
 ```
 
 `QWENPAW_LLM_*` is consumed by the API's direct, OpenAI-compatible relay
@@ -42,11 +40,9 @@ curl -fsS http://127.0.0.1:8000/api/health
 curl -fsS http://127.0.0.1:8000/api/pawly/status
 ```
 
-The public nginx site should proxy to `127.0.0.1:3000`. The browser then
-prompts for the Basic Auth credentials before loading the Government,
-Merchant, or Hunter surfaces. Run one Government workflow and refresh the
-page: the persisted run id must remain visible and the start button must not
-reappear.
+The public nginx site should proxy to `127.0.0.1:3000`. Run one Government
+workflow and refresh the page: the persisted run id must remain visible and
+the start button must not reappear.
 
 The API, Web, and QwenPaw services use `restart: unless-stopped`; after a host
 reboot Docker brings them back automatically, and the API reconnects any

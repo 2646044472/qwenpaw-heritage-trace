@@ -37,11 +37,7 @@ Open [http://localhost:3000](http://localhost:3000).  The API is available at
 [http://localhost:8000](http://localhost:8000) and exposes a health endpoint at
 `/api/health`.
 
-The included Compose configuration protects the website with HTTP Basic Auth.
-Its presentation defaults are `OCTRA` / `OCTRAum`; set `WEB_AUTH_USER` and
-`WEB_AUTH_PASSWORD` in an ignored `.env` file before any non-demo deployment.
-The authentication gate covers both pages and the web application's API proxy,
-so an unauthenticated visitor cannot trigger a workflow directly.
+The website and workflow proxy do not require an account or password.
 
 From Government, select 禮記雪糕 and choose **Run workflow**.  The web app sends
 `POST /api/v2/heritage/workflows`, polls the returned run id, and obtains the

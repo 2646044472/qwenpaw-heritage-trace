@@ -146,7 +146,6 @@ function WorkflowResultDetails({ result }: { result: WorkflowResult }) {
         <span>不支持</span><strong className="text-red-300">{counts.unsupported}</strong>
         <span>待處理事項</span><strong className="text-slate-100">{publicIssues.length}</strong>
       </div>
-      <p className="mt-2 text-slate-400">“證據支持”表示 Verifier 找到來源證據並通過一致性檢查，不代表社交平台曝光量。</p>
       <div className="mt-2 border-white/10 border-t pt-2">
         <p className="text-slate-300">已產出文化資產卡</p>
         <dl className="mt-1 grid grid-cols-[5rem_1fr] gap-x-2 gap-y-1 text-slate-400">

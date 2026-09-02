@@ -16,7 +16,9 @@ services:
       QWENPAW_HOST: 0.0.0.0
       QWENPAW_PORT: "8000"
       QWENPAW_DB_PATH: /var/lib/heritage-trace/qwenpaw.db
-      QWENPAW_WORKFLOW_EXECUTOR: fixture
+      # Keep fixture mode for an unconfigured local demo. Set this to "real"
+      # together with docker-compose.live.yml to restore the live QwenPaw run.
+      QWENPAW_WORKFLOW_EXECUTOR: ${QWENPAW_WORKFLOW_EXECUTOR:-fixture}
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
@@ -35,8 +37,6 @@ services:
       dockerfile: apps/web/Dockerfile
     environment:
       API_BASE_URL: http://api:8000
-      WEB_AUTH_USER: ${WEB_AUTH_USER:-OCTRA}
-      WEB_AUTH_PASSWORD: ${WEB_AUTH_PASSWORD:-OCTRAum}
     ports:
       - "127.0.0.1:3000:3000"
     depends_on:
