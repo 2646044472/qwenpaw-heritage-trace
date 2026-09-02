@@ -90,6 +90,7 @@ export function MerchantPawly({ shop }: { shop: HeritageShop }) {
   const isLiveMode = liveMode;
   const telemetry = getMerchantTelemetry(sharedShop.shop_id);
   const heroCopy = merchantHeroCopy[sharedShop.shop_id];
+  const canPublish = sharedShop.workflow.publication_status === "publishable";
 
   useEffect(() => {
     let active = true;
@@ -224,7 +225,7 @@ export function MerchantPawly({ shop }: { shop: HeritageShop }) {
     setShowDetailChoices(false);
     setTurns((current) => [
       ...current,
-      { id: `owner-xiaohongshu-${Date.now()}`, kind: "text", speaker: "owner", text: "預覽小紅書內容（Demo）" },
+      { id: `owner-xiaohongshu-${Date.now()}`, kind: "text", speaker: "owner", text: "幫我生成小紅書內容" },
     ]);
     setPublicationState("generating");
   }
@@ -329,6 +330,7 @@ export function MerchantPawly({ shop }: { shop: HeritageShop }) {
                 state={publicationState}
                 shop={sharedShop}
                 telemetry={telemetry}
+                canPublish={canPublish}
                 presentation={heroCopy}
               />
             </MerchantChatMessage>
@@ -387,7 +389,7 @@ export function MerchantPawly({ shop }: { shop: HeritageShop }) {
                   type="button"
                 >
                   <Send aria-hidden="true" className="size-4" />
-                  預覽小紅書內容（Demo）
+                  幫我生成小紅書內容
                 </button>
               </>
             ) : null}

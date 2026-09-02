@@ -17,8 +17,8 @@ describe("workflow presentation", () => {
       {
         claim_id: "claim-2",
         issue_type: "insufficient_locator",
-        description: "需要补充来源位置。",
-        recommended_action: "补充原始资料。",
+        description: "需要補充來源位置。",
+        recommended_action: "補充原始資料。",
       },
     ];
 

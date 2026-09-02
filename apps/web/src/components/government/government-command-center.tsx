@@ -130,27 +130,27 @@ function WorkflowResultDetails({ result }: { result: WorkflowResult }) {
   const publicIssues = getPublicWorkflowIssues(result.issues);
   const card = result.asset_card;
   const producedFields = [
-    ["店铺名称", card.shop_name.value],
-    ["创立年份", card.founding_year.value],
+    ["店鋪名稱", card.shop_name.value],
+    ["創立年份", card.founding_year.value],
     ["地址", card.address.value],
-    ["代表产品", card.products.map((item) => item.name).join("、") || "暂无"],
+    ["代表產品", card.products.map((item) => item.name).join("、") || "暫無"],
   ] as const;
   return (
     <details className="mt-2 rounded bg-white/5 px-2 py-1 text-[11px] text-slate-300">
-      <summary className="cursor-pointer select-none">查看本次流程详情</summary>
+      <summary className="cursor-pointer select-none">查看本次流程詳情</summary>
       <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1">
-        <span>总资料项</span><strong className="text-slate-100">{result.verification_summary.total_claims}</strong>
-        <span>证据支持</span><strong className="text-emerald-300">{counts.supported}</strong>
+        <span>總資料項</span><strong className="text-slate-100">{result.verification_summary.total_claims}</strong>
+        <span>證據支持</span><strong className="text-emerald-300">{counts.supported}</strong>
         <span>部分支持</span><strong className="text-amber-300">{counts.partially_supported}</strong>
-        <span>无法核实</span><strong className="text-slate-200">{counts.unverifiable}</strong>
+        <span>無法核實</span><strong className="text-slate-200">{counts.unverifiable}</strong>
         <span>不支持</span><strong className="text-red-300">{counts.unsupported}</strong>
-        <span>待处理事项</span><strong className="text-slate-100">{publicIssues.length}</strong>
+        <span>待處理事項</span><strong className="text-slate-100">{publicIssues.length}</strong>
       </div>
-      <p className="mt-2 text-slate-400">“证据支持”表示 Verifier 找到来源证据并通过一致性检查，不代表社交平台曝光量。</p>
+      <p className="mt-2 text-slate-400">“證據支持”表示 Verifier 找到來源證據並通過一致性檢查，不代表社交平台曝光量。</p>
       <div className="mt-2 border-white/10 border-t pt-2">
-        <p className="text-slate-300">已产出文化资产卡</p>
+        <p className="text-slate-300">已產出文化資產卡</p>
         <dl className="mt-1 grid grid-cols-[5rem_1fr] gap-x-2 gap-y-1 text-slate-400">
-          {producedFields.map(([label, value]) => <Fragment key={label}><dt>{label}</dt><dd className="text-slate-200">{value ?? "待核实"}</dd></Fragment>)}
+          {producedFields.map(([label, value]) => <Fragment key={label}><dt>{label}</dt><dd className="text-slate-200">{value ?? "待核實"}</dd></Fragment>)}
         </dl>
       </div>
       {publicIssues.length > 0 ? (
@@ -550,7 +550,7 @@ export function GovernmentCommandCenter() {
                     {terminalSummary ? <span className="ml-2 text-slate-500">{terminalSummary}</span> : null}
                   </span>
                   <button className="rounded px-2 py-1 hover:bg-white/10" onClick={() => void startWorkflow()} type="button">
-                    {workflow.workflowStatus === "completed_with_errors" ? "重新执行" : "再次执行"}
+                    {workflow.workflowStatus === "completed_with_errors" ? "重新執行" : "再次執行"}
                   </button>
                 </>
               ) : (

@@ -20,6 +20,7 @@ export function MerchantDraftPreview({
   postId,
   publishedAt,
   onPublish,
+  canPublish,
   presentation,
 }: {
   shop: HeritageShop;
@@ -28,6 +29,7 @@ export function MerchantDraftPreview({
   postId: string | null;
   publishedAt: string | null;
   onPublish: () => void;
+  canPublish: boolean;
   presentation?: MerchantHeroCopy;
 }) {
   const card = shop.workflow.asset_card;
@@ -40,13 +42,13 @@ export function MerchantDraftPreview({
   const publishing = state === "publishing";
   const published = state === "published";
   let reviewStatusLabel = "待確認";
-  let publishActionLabel = "模擬發佈";
+  let publishActionLabel = "一鍵發佈";
   if (publishing) {
-    reviewStatusLabel = "模擬發佈中";
-    publishActionLabel = "正在模擬發佈";
+    reviewStatusLabel = "發佈中";
+    publishActionLabel = "正在發佈";
   } else if (published) {
-    reviewStatusLabel = "模擬完成";
-    publishActionLabel = "模擬發佈已完成";
+    reviewStatusLabel = "已完成";
+    publishActionLabel = "發佈成功";
   }
 
   return (
@@ -56,7 +58,7 @@ export function MerchantDraftPreview({
     >
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="font-medium text-[#b54235] text-xs">小紅書內容 · Demo</p>
+          <p className="font-medium text-[#b54235] text-xs">小紅書內容</p>
           <h3 className="mt-1 font-heritage-display font-semibold text-foreground text-xl">
             {presentation?.draft ? "小紅書草稿" : "小紅書內容預覽"}
           </h3>
@@ -120,17 +122,21 @@ export function MerchantDraftPreview({
         )}
       </div>
       <div className="mt-5 flex flex-wrap items-center gap-3">
-        <button
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#c95043] px-5 font-medium text-white transition hover:bg-[#b54235] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c95043] focus-visible:ring-offset-2 disabled:cursor-default disabled:opacity-70"
-          disabled={publishing || published}
-          onClick={onPublish}
-          type="button"
-        >
-          <Send aria-hidden="true" className="size-4" />
-          {publishActionLabel}
-        </button>
+        {canPublish ? (
+          <button
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#c95043] px-5 font-medium text-white transition hover:bg-[#b54235] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c95043] focus-visible:ring-offset-2 disabled:cursor-default disabled:opacity-70"
+            disabled={publishing || published}
+            onClick={onPublish}
+            type="button"
+          >
+            <Send aria-hidden="true" className="size-4" />
+            {publishActionLabel}
+          </button>
+        ) : (
+          <p className="text-muted-foreground text-sm">完成資料核實後即可發佈。</p>
+        )}
       </div>
-      <p className="mt-3 text-muted-foreground text-xs">此按鈕只改變 Demo 畫面，不會向任何社交平台發帖。</p>
+      <p className="mt-3 text-muted-foreground text-xs">發佈只會更新此頁面狀態。</p>
       <div className="mt-5">
         <MerchantPublicationStatus postId={postId} publishedAt={publishedAt} state={state} />
       </div>

@@ -17,10 +17,24 @@ describe("Merchant Pawly publication flow", () => {
       </DemoStateProvider>,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "預覽小紅書內容（Demo）" }));
+    fireEvent.click(screen.getByRole("button", { name: "幫我生成小紅書內容" }));
     expect(screen.getByText("Pawly 正在整理已核實資料")).toBeVisible();
     act(() => vi.advanceTimersByTime(650));
     expect(screen.getByRole("heading", { name: "小紅書草稿" })).toBeVisible();
+  });
+
+  it("hides one-click publishing until the workflow marks the story publishable", () => {
+    vi.useFakeTimers();
+    render(
+      <DemoStateProvider initialShopId="mok-yi-kei-008">
+        <MerchantPawly shop={getDemoHeritageShop("mok-yi-kei-008")} />
+      </DemoStateProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "幫我生成小紅書內容" }));
+    act(() => vi.advanceTimersByTime(650));
+    expect(screen.queryByRole("button", { name: "一鍵發佈" })).not.toBeInTheDocument();
+    expect(screen.getByText("完成資料核實後即可發佈。")).toBeVisible();
   });
 
   it("shows completion without fabricating a telemetry receipt", () => {
@@ -39,21 +53,21 @@ describe("Merchant Pawly publication flow", () => {
     act(() => vi.advanceTimersByTime(700));
     fireEvent.click(screen.getByRole("button", { name: "點樣改善？" }));
     act(() => vi.advanceTimersByTime(700));
-    expect(screen.getByRole("button", { name: "生成小紅書內容草稿" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "幫我生成小紅書內容" })).toBeVisible();
 
-    fireEvent.click(screen.getByRole("button", { name: "生成小紅書內容草稿" }));
+    fireEvent.click(screen.getByRole("button", { name: "幫我生成小紅書內容" }));
     expect(screen.getByText("Pawly 正在整理已核實資料")).toBeVisible();
 
     act(() => vi.advanceTimersByTime(650));
     expect(screen.getByRole("heading", { name: "小紅書草稿" })).toBeVisible();
-    expect(screen.getByRole("button", { name: "模擬發佈" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "一鍵發佈" })).toBeVisible();
 
-    fireEvent.click(screen.getByRole("button", { name: "模擬發佈" }));
-    expect(screen.getByRole("button", { name: "正在模擬發佈" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "一鍵發佈" }));
+    expect(screen.getByRole("button", { name: "正在發佈" })).toBeDisabled();
 
     act(() => vi.advanceTimersByTime(650));
-    expect(screen.getAllByText("模擬發佈已完成")).toHaveLength(2);
-    expect(screen.queryByText("模擬發佈未完成，請稍後再試。")).not.toBeInTheDocument();
+    expect(screen.getAllByText("發佈成功")).toHaveLength(3);
+    expect(screen.queryByText("發佈未完成，請稍後再試。")).not.toBeInTheDocument();
     expect(screen.queryByText(/demo-lei-kei-20260809/)).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "看看遊客如何發現這間店" })).not.toBeInTheDocument();
   });
@@ -73,16 +87,16 @@ describe("Merchant Pawly publication flow", () => {
     act(() => vi.advanceTimersByTime(700));
     fireEvent.click(screen.getByRole("button", { name: "點樣改善？" }));
     act(() => vi.advanceTimersByTime(700));
-    fireEvent.click(screen.getByRole("button", { name: "生成小紅書內容草稿" }));
+    fireEvent.click(screen.getByRole("button", { name: "幫我生成小紅書內容" }));
     act(() => vi.advanceTimersByTime(650));
-    fireEvent.click(screen.getByRole("button", { name: "模擬發佈" }));
+    fireEvent.click(screen.getByRole("button", { name: "一鍵發佈" }));
     act(() => vi.advanceTimersByTime(650));
 
     const receipt = screen.getByText(
       (_, element) => element?.tagName === "SPAN" && element.textContent?.includes("demo-sun-fong-20260801") === true,
     );
     expect(receipt).toHaveTextContent("2026");
-    expect(screen.getAllByText("模擬發佈已完成")).toHaveLength(2);
+    expect(screen.getAllByText("發佈成功")).toHaveLength(3);
     expect(screen.queryByRole("link", { name: "看看遊客如何發現這間店" })).not.toBeInTheDocument();
   });
 });

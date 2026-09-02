@@ -226,7 +226,7 @@ export function DemoStateProvider({ children, initialShopId }: { children: React
       const request: MiningRequest = {
         ...LIVE_HERO_WORKFLOW_REQUEST,
         // Keep the server-side idempotency guard for retries, while allowing
-        // an intentional "再次执行" after a previous terminal run.
+        // an intentional "再次執行" after a previous terminal run.
         case_id: `CASE-LAIKEI-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
       };
       const response = await runHeritageWorkflowWithFallback(request, {
@@ -305,7 +305,7 @@ export function DemoStateProvider({ children, initialShopId }: { children: React
           pipeline: {
             ...current.pipeline,
             workflowStatus: "abort",
-            workflowError: { code: "aborted", message: "Workflow中止请求失败，请稍后刷新重试。" },
+            workflowError: { code: "aborted", message: "Workflow中止請求失敗，請稍後刷新重試。" },
             isRunning: false,
           },
         }));
